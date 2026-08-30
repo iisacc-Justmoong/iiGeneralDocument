@@ -1,6 +1,294 @@
 cmake_minimum_required(VERSION 3.31)
-project(iiGeneralDocument)
+project(iiGeneralDocument VERSION 0.1.0 LANGUAGES C CXX)
 
-set(CMAKE_CXX_STANDARD 20)
+include(CTest)
+include(ExternalProject)
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+include(GenerateExportHeader)
 
-add_library(iiGeneralDocument SHARED library.cpp)
+option(IIGENERALDOCUMENT_BUILD_SHARED "Build iiGeneralDocument as a shared library." ON)
+option(IIGENERALDOCUMENT_USE_SYSTEM_QPDF "Use an installed qpdf package instead of the pinned build dependency." OFF)
+
+set(IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT "$ENV{HOME}/.local" CACHE PATH
+    "Root directory containing installed iisacc libraries.")
+foreach(package_name IN ITEMS iiXml iiHtmlBlock)
+    set(package_prefix "${IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT}/${package_name}")
+    if(EXISTS "${package_prefix}")
+        list(APPEND CMAKE_PREFIX_PATH "${package_prefix}")
+    endif()
+endforeach()
+unset(package_prefix)
+unset(package_name)
+if(CMAKE_PREFIX_PATH)
+    list(REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
+endif()
+
+find_package(iiXml 0.1.0 CONFIG REQUIRED)
+find_package(iiHtmlBlock 0.1.0 CONFIG REQUIRED)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Qml)
+find_package(ZLIB REQUIRED)
+find_package(JPEG REQUIRED)
+
+if(APPLE AND TARGET WrapOpenGL::WrapOpenGL)
+    get_target_property(iigeneraldocument_wrap_opengl_links
+        WrapOpenGL::WrapOpenGL INTERFACE_LINK_LIBRARIES)
+    if(iigeneraldocument_wrap_opengl_links)
+        set(iigeneraldocument_filtered_wrap_opengl_links)
+        foreach(iigeneraldocument_wrap_link IN LISTS iigeneraldocument_wrap_opengl_links)
+            if(iigeneraldocument_wrap_link STREQUAL "-framework AGL"
+                    OR iigeneraldocument_wrap_link MATCHES "AGL\\.framework")
+                continue()
+            endif()
+            list(APPEND iigeneraldocument_filtered_wrap_opengl_links
+                "${iigeneraldocument_wrap_link}")
+        endforeach()
+        set_property(TARGET WrapOpenGL::WrapOpenGL PROPERTY
+            INTERFACE_LINK_LIBRARIES "${iigeneraldocument_filtered_wrap_opengl_links}")
+    endif()
+endif()
+
+include(cmake/ThinkingSpaceDocumentModelSources.cmake)
+
+find_library(IIGENERALDOCUMENT_STATIC_JPEG_LIBRARY
+    NAMES "${CMAKE_STATIC_LIBRARY_PREFIX}jpeg${CMAKE_STATIC_LIBRARY_SUFFIX}")
+if(IIGENERALDOCUMENT_STATIC_JPEG_LIBRARY)
+    add_library(iiGeneralDocumentJpeg STATIC IMPORTED GLOBAL)
+    set_target_properties(iiGeneralDocumentJpeg PROPERTIES
+        IMPORTED_LOCATION "${IIGENERALDOCUMENT_STATIC_JPEG_LIBRARY}")
+    set(IIGENERALDOCUMENT_JPEG_TARGET iiGeneralDocumentJpeg)
+else()
+    set(IIGENERALDOCUMENT_JPEG_TARGET JPEG::JPEG)
+endif()
+
+set(IIGENERALDOCUMENT_QPDF_TARGET "")
+if(IIGENERALDOCUMENT_USE_SYSTEM_QPDF)
+    find_package(qpdf 12.3 CONFIG REQUIRED)
+    if(TARGET qpdf::libqpdf)
+        set(IIGENERALDOCUMENT_QPDF_TARGET qpdf::libqpdf)
+    elseif(TARGET qpdf::libqpdf_static)
+        set(IIGENERALDOCUMENT_QPDF_TARGET qpdf::libqpdf_static)
+    else()
+        message(FATAL_ERROR "The qpdf package does not export a supported library target.")
+    endif()
+else()
+    set(IIGENERALDOCUMENT_QPDF_VERSION 12.3.2)
+    set(IIGENERALDOCUMENT_QPDF_COMMIT a898bb3a7289d1d05789d6d3f0d5dd534943a8da)
+    set(IIGENERALDOCUMENT_QPDF_PREFIX "${CMAKE_BINARY_DIR}/_deps/qpdf")
+    set(IIGENERALDOCUMENT_QPDF_INSTALL "${IIGENERALDOCUMENT_QPDF_PREFIX}/install")
+    file(MAKE_DIRECTORY "${IIGENERALDOCUMENT_QPDF_INSTALL}/${CMAKE_INSTALL_INCLUDEDIR}")
+
+    ExternalProject_Add(iiGeneralDocumentQpdf
+        PREFIX "${IIGENERALDOCUMENT_QPDF_PREFIX}"
+        GIT_REPOSITORY https://github.com/qpdf/qpdf.git
+        GIT_TAG "${IIGENERALDOCUMENT_QPDF_COMMIT}"
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+        UPDATE_DISCONNECTED TRUE
+        CMAKE_ARGS
+            -DCMAKE_BUILD_TYPE=$<CONFIG>
+            -DCMAKE_INSTALL_PREFIX=${IIGENERALDOCUMENT_QPDF_INSTALL}
+            -DCMAKE_INSTALL_LIBDIR=${CMAKE_INSTALL_LIBDIR}
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+            -DBUILD_SHARED_LIBS=OFF
+            -DBUILD_STATIC_LIBS=ON
+            -DBUILD_DOC=OFF
+            -DINSTALL_MANUAL=OFF
+            -DINSTALL_EXAMPLES=OFF
+            -DINSTALL_PKGCONFIG=OFF
+            -DINSTALL_CMAKE_PACKAGE=OFF
+            -DUSE_IMPLICIT_CRYPTO=OFF
+            -DREQUIRE_CRYPTO_NATIVE=ON
+        BUILD_COMMAND
+            ${CMAKE_COMMAND} --build <BINARY_DIR> --config $<CONFIG> --target libqpdf
+        INSTALL_COMMAND
+            ${CMAKE_COMMAND} --install <BINARY_DIR> --config $<CONFIG> --component dev
+        BUILD_BYPRODUCTS
+            "${IIGENERALDOCUMENT_QPDF_INSTALL}/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}qpdf${CMAKE_STATIC_LIBRARY_SUFFIX}")
+
+    if(APPLE)
+        # Apple ld's hidden archive form prevents the private QPDF ABI from
+        # leaking through the iiGeneralDocument shared-library symbol table.
+        add_library(iiGeneralDocumentQpdfLibrary INTERFACE)
+        target_include_directories(iiGeneralDocumentQpdfLibrary INTERFACE
+            "${IIGENERALDOCUMENT_QPDF_INSTALL}/${CMAKE_INSTALL_INCLUDEDIR}")
+        target_link_directories(iiGeneralDocumentQpdfLibrary INTERFACE
+            "${IIGENERALDOCUMENT_QPDF_INSTALL}/${CMAKE_INSTALL_LIBDIR}")
+        target_link_libraries(iiGeneralDocumentQpdfLibrary INTERFACE
+            "-Wl,-hidden-lqpdf")
+    else()
+        add_library(iiGeneralDocumentQpdfLibrary STATIC IMPORTED GLOBAL)
+        set_target_properties(iiGeneralDocumentQpdfLibrary PROPERTIES
+            IMPORTED_LOCATION
+                "${IIGENERALDOCUMENT_QPDF_INSTALL}/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}qpdf${CMAKE_STATIC_LIBRARY_SUFFIX}"
+            INTERFACE_INCLUDE_DIRECTORIES
+                "${IIGENERALDOCUMENT_QPDF_INSTALL}/${CMAKE_INSTALL_INCLUDEDIR}")
+        if(UNIX)
+            set_property(TARGET iiGeneralDocumentQpdfLibrary APPEND PROPERTY
+                INTERFACE_LINK_OPTIONS "LINKER:--exclude-libs,libqpdf.a")
+        endif()
+    endif()
+    add_dependencies(iiGeneralDocumentQpdfLibrary iiGeneralDocumentQpdf)
+    set(IIGENERALDOCUMENT_QPDF_TARGET iiGeneralDocumentQpdfLibrary)
+endif()
+
+set(IIGENERALDOCUMENT_LIBRARY_TYPE STATIC)
+if(IIGENERALDOCUMENT_BUILD_SHARED AND NOT EMSCRIPTEN)
+    set(IIGENERALDOCUMENT_LIBRARY_TYPE SHARED)
+endif()
+
+add_library(iiGeneralDocument ${IIGENERALDOCUMENT_LIBRARY_TYPE}
+    ${IIGENERALDOCUMENT_THINKING_SPACE_SOURCES}
+    src/Core/Diagnostic.cpp
+    src/Core/Diagnostic.h
+    src/Core/PdfValue.cpp
+    src/Core/PdfValue.h
+    src/Editing/DocumentEditor.cpp
+    src/Editing/DocumentEditor.h
+    src/IO/DocumentReader.h
+    src/IO/DocumentWriter.h
+    src/Model/Document.cpp
+    src/Model/Document.h
+    src/Model/Element.cpp
+    src/Model/Element.h
+    src/Model/Geometry.h
+    src/Model/Page.cpp
+    src/Model/Page.h
+    src/Pdf/PdfDocumentReader.cpp
+    src/Pdf/PdfDocumentReader.h
+    src/Pdf/PdfDocumentWriter.cpp
+    src/Pdf/PdfDocumentWriter.h
+    src/Validation/DocumentValidator.cpp
+    src/Validation/DocumentValidator.h
+    src/iiGeneralDocument.h)
+add_library(iiGeneralDocument::iiGeneralDocument ALIAS iiGeneralDocument)
+
+generate_export_header(iiGeneralDocument
+    EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/generated/iiGeneralDocument/Export.h")
+
+target_compile_features(iiGeneralDocument PUBLIC cxx_std_20)
+target_include_directories(iiGeneralDocument PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/iiGeneralDocument>)
+target_link_libraries(iiGeneralDocument
+    PUBLIC
+        iiXml::iiXml
+        iiHtmlBlock::iiHtmlBlock
+        Qt6::Core
+        Qt6::Gui
+    PRIVATE
+        Qt6::Qml
+        ${IIGENERALDOCUMENT_QPDF_TARGET}
+        ZLIB::ZLIB
+        ${IIGENERALDOCUMENT_JPEG_TARGET})
+if(MSVC)
+    target_compile_options(iiGeneralDocument PRIVATE /W4)
+else()
+    target_compile_options(iiGeneralDocument PRIVATE
+        -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion)
+endif()
+set_target_properties(iiGeneralDocument PROPERTIES
+    AUTOMOC ON
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN YES
+    WINDOWS_EXPORT_ALL_SYMBOLS YES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR})
+
+install(TARGETS iiGeneralDocument
+    EXPORT iiGeneralDocumentTargets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(DIRECTORY src/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iiGeneralDocument
+    FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
+install(DIRECTORY platform/Android/
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/iiGeneralDocument/platform/Android)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/generated/iiGeneralDocument/Export.h"
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iiGeneralDocument)
+install(EXPORT iiGeneralDocumentTargets
+    FILE iiGeneralDocumentTargets.cmake
+    NAMESPACE iiGeneralDocument::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/iiGeneralDocument)
+
+configure_package_config_file(
+    cmake/iiGeneralDocumentConfig.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/iiGeneralDocumentConfig.cmake"
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/iiGeneralDocument)
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/iiGeneralDocumentConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion)
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/iiGeneralDocumentConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/iiGeneralDocumentConfigVersion.cmake"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/iiGeneralDocument)
+install(FILES README.md THIRD_PARTY_NOTICES.md docs/API.md docs/ARCHITECTURE.md docs/PDF_SUPPORT.md
+    docs/THINKING_SPACE_DOCUMENT_MODEL.md
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/iiGeneralDocument)
+if(NOT IIGENERALDOCUMENT_USE_SYSTEM_QPDF)
+    install(FILES
+        "${IIGENERALDOCUMENT_QPDF_PREFIX}/src/iiGeneralDocumentQpdf/LICENSE.txt"
+        "${IIGENERALDOCUMENT_QPDF_PREFIX}/src/iiGeneralDocumentQpdf/NOTICE.md"
+        "${IIGENERALDOCUMENT_QPDF_PREFIX}/src/iiGeneralDocumentQpdf/Artistic-2.0"
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument/qpdf)
+endif()
+
+if(BUILD_TESTING)
+    add_executable(iiGeneralDocumentModelTest tests/ModelTest.cpp)
+    target_link_libraries(iiGeneralDocumentModelTest PRIVATE iiGeneralDocument::iiGeneralDocument)
+    add_test(NAME iiGeneralDocument.Model COMMAND iiGeneralDocumentModelTest)
+
+    add_executable(iiGeneralDocumentEditorTest tests/DocumentEditorTest.cpp)
+    target_link_libraries(iiGeneralDocumentEditorTest PRIVATE iiGeneralDocument::iiGeneralDocument)
+    add_test(NAME iiGeneralDocument.Editor COMMAND iiGeneralDocumentEditorTest)
+
+    add_executable(iiGeneralDocumentPdfRoundTripTest tests/PdfRoundTripTest.cpp)
+    target_link_libraries(iiGeneralDocumentPdfRoundTripTest PRIVATE iiGeneralDocument::iiGeneralDocument)
+    target_compile_definitions(iiGeneralDocumentPdfRoundTripTest PRIVATE
+        IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output")
+    add_test(NAME iiGeneralDocument.PdfRoundTrip COMMAND iiGeneralDocumentPdfRoundTripTest)
+
+    add_executable(iiGeneralDocumentValidationTest tests/ValidationTest.cpp)
+    target_link_libraries(iiGeneralDocumentValidationTest PRIVATE iiGeneralDocument::iiGeneralDocument)
+    add_test(NAME iiGeneralDocument.Validation COMMAND iiGeneralDocumentValidationTest)
+
+    add_executable(iiGeneralDocumentThinkingSpaceModelTest
+        tests/ThinkingSpaceDocumentModelTest.cpp)
+    target_link_libraries(iiGeneralDocumentThinkingSpaceModelTest PRIVATE
+        iiGeneralDocument::iiGeneralDocument)
+    add_test(NAME iiGeneralDocument.ThinkingSpaceModel
+        COMMAND iiGeneralDocumentThinkingSpaceModelTest)
+
+    add_test(NAME iiGeneralDocument.ThinkingSpaceModelContract
+        COMMAND ${CMAKE_COMMAND}
+            -DIIGENERALDOCUMENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/ThinkingSpaceModelContractTest.cmake)
+
+    add_test(NAME iiGeneralDocument.ProjectContract
+        COMMAND ${CMAKE_COMMAND}
+            -DIIGENERALDOCUMENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/ProjectContractTest.cmake)
+
+    add_test(NAME iiGeneralDocument.InstallConsumer
+        COMMAND ${CMAKE_COMMAND}
+            -DIIGENERALDOCUMENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}
+            -DIIGENERALDOCUMENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -DIIGENERALDOCUMENT_CMAKE_COMMAND=${CMAKE_COMMAND}
+            "-DIIGENERALDOCUMENT_IIXML_DIR=${iiXml_DIR}"
+            "-DIIGENERALDOCUMENT_IIHTMLBLOCK_DIR=${iiHtmlBlock_DIR}"
+            "-DIIGENERALDOCUMENT_QT6_DIR=${Qt6_DIR}"
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/InstallConsumerTest.cmake)
+
+    if(UNIX)
+        add_test(NAME iiGeneralDocument.SymbolIsolation
+            COMMAND ${CMAKE_COMMAND}
+                -DIIGENERALDOCUMENT_LIBRARY=$<TARGET_FILE:iiGeneralDocument>
+                -DIIGENERALDOCUMENT_NM=${CMAKE_NM}
+                -DIIGENERALDOCUMENT_APPLE=${APPLE}
+                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/SymbolIsolationTest.cmake)
+    endif()
+endif()

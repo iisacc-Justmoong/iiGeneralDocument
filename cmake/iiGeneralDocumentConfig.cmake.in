@@ -1,0 +1,29 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(iiXml 0.1.0 CONFIG REQUIRED)
+find_dependency(iiHtmlBlock 0.1.0 CONFIG REQUIRED)
+find_dependency(Qt6 6.5 REQUIRED COMPONENTS Core Gui Qml)
+
+if(APPLE AND TARGET WrapOpenGL::WrapOpenGL)
+    get_target_property(iigeneraldocument_wrap_opengl_links
+        WrapOpenGL::WrapOpenGL INTERFACE_LINK_LIBRARIES)
+    if(iigeneraldocument_wrap_opengl_links)
+        set(iigeneraldocument_filtered_wrap_opengl_links)
+        foreach(iigeneraldocument_wrap_link IN LISTS iigeneraldocument_wrap_opengl_links)
+            if(iigeneraldocument_wrap_link STREQUAL "-framework AGL"
+                    OR iigeneraldocument_wrap_link MATCHES "AGL\\.framework")
+                continue()
+            endif()
+            list(APPEND iigeneraldocument_filtered_wrap_opengl_links
+                "${iigeneraldocument_wrap_link}")
+        endforeach()
+        set_property(TARGET WrapOpenGL::WrapOpenGL PROPERTY
+            INTERFACE_LINK_LIBRARIES "${iigeneraldocument_filtered_wrap_opengl_links}")
+    endif()
+endif()
+
+include("${CMAKE_CURRENT_LIST_DIR}/iiGeneralDocumentTargets.cmake")
+
+check_required_components(iiGeneralDocument)
