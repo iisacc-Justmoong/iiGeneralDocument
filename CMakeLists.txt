@@ -9,6 +9,7 @@ include(GenerateExportHeader)
 
 option(IIGENERALDOCUMENT_BUILD_SHARED "Build iiGeneralDocument as a shared library." ON)
 option(IIGENERALDOCUMENT_USE_SYSTEM_QPDF "Use an installed qpdf package instead of the pinned build dependency." OFF)
+option(IIGENERALDOCUMENT_USE_SYSTEM_LIBZIP "Use an installed libzip package instead of the pinned build dependency." OFF)
 
 set(IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT "$ENV{HOME}/.local" CACHE PATH
     "Root directory containing installed iisacc libraries.")
@@ -132,6 +133,73 @@ else()
     set(IIGENERALDOCUMENT_QPDF_TARGET iiGeneralDocumentQpdfLibrary)
 endif()
 
+set(IIGENERALDOCUMENT_LIBZIP_TARGET "")
+if(IIGENERALDOCUMENT_USE_SYSTEM_LIBZIP)
+    find_package(libzip 1.11 CONFIG REQUIRED)
+    if(NOT TARGET libzip::zip)
+        message(FATAL_ERROR "The libzip package does not export libzip::zip.")
+    endif()
+    set(IIGENERALDOCUMENT_LIBZIP_TARGET libzip::zip)
+else()
+    set(IIGENERALDOCUMENT_LIBZIP_VERSION 1.11.4)
+    set(IIGENERALDOCUMENT_LIBZIP_COMMIT 6f8a0cdd24a0dc6cce9dac4a7679da784ab124ea)
+    set(IIGENERALDOCUMENT_LIBZIP_PREFIX "${CMAKE_BINARY_DIR}/_deps/libzip")
+    set(IIGENERALDOCUMENT_LIBZIP_INSTALL "${IIGENERALDOCUMENT_LIBZIP_PREFIX}/install")
+    file(MAKE_DIRECTORY "${IIGENERALDOCUMENT_LIBZIP_INSTALL}/${CMAKE_INSTALL_INCLUDEDIR}")
+
+    ExternalProject_Add(iiGeneralDocumentLibzip
+        PREFIX "${IIGENERALDOCUMENT_LIBZIP_PREFIX}"
+        GIT_REPOSITORY https://github.com/nih-at/libzip.git
+        GIT_TAG "${IIGENERALDOCUMENT_LIBZIP_COMMIT}"
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+        UPDATE_DISCONNECTED TRUE
+        CMAKE_ARGS
+            -DCMAKE_BUILD_TYPE=$<CONFIG>
+            -DCMAKE_INSTALL_PREFIX=${IIGENERALDOCUMENT_LIBZIP_INSTALL}
+            -DCMAKE_INSTALL_LIBDIR=${CMAKE_INSTALL_LIBDIR}
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+            -DBUILD_SHARED_LIBS=OFF
+            -DBUILD_TOOLS=OFF
+            -DBUILD_REGRESS=OFF
+            -DBUILD_OSSFUZZ=OFF
+            -DBUILD_EXAMPLES=OFF
+            -DBUILD_DOC=OFF
+            -DENABLE_COMMONCRYPTO=OFF
+            -DENABLE_GNUTLS=OFF
+            -DENABLE_MBEDTLS=OFF
+            -DENABLE_OPENSSL=OFF
+            -DENABLE_WINDOWS_CRYPTO=OFF
+            -DENABLE_BZIP2=OFF
+            -DENABLE_LZMA=OFF
+            -DENABLE_ZSTD=OFF
+        BUILD_BYPRODUCTS
+            "${IIGENERALDOCUMENT_LIBZIP_INSTALL}/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}zip${CMAKE_STATIC_LIBRARY_SUFFIX}")
+
+    if(APPLE)
+        add_library(iiGeneralDocumentLibzipLibrary INTERFACE)
+        target_include_directories(iiGeneralDocumentLibzipLibrary SYSTEM INTERFACE
+            "${IIGENERALDOCUMENT_LIBZIP_INSTALL}/${CMAKE_INSTALL_INCLUDEDIR}")
+        target_link_directories(iiGeneralDocumentLibzipLibrary INTERFACE
+            "${IIGENERALDOCUMENT_LIBZIP_INSTALL}/${CMAKE_INSTALL_LIBDIR}")
+        target_link_libraries(iiGeneralDocumentLibzipLibrary INTERFACE
+            "-Wl,-hidden-lzip")
+    else()
+        add_library(iiGeneralDocumentLibzipLibrary STATIC IMPORTED GLOBAL)
+        set_target_properties(iiGeneralDocumentLibzipLibrary PROPERTIES
+            IMPORTED_LOCATION
+                "${IIGENERALDOCUMENT_LIBZIP_INSTALL}/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}zip${CMAKE_STATIC_LIBRARY_SUFFIX}"
+            INTERFACE_INCLUDE_DIRECTORIES
+                "${IIGENERALDOCUMENT_LIBZIP_INSTALL}/${CMAKE_INSTALL_INCLUDEDIR}")
+        if(UNIX)
+            set_property(TARGET iiGeneralDocumentLibzipLibrary APPEND PROPERTY
+                INTERFACE_LINK_OPTIONS "LINKER:--exclude-libs,libzip.a")
+        endif()
+    endif()
+    add_dependencies(iiGeneralDocumentLibzipLibrary iiGeneralDocumentLibzip)
+    set(IIGENERALDOCUMENT_LIBZIP_TARGET iiGeneralDocumentLibzipLibrary)
+endif()
+
 set(IIGENERALDOCUMENT_LIBRARY_TYPE STATIC)
 if(IIGENERALDOCUMENT_BUILD_SHARED AND NOT EMSCRIPTEN)
     set(IIGENERALDOCUMENT_LIBRARY_TYPE SHARED)
@@ -145,6 +213,10 @@ add_library(iiGeneralDocument ${IIGENERALDOCUMENT_LIBRARY_TYPE}
     src/Core/PdfValue.h
     src/Editing/DocumentEditor.cpp
     src/Editing/DocumentEditor.h
+    src/Html/HtmlBlockDocument.cpp
+    src/Html/HtmlBlockDocument.h
+    src/Html/HtmlBlockEditor.cpp
+    src/Html/HtmlBlockEditor.h
     src/IO/DocumentReader.h
     src/IO/DocumentWriter.h
     src/Model/Document.cpp
@@ -158,6 +230,20 @@ add_library(iiGeneralDocument ${IIGENERALDOCUMENT_LIBRARY_TYPE}
     src/Pdf/PdfDocumentReader.h
     src/Pdf/PdfDocumentWriter.cpp
     src/Pdf/PdfDocumentWriter.h
+    src/Word/WordDocument.cpp
+    src/Word/WordDocument.h
+    src/Word/WordDocumentReader.cpp
+    src/Word/WordDocumentReader.h
+    src/Word/WordDocumentWriter.cpp
+    src/Word/WordDocumentWriter.h
+    src/Word/Private/DocxPackage.cpp
+    src/Word/Private/DocxPackage.h
+    src/Word/Private/LegacyDocConverter.cpp
+    src/Word/Private/LegacyDocConverter.h
+    src/Xml/XmlTreeDocument.cpp
+    src/Xml/XmlTreeDocument.h
+    src/Xml/XmlTreeEditor.cpp
+    src/Xml/XmlTreeEditor.h
     src/Validation/DocumentValidator.cpp
     src/Validation/DocumentValidator.h
     src/iiGeneralDocument.h)
@@ -181,6 +267,7 @@ target_link_libraries(iiGeneralDocument
     PRIVATE
         Qt6::Qml
         ${IIGENERALDOCUMENT_QPDF_TARGET}
+        ${IIGENERALDOCUMENT_LIBZIP_TARGET}
         ZLIB::ZLIB
         ${IIGENERALDOCUMENT_JPEG_TARGET})
 if(MSVC)
@@ -204,7 +291,8 @@ install(TARGETS iiGeneralDocument
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(DIRECTORY src/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iiGeneralDocument
-    FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp")
+    FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+    PATTERN "*/Private/*" EXCLUDE)
 install(DIRECTORY platform/Android/
     DESTINATION ${CMAKE_INSTALL_DATADIR}/iiGeneralDocument/platform/Android)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/generated/iiGeneralDocument/Export.h"
@@ -227,7 +315,8 @@ install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/iiGeneralDocumentConfigVersion.cmake"
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/iiGeneralDocument)
 install(FILES README.md THIRD_PARTY_NOTICES.md docs/API.md docs/ARCHITECTURE.md docs/PDF_SUPPORT.md
-    docs/THINKING_SPACE_DOCUMENT_MODEL.md
+    docs/HTML_BLOCK_CRUD.md docs/THINKING_SPACE_DOCUMENT_MODEL.md docs/WORD_SUPPORT.md
+    docs/XML_TREE_CRUD.md
     DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/iiGeneralDocument)
 if(NOT IIGENERALDOCUMENT_USE_SYSTEM_QPDF)
     install(FILES
@@ -236,8 +325,48 @@ if(NOT IIGENERALDOCUMENT_USE_SYSTEM_QPDF)
         "${IIGENERALDOCUMENT_QPDF_PREFIX}/src/iiGeneralDocumentQpdf/Artistic-2.0"
         DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument/qpdf)
 endif()
+if(NOT IIGENERALDOCUMENT_USE_SYSTEM_LIBZIP)
+    install(FILES
+        "${IIGENERALDOCUMENT_LIBZIP_PREFIX}/src/iiGeneralDocumentLibzip/LICENSE"
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument/libzip)
+endif()
 
 if(BUILD_TESTING)
+    add_executable(iiGeneralDocumentXmlTreeCrudTest tests/XmlTreeCrudTest.cpp)
+    target_link_libraries(iiGeneralDocumentXmlTreeCrudTest PRIVATE
+        iiGeneralDocument::iiGeneralDocument)
+    add_test(NAME iiGeneralDocument.XmlTreeCrud
+        COMMAND iiGeneralDocumentXmlTreeCrudTest)
+
+    add_executable(iiGeneralDocumentHtmlBlockCrudTest tests/HtmlBlockCrudTest.cpp)
+    target_link_libraries(iiGeneralDocumentHtmlBlockCrudTest PRIVATE
+        iiGeneralDocument::iiGeneralDocument)
+    add_test(NAME iiGeneralDocument.HtmlBlockCrud
+        COMMAND iiGeneralDocumentHtmlBlockCrudTest)
+
+    add_executable(iiGeneralDocumentWordModelTest tests/WordModelTest.cpp)
+    target_link_libraries(iiGeneralDocumentWordModelTest PRIVATE iiGeneralDocument::iiGeneralDocument)
+    add_test(NAME iiGeneralDocument.WordModel COMMAND iiGeneralDocumentWordModelTest)
+
+    add_executable(iiGeneralDocumentWordRoundTripTest tests/WordRoundTripTest.cpp)
+    target_link_libraries(iiGeneralDocumentWordRoundTripTest PRIVATE iiGeneralDocument::iiGeneralDocument)
+    target_compile_definitions(iiGeneralDocumentWordRoundTripTest PRIVATE
+        IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output")
+    add_test(NAME iiGeneralDocument.WordRoundTrip COMMAND iiGeneralDocumentWordRoundTripTest)
+
+    find_program(IIGENERALDOCUMENT_TEST_SOFFICE_EXECUTABLE NAMES soffice libreoffice)
+    if(IIGENERALDOCUMENT_TEST_SOFFICE_EXECUTABLE)
+        add_executable(iiGeneralDocumentLegacyDocRoundTripTest
+            tests/LegacyDocRoundTripTest.cpp)
+        target_link_libraries(iiGeneralDocumentLegacyDocRoundTripTest PRIVATE
+            iiGeneralDocument::iiGeneralDocument)
+        target_compile_definitions(iiGeneralDocumentLegacyDocRoundTripTest PRIVATE
+            IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output"
+            IIGENERALDOCUMENT_TEST_SOFFICE="${IIGENERALDOCUMENT_TEST_SOFFICE_EXECUTABLE}")
+        add_test(NAME iiGeneralDocument.LegacyDocRoundTrip
+            COMMAND iiGeneralDocumentLegacyDocRoundTripTest)
+    endif()
+
     add_executable(iiGeneralDocumentModelTest tests/ModelTest.cpp)
     target_link_libraries(iiGeneralDocumentModelTest PRIVATE iiGeneralDocument::iiGeneralDocument)
     add_test(NAME iiGeneralDocument.Model COMMAND iiGeneralDocumentModelTest)

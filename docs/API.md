@@ -1,5 +1,92 @@
 # API
 
+## Hierarchical XML documents
+
+`XmlTreeDocument::fromXml()` adapts `iiXml::Parser::TagDocument` into a strict,
+single-root hierarchy without exposing iiXml types in public headers. Every
+`XmlNode` provides a runtime-stable ID, optional parent ID, ordered direct-child
+IDs, name, inner/raw XML, attributes, self-closing state, and full-document byte
+ranges. `XmlAttribute` retains iiXml's string, integer, real, and boolean type
+inference.
+
+`XmlTreeEditor` provides subtree-level CRUD:
+
+```cpp
+auto document = XmlTreeDocument::fromXml(
+    "<catalog><item>Existing</item></catalog>");
+XmlTreeEditor editor(document);
+
+const XmlNodeId catalogId = *document.rootId();
+const XmlNodeId created = editor.create(
+    "<item enabled=true>Created</item>", catalogId);
+const XmlNode* node = editor.read(created);
+editor.update(created, "<entry>Updated</entry>");
+editor.remove(created);
+```
+
+Create accepts exactly one bare element fragment and appends it as the last
+child. An empty editor state accepts one new root; a non-empty document rejects
+a second root. Creating below a self-closing parent expands it to a paired tag.
+Update retains the selected root ID while replacing its descendants; remove
+deletes the entire selected subtree. All source-changing mutations are parsed
+and identity-reconciled in temporary state before one atomic commit. See
+`XML_TREE_CRUD.md` for prolog handling, pointer lifetime, identity, and syntax
+boundaries.
+
+## HTML block documents
+
+`HtmlBlockDocument::fromHtml()` uses `iiHtmlBlock` to recognize every block
+element while preserving the complete source string. `HtmlBlock` exposes a
+stable ID, tag, value, raw HTML, source ranges, and display override metadata as
+an immutable view.
+
+`HtmlBlockEditor` provides block-level CRUD:
+
+```cpp
+auto document = HtmlBlockDocument::fromHtml(
+    "<main><p>Existing</p></main>");
+HtmlBlockEditor editor(document);
+
+const HtmlBlockId mainId = document.blocks().front().id();
+const HtmlBlockId created = editor.create("<p>Created</p>", mainId);
+const HtmlBlock* block = editor.read(created);
+editor.update(created, "<article>Updated</article>");
+editor.remove(created);
+```
+
+Create appends at document level or as the last child of a supplied parent.
+Create and update accept exactly one serialized block root. Update retains the
+target ID; remove deletes the selected block and its nested identities. Every
+successful mutation reparses temporary state and increments `revision()` once;
+every failure rolls back completely. See `HTML_BLOCK_CRUD.md` for identity,
+pointer lifetime, iiXml overlap, and accepted-syntax boundaries.
+
+## Microsoft Word documents
+
+`WordDocument` is an ordered, flow-oriented model separate from the PDF page
+model. Its `WordBlock` values are `WordParagraph` or `WordTable`. Paragraph
+runs remain independently editable, including Unicode text, tabs, line breaks,
+emphasis, separate Latin/East Asian fonts, size, and color. Page dimensions and
+margins use Word twips.
+
+`WordDocumentReader` and `WordDocumentWriter` select the backend from `.docx`
+or `.doc`. DOCX uses the native OOXML package codec. DOC uses LibreOffice as an
+isolated conversion process; callers may specify its executable and timeout in
+the matching options type. Both return stable diagnostics and `hasErrors()`.
+
+```cpp
+WordDocument document;
+WordParagraph paragraph;
+paragraph.runs.push_back({"Hello Word", {.fontFamily = "Arial"}});
+document.appendParagraph(std::move(paragraph));
+
+auto result = WordDocumentWriter{}.write(document, "hello.docx");
+auto reopened = WordDocumentReader{}.read("hello.docx");
+```
+
+See `WORD_SUPPORT.md` for the supported object matrix, fidelity boundaries,
+LibreOffice runtime contract, security limits, and verification gates.
+
 ## Thinking Space document model
 
 Include `ThinkingSpace/DocumentModel.h` for the complete structured-note

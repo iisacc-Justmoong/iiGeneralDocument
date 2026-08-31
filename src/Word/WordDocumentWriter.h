@@ -1,0 +1,35 @@
+#pragma once
+
+#include "Core/Diagnostic.h"
+#include "Word/WordDocument.h"
+#include "iiGeneralDocument/Export.h"
+
+#include <chrono>
+#include <filesystem>
+#include <vector>
+
+namespace ii::document {
+
+struct WordWriteOptions {
+    std::filesystem::path libreOfficeExecutable;
+    std::chrono::milliseconds conversionTimeout{60000};
+};
+
+struct IIGENERALDOCUMENT_EXPORT WordWriteResult {
+    std::vector<Diagnostic> diagnostics;
+
+    [[nodiscard]] bool hasErrors() const noexcept
+    {
+        return ii::document::hasErrors(diagnostics);
+    }
+};
+
+class IIGENERALDOCUMENT_EXPORT WordDocumentWriter final {
+public:
+    [[nodiscard]] WordWriteResult write(
+        const WordDocument& document,
+        const std::filesystem::path& destination,
+        const WordWriteOptions& options = {}) const;
+};
+
+} // namespace ii::document
