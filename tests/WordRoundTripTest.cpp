@@ -4,6 +4,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <string>
 #include <utility>
 #include <variant>
@@ -46,6 +47,28 @@ WordDocument sampleDocument()
     }
     document.appendTable(std::move(table));
     return document;
+}
+
+std::string readFile(const std::filesystem::path& path)
+{
+    std::ifstream input(path, std::ios::binary);
+    expect(input.is_open(), "the DOCX transaction fixture can be reopened");
+    return {
+        std::istreambuf_iterator<char>(input),
+        std::istreambuf_iterator<char>()};
+}
+
+bool hasDiagnostic(
+    const WordWriteResult& result,
+    const std::string& code,
+    const std::string& messageFragment)
+{
+    for (const auto& item : result.diagnostics) {
+        if (item.code == code && item.message.find(messageFragment) != std::string::npos) {
+            return true;
+        }
+    }
+    return false;
 }
 
 } // namespace
@@ -120,4 +143,68 @@ int main()
     const auto invalid = WordDocumentWriter{}.write(
         invalidDocument, outputDirectory / "invalid-table.docx");
     expect(invalid.hasErrors(), "structurally invalid Word tables fail before writing");
+
+    const auto atomicPath = outputDirectory / "word-atomic-overwrite.docx";
+    auto atomicDocument = sampleDocument();
+    const auto atomicInitial = WordDocumentWriter{}.write(atomicDocument, atomicPath);
+    expect(!atomicInitial.hasErrors(), "the atomic DOCX fixture is initially written");
+    const auto originalBytes = readFile(atomicPath);
+
+    WordWriteOptions restrictive;
+    restrictive.maximumXmlPartBytes = 1;
+    std::get<WordParagraph>(atomicDocument.blocks().front()).runs.front().text =
+        "must not commit";
+    const auto rejected = WordDocumentWriter{}.write(
+        atomicDocument, atomicPath, restrictive);
+    expect(rejected.hasErrors(), "DOCX post-generation validation can reject output");
+    expect(hasDiagnostic(rejected, "docx.part_too_large", "_rels/.rels"),
+           "the DOCX writer applies the XML limit to the root relationship part");
+    expect(readFile(atomicPath) == originalBytes,
+           "a rejected DOCX replacement preserves the existing bytes");
+
+    const auto stylesLimitPath = outputDirectory / "word-styles-limit.docx";
+    WordDocument stylesLimitDocument;
+    WordParagraph stylesLimitParagraph;
+    stylesLimitParagraph.runs.push_back({"before"});
+    stylesLimitDocument.appendParagraph(std::move(stylesLimitParagraph));
+    const auto stylesLimitInitial = WordDocumentWriter{}.write(
+        stylesLimitDocument, stylesLimitPath);
+    expect(!stylesLimitInitial.hasErrors(),
+           "the DOCX styles-limit fixture is initially written");
+    const auto stylesLimitOriginalBytes = readFile(stylesLimitPath);
+
+    std::get<WordParagraph>(stylesLimitDocument.blocks().front()).runs.front().text =
+        "after";
+    WordWriteOptions stylesLimit;
+    stylesLimit.maximumXmlPartBytes = 2'000;
+    const auto stylesLimitRejected = WordDocumentWriter{}.write(
+        stylesLimitDocument, stylesLimitPath, stylesLimit);
+    expect(hasDiagnostic(
+               stylesLimitRejected, "docx.part_too_large", "word/styles.xml"),
+           "the DOCX writer applies the 2000-byte limit to styles.xml");
+    expect(readFile(stylesLimitPath) == stylesLimitOriginalBytes,
+           "an oversized generated DOCX XML part preserves existing destination bytes");
+
+#ifndef _WIN32
+    constexpr auto mode0644 = std::filesystem::perms::owner_read
+        | std::filesystem::perms::owner_write
+        | std::filesystem::perms::group_read
+        | std::filesystem::perms::others_read;
+    std::error_code permissionError;
+    std::filesystem::permissions(
+        atomicPath, mode0644, std::filesystem::perm_options::replace,
+        permissionError);
+    expect(!permissionError, "the DOCX fixture can be changed to mode 0644");
+#endif
+
+    const auto atomicOverwrite = WordDocumentWriter{}.write(
+        atomicDocument, atomicPath);
+    expect(!atomicOverwrite.hasErrors(), "a validated DOCX replacement is committed");
+#ifndef _WIN32
+    std::error_code statusError;
+    const auto actualMode = std::filesystem::status(atomicPath, statusError).permissions()
+        & std::filesystem::perms::all;
+    expect(!statusError && actualMode == mode0644,
+           "DOCX atomic overwrite preserves the existing 0644 mode");
+#endif
 }

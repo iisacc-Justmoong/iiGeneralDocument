@@ -17,7 +17,7 @@ if(symbols MATCHES "QPDF|QUtil|Pl_[A-Za-z]")
     message(FATAL_ERROR "Private QPDF symbols leaked into the public ABI")
 endif()
 
-if(symbols MATCHES "(^|\\n)_?zip_(open|close|fopen|fread|file_add)([^A-Za-z0-9_]|$)")
+if(symbols MATCHES "(^|\\n)_?zip_[A-Za-z0-9_]+([^A-Za-z0-9_]|$)")
     message(FATAL_ERROR "Private libzip symbols leaked into the public ABI")
 endif()
 

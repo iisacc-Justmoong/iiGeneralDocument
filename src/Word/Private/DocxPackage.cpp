@@ -1,15 +1,19 @@
 #include "Word/Private/DocxPackage.h"
 
+#include "Word/Private/AtomicFileCommit.h"
+
 #include <QBuffer>
 #include <QByteArray>
 #include <QDir>
 #include <QString>
+#include <QTemporaryFile>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
 #include <zip.h>
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <cmath>
 #include <cstddef>
@@ -750,7 +754,8 @@ void writeParagraph(QXmlStreamWriter& xml, const WordParagraph& paragraph)
     const auto& properties = paragraph.properties;
     if (!properties.styleId.empty()
         || properties.alignment != WordParagraphAlignment::automatic
-        || properties.numberingId.has_value()) {
+        || (properties.numberingId.has_value()
+            && !properties.numberingContinuation)) {
         xml.writeStartElement(wordNamespace(), QStringLiteral("pPr"));
         if (!properties.styleId.empty()) {
             writeValElement(
@@ -776,7 +781,7 @@ void writeParagraph(QXmlStreamWriter& xml, const WordParagraph& paragraph)
         if (!alignment.isEmpty()) {
             writeValElement(xml, QStringLiteral("jc"), alignment);
         }
-        if (properties.numberingId) {
+        if (properties.numberingId && !properties.numberingContinuation) {
             xml.writeStartElement(wordNamespace(), QStringLiteral("numPr"));
             writeValElement(
                 xml, QStringLiteral("ilvl"), QString::number(properties.numberingLevel));
@@ -1271,6 +1276,12 @@ struct PackagePart {
     QByteArray bytes;
 };
 
+bool isXmlPackagePart(const PackagePart& part)
+{
+    const std::string_view name{part.name};
+    return name.ends_with(".xml") || name.ends_with(".rels");
+}
+
 bool isHexColor(const std::string& color)
 {
     return color.size() == 6
@@ -1289,6 +1300,14 @@ void validateParagraph(
             DiagnosticSeverity::error,
             "docx.invalid_numbering_id",
             "Word numbering identifiers must be non-negative.",
+            destination));
+    }
+    if (paragraph.properties.numberingContinuation
+        && !paragraph.properties.numberingId) {
+        diagnostics.push_back(diagnostic(
+            DiagnosticSeverity::error,
+            "docx.invalid_numbering_continuation",
+            "A list-item continuation requires a numbering identifier.",
             destination));
     }
     if (paragraph.properties.numberingLevel < 0 || paragraph.properties.numberingLevel > 8) {
@@ -1317,16 +1336,60 @@ void validateParagraph(
     }
 }
 
+void validateNumberingContinuations(
+    const std::vector<const WordParagraph*>& paragraphs,
+    const std::filesystem::path& destination,
+    std::vector<Diagnostic>& diagnostics)
+{
+    std::optional<int> activeIdentifier;
+    std::array<bool, 9> hasItemAtLevel{};
+    for (const auto* paragraph : paragraphs) {
+        if (!paragraph->properties.numberingId) {
+            activeIdentifier.reset();
+            hasItemAtLevel.fill(false);
+            continue;
+        }
+        if (activeIdentifier != paragraph->properties.numberingId) {
+            activeIdentifier = paragraph->properties.numberingId;
+            hasItemAtLevel.fill(false);
+        }
+        if (paragraph->properties.numberingLevel < 0
+            || paragraph->properties.numberingLevel > 8) {
+            continue;
+        }
+        const auto level = static_cast<std::size_t>(
+            paragraph->properties.numberingLevel);
+        if (paragraph->properties.numberingContinuation) {
+            if (!hasItemAtLevel[level]) {
+                diagnostics.push_back(diagnostic(
+                    DiagnosticSeverity::error,
+                    "docx.invalid_numbering_continuation",
+                    "A list-item continuation has no preceding item at its level.",
+                    destination));
+            }
+            continue;
+        }
+        hasItemAtLevel[level] = true;
+        std::fill(
+            hasItemAtLevel.begin() + static_cast<std::ptrdiff_t>(level + 1),
+            hasItemAtLevel.end(), false);
+    }
+}
+
 void validateDocument(
     const WordDocument& document,
     const std::filesystem::path& destination,
     std::vector<Diagnostic>& diagnostics)
 {
+    std::vector<const WordParagraph*> bodyParagraphs;
     for (const auto& block : document.blocks()) {
         if (const auto* paragraph = std::get_if<WordParagraph>(&block)) {
             validateParagraph(*paragraph, destination, diagnostics);
+            bodyParagraphs.push_back(paragraph);
             continue;
         }
+        validateNumberingContinuations(bodyParagraphs, destination, diagnostics);
+        bodyParagraphs.clear();
         const auto& table = std::get<WordTable>(block);
         if (table.rows.empty()) {
             diagnostics.push_back(diagnostic(
@@ -1345,12 +1408,17 @@ void validateDocument(
                     destination));
             }
             for (const auto& cell : row.cells) {
+                std::vector<const WordParagraph*> cellParagraphs;
                 for (const auto& paragraph : cell.paragraphs) {
                     validateParagraph(paragraph, destination, diagnostics);
+                    cellParagraphs.push_back(&paragraph);
                 }
+                validateNumberingContinuations(
+                    cellParagraphs, destination, diagnostics);
             }
         }
     }
+    validateNumberingContinuations(bodyParagraphs, destination, diagnostics);
 }
 
 } // namespace
@@ -1424,13 +1492,20 @@ WordWriteResult writeDocxPackage(
     const std::filesystem::path& destination,
     const WordWriteOptions& options)
 {
-    (void)options;
     WordWriteResult result;
     if (destination.empty()) {
         result.diagnostics.push_back(diagnostic(
             DiagnosticSeverity::error,
             "docx.destination_missing",
             "A DOCX destination path is required.",
+            destination));
+        return result;
+    }
+    if (options.maximumXmlPartBytes == 0) {
+        result.diagnostics.push_back(diagnostic(
+            DiagnosticSeverity::error,
+            "docx.invalid_part_limit",
+            "The DOCX XML-part validation limit must be positive.",
             destination));
         return result;
     }
@@ -1480,9 +1555,43 @@ WordWriteResult writeDocxPackage(
         parts.push_back({"word/numbering.xml", numberingXml(numberingIdentifiers)});
     }
 
+    for (const auto& part : parts) {
+        if (isXmlPackagePart(part)
+            && static_cast<std::uint64_t>(part.bytes.size())
+                > options.maximumXmlPartBytes) {
+            result.diagnostics.push_back(diagnostic(
+                DiagnosticSeverity::error,
+                "docx.part_too_large",
+                "The generated DOCX XML part exceeds the configured write limit: "
+                    + part.name + ".",
+                destination));
+        }
+    }
+    if (result.hasErrors()) {
+        return result;
+    }
+
+    const auto parent = destination.parent_path().empty()
+        ? std::filesystem::current_path() : destination.parent_path();
+    const auto temporaryTemplate = parent
+        / ("." + destination.filename().string() + ".XXXXXX");
+    QTemporaryFile temporary(QString::fromStdString(temporaryTemplate.string()));
+    temporary.setAutoRemove(true);
+    if (!temporary.open()) {
+        result.diagnostics.push_back(diagnostic(
+            DiagnosticSeverity::error,
+            "docx.temporary_file_failed",
+            "Unable to create a same-directory temporary DOCX package.",
+            destination));
+        return result;
+    }
+    const auto temporaryPath = std::filesystem::path(
+        temporary.fileName().toStdString());
+    temporary.close();
+
     int openError = 0;
     ZipArchive archive(zip_open(
-        destination.string().c_str(), ZIP_CREATE | ZIP_TRUNCATE, &openError));
+        temporaryPath.string().c_str(), ZIP_CREATE | ZIP_TRUNCATE, &openError));
     if (!archive.get()) {
         result.diagnostics.push_back(diagnostic(
             DiagnosticSeverity::error,
@@ -1541,18 +1650,32 @@ WordWriteResult writeDocxPackage(
     }
 
     WordReadOptions validationOptions;
-    auto validation = readDocxPackage(destination, validationOptions);
+    validationOptions.maximumXmlPartBytes = options.maximumXmlPartBytes;
+    auto validation = readDocxPackage(temporaryPath, validationOptions);
     if (validation.hasErrors()) {
         result.diagnostics.push_back(diagnostic(
             DiagnosticSeverity::error,
             "docx.post_write_validation_failed",
-            "The committed DOCX package could not be reopened.",
+            "The generated DOCX package could not be reopened before commit.",
             destination));
         result.diagnostics.insert(
             result.diagnostics.end(),
             std::make_move_iterator(validation.diagnostics.begin()),
             std::make_move_iterator(validation.diagnostics.end()));
+        return result;
     }
+
+    const auto commit = atomicReplacePreservingPermissions(
+        temporaryPath, destination);
+    if (!commit.succeeded) {
+        result.diagnostics.push_back(diagnostic(
+            DiagnosticSeverity::error,
+            "docx." + commit.diagnosticSuffix,
+            commit.message,
+            destination));
+        return result;
+    }
+    temporary.setAutoRemove(false);
     return result;
 }
 

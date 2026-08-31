@@ -2,6 +2,7 @@
 
 #include "Word/Private/DocxPackage.h"
 #include "Word/Private/LegacyDocConverter.h"
+#include "Word/Private/OdfTextCodec.h"
 
 #include <QTemporaryDir>
 
@@ -34,12 +35,18 @@ WordReadResult WordDocumentReader::read(
     if (extension == ".docx") {
         return detail::readDocxPackage(source, options);
     }
+    if (extension == ".odt") {
+        return detail::readOdtPackage(source, options);
+    }
+    if (extension == ".fodt") {
+        return detail::readFodtDocument(source, options);
+    }
     if (extension != ".doc") {
         WordReadResult result;
         result.diagnostics.push_back({
             DiagnosticSeverity::error,
             "word.unsupported_extension",
-            "WordDocumentReader supports only .doc and .docx files.",
+            "WordDocumentReader supports .doc, .docx, .odt, and .fodt files.",
             source.string(),
         });
         return result;

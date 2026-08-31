@@ -16,7 +16,7 @@ QPDF uses zlib for PDF stream compression and decompression. zlib is distributed
 
 ## libzip 1.11.4
 
-libzip reads, creates, and atomically commits the ZIP packages used by DOCX.
+libzip reads and creates the ZIP packages used by DOCX and ODT.
 iiGeneralDocument pins commit `6f8a0cdd24a0dc6cce9dac4a7679da784ab124ea`
 from release 1.11.4 and builds only its static library with optional crypto and
 additional compression backends disabled.
@@ -41,10 +41,9 @@ The installed LibreOffice distribution and its licenses govern that runtime.
 
 QPDF uses the system JPEG implementation for DCT streams. The default build prefers an available static `libjpeg` archive for a self-contained iiGeneralDocument library and otherwise links the CMake `JPEG::JPEG` target. libjpeg-turbo carries IJG, BSD-style, and zlib licenses: https://github.com/libjpeg-turbo/libjpeg-turbo/blob/main/LICENSE.md.
 
-## Qt Core, Gui, and Qml 6.8.3
+## Qt Core 6.8.3
 
-The Thinking Space document model directly uses Qt Core, Gui, and Qml. `iiXml`
-and `iiHtmlBlock` also link Qt Core. Qt is available under commercial and
+iiGeneralDocument, `iiXml`, and `iiHtmlBlock` link Qt Core. Qt is available under commercial and
 open-source license options; the selected Qt distribution terms apply. The
 locally installed Qt source includes the applicable LGPL, GPL, and commercial
 license texts under the Qt source `LICENSES` directories.
@@ -58,13 +57,3 @@ These first-party iisacc libraries are resolved as installed CMake packages rath
 
 - iiXml: https://github.com/iisacc-Justmoong/iiXml
 - iiHtmlBlock: https://github.com/iisacc-Justmoong/iiHtmlBlock
-
-## AndroidX DocumentFile
-
-The optional Thinking Space Android Storage Access Framework bridge imports
-`androidx.documentfile.provider.DocumentFile`. AndroidX is distributed under
-the Apache License 2.0. The Java source is installed for Android consumers but
-AndroidX binaries are not vendored by this repository.
-
-- Project: https://developer.android.com/jetpack/androidx
-- License: https://www.apache.org/licenses/LICENSE-2.0

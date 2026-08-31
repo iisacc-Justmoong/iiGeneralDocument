@@ -2,6 +2,7 @@
 
 #include "Word/Private/DocxPackage.h"
 #include "Word/Private/LegacyDocConverter.h"
+#include "Word/Private/OdfTextCodec.h"
 
 #include <QTemporaryDir>
 
@@ -35,12 +36,18 @@ WordWriteResult WordDocumentWriter::write(
     if (extension == ".docx") {
         return detail::writeDocxPackage(document, destination, options);
     }
+    if (extension == ".odt") {
+        return detail::writeOdtPackage(document, destination, options);
+    }
+    if (extension == ".fodt") {
+        return detail::writeFodtDocument(document, destination, options);
+    }
     if (extension != ".doc") {
         WordWriteResult result;
         result.diagnostics.push_back({
             DiagnosticSeverity::error,
             "word.unsupported_extension",
-            "WordDocumentWriter supports only .doc and .docx files.",
+            "WordDocumentWriter supports .doc, .docx, .odt, and .fodt files.",
             destination.string(),
         });
         return result;
@@ -104,6 +111,7 @@ WordWriteResult WordDocumentWriter::write(
     }
 
     WordReadOptions validationOptions;
+    validationOptions.maximumXmlPartBytes = options.maximumXmlPartBytes;
     auto validation = detail::readDocxPackage(reopenedDocx, validationOptions);
     if (validation.hasErrors()) {
         result.diagnostics.push_back({

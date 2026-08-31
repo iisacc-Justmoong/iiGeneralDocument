@@ -61,18 +61,25 @@ successful mutation reparses temporary state and increments `revision()` once;
 every failure rolls back completely. See `HTML_BLOCK_CRUD.md` for identity,
 pointer lifetime, iiXml overlap, and accepted-syntax boundaries.
 
-## Microsoft Word documents
+## Flow text documents
 
 `WordDocument` is an ordered, flow-oriented model separate from the PDF page
 model. Its `WordBlock` values are `WordParagraph` or `WordTable`. Paragraph
 runs remain independently editable, including Unicode text, tabs, line breaks,
 emphasis, separate Latin/East Asian fonts, size, and color. Page dimensions and
-margins use Word twips.
+margins use Word twips. `WordParagraphProperties::numberingId` and
+`numberingLevel` identify a list and its depth;
+`numberingContinuation` marks an additional paragraph that belongs to the same
+ODF list item rather than creating another numbered item.
 
-`WordDocumentReader` and `WordDocumentWriter` select the backend from `.docx`
-or `.doc`. DOCX uses the native OOXML package codec. DOC uses LibreOffice as an
-isolated conversion process; callers may specify its executable and timeout in
-the matching options type. Both return stable diagnostics and `hasErrors()`.
+`WordDocumentReader` and `WordDocumentWriter` select the backend from `.docx`,
+`.doc`, `.odt`, or `.fodt`. DOCX, ODT, and FODT use native package/XML codecs.
+DOC uses LibreOffice as an isolated conversion process; callers may specify its
+executable and timeout in the matching options type. Every backend returns
+stable diagnostics and `hasErrors()`. Reader and writer options both expose
+`maximumXmlPartBytes`; the DOCX writer checks every generated XML/relationship
+part and all native writers use it for pre-commit reopen validation, so a failed
+validation never replaces an existing DOCX/ODT/FODT destination.
 
 ```cpp
 WordDocument document;
@@ -82,33 +89,12 @@ document.appendParagraph(std::move(paragraph));
 
 auto result = WordDocumentWriter{}.write(document, "hello.docx");
 auto reopened = WordDocumentReader{}.read("hello.docx");
+auto odf = WordDocumentWriter{}.write(reopened.document, "hello.odt");
 ```
 
 See `WORD_SUPPORT.md` for the supported object matrix, fidelity boundaries,
-LibreOffice runtime contract, security limits, and verification gates.
-
-## Thinking Space document model
-
-Include `ThinkingSpace/DocumentModel.h` for the complete structured-note
-surface or include a domain header directly. The high-level persistence entry
-points are `ThinkingSpace::NoteBodyPersistence`,
-`ThinkingSpaceLocalNoteFileStore`, and `NoteEditorDocumentSession`.
-
-`ThinkingSpace::NoteBodyPersistence` converts the editable source language to
-and from the `THINKINGSPACENOTE` XML representation. Source constructs such as
-styles, callouts, resources, links, and semantic tags remain editable rather
-than being flattened into presentation HTML. `SetTag`, `SetProperty`, and
-`GetProperty` expose the same typed editor mutation contract used by the source
-application.
-
-`ThinkingSpaceLocalNoteFileStore` creates, reads, updates, and deletes unpacked
-`.tsnote` packages. Updates can capture `.tsnversion` snapshots and unified
-header/body diffs through `ThinkingSpaceLocalNoteVersionStore`. Folder, tag,
-library, and resource persistence types are available under their matching
-`ThinkingSpace` subdirectories.
-
-The authoritative format and provenance mapping is documented in
-`THINKING_SPACE_DOCUMENT_MODEL.md`.
+LibreOffice runtime contract, security limits, and verification gates. See
+`ODF_SUPPORT.md` for ODT/FODT packaging, semantic mapping, and CRUD limits.
 
 ## Document model
 

@@ -27,7 +27,7 @@ endif()
 
 find_package(iiXml 0.1.0 CONFIG REQUIRED)
 find_package(iiHtmlBlock 0.1.0 CONFIG REQUIRED)
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Qml)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core)
 find_package(ZLIB REQUIRED)
 find_package(JPEG REQUIRED)
 
@@ -48,8 +48,6 @@ if(APPLE AND TARGET WrapOpenGL::WrapOpenGL)
             INTERFACE_LINK_LIBRARIES "${iigeneraldocument_filtered_wrap_opengl_links}")
     endif()
 endif()
-
-include(cmake/ThinkingSpaceDocumentModelSources.cmake)
 
 find_library(IIGENERALDOCUMENT_STATIC_JPEG_LIBRARY
     NAMES "${CMAKE_STATIC_LIBRARY_PREFIX}jpeg${CMAKE_STATIC_LIBRARY_SUFFIX}")
@@ -206,7 +204,6 @@ if(IIGENERALDOCUMENT_BUILD_SHARED AND NOT EMSCRIPTEN)
 endif()
 
 add_library(iiGeneralDocument ${IIGENERALDOCUMENT_LIBRARY_TYPE}
-    ${IIGENERALDOCUMENT_THINKING_SPACE_SOURCES}
     src/Core/Diagnostic.cpp
     src/Core/Diagnostic.h
     src/Core/PdfValue.cpp
@@ -236,10 +233,14 @@ add_library(iiGeneralDocument ${IIGENERALDOCUMENT_LIBRARY_TYPE}
     src/Word/WordDocumentReader.h
     src/Word/WordDocumentWriter.cpp
     src/Word/WordDocumentWriter.h
+    src/Word/Private/AtomicFileCommit.cpp
+    src/Word/Private/AtomicFileCommit.h
     src/Word/Private/DocxPackage.cpp
     src/Word/Private/DocxPackage.h
     src/Word/Private/LegacyDocConverter.cpp
     src/Word/Private/LegacyDocConverter.h
+    src/Word/Private/OdfTextCodec.cpp
+    src/Word/Private/OdfTextCodec.h
     src/Xml/XmlTreeDocument.cpp
     src/Xml/XmlTreeDocument.h
     src/Xml/XmlTreeEditor.cpp
@@ -263,9 +264,7 @@ target_link_libraries(iiGeneralDocument
         iiXml::iiXml
         iiHtmlBlock::iiHtmlBlock
         Qt6::Core
-        Qt6::Gui
     PRIVATE
-        Qt6::Qml
         ${IIGENERALDOCUMENT_QPDF_TARGET}
         ${IIGENERALDOCUMENT_LIBZIP_TARGET}
         ZLIB::ZLIB
@@ -293,8 +292,6 @@ install(DIRECTORY src/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iiGeneralDocument
     FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
     PATTERN "*/Private/*" EXCLUDE)
-install(DIRECTORY platform/Android/
-    DESTINATION ${CMAKE_INSTALL_DATADIR}/iiGeneralDocument/platform/Android)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/generated/iiGeneralDocument/Export.h"
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iiGeneralDocument)
 install(EXPORT iiGeneralDocumentTargets
@@ -315,7 +312,7 @@ install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/iiGeneralDocumentConfigVersion.cmake"
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/iiGeneralDocument)
 install(FILES README.md THIRD_PARTY_NOTICES.md docs/API.md docs/ARCHITECTURE.md docs/PDF_SUPPORT.md
-    docs/HTML_BLOCK_CRUD.md docs/THINKING_SPACE_DOCUMENT_MODEL.md docs/WORD_SUPPORT.md
+    docs/HTML_BLOCK_CRUD.md docs/ODF_SUPPORT.md docs/WORD_SUPPORT.md
     docs/XML_TREE_CRUD.md
     DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/iiGeneralDocument)
 if(NOT IIGENERALDOCUMENT_USE_SYSTEM_QPDF)
@@ -354,6 +351,33 @@ if(BUILD_TESTING)
         IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output")
     add_test(NAME iiGeneralDocument.WordRoundTrip COMMAND iiGeneralDocumentWordRoundTripTest)
 
+    add_executable(iiGeneralDocumentOdfRoundTripTest tests/OdfRoundTripTest.cpp)
+    target_link_libraries(iiGeneralDocumentOdfRoundTripTest PRIVATE
+        iiGeneralDocument::iiGeneralDocument)
+    target_compile_definitions(iiGeneralDocumentOdfRoundTripTest PRIVATE
+        IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output")
+    add_test(NAME iiGeneralDocument.OdfRoundTrip COMMAND iiGeneralDocumentOdfRoundTripTest)
+
+    add_executable(iiGeneralDocumentOdfStyleCompatibilityTest
+        tests/OdfStyleCompatibilityTest.cpp)
+    target_link_libraries(iiGeneralDocumentOdfStyleCompatibilityTest PRIVATE
+        iiGeneralDocument::iiGeneralDocument
+        ${IIGENERALDOCUMENT_LIBZIP_TARGET}
+        ZLIB::ZLIB)
+    target_compile_definitions(iiGeneralDocumentOdfStyleCompatibilityTest PRIVATE
+        IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output")
+    add_test(NAME iiGeneralDocument.OdfStyleCompatibility
+        COMMAND iiGeneralDocumentOdfStyleCompatibilityTest)
+
+    add_executable(iiGeneralDocumentOdfRobustnessTest
+        tests/OdfRobustnessTest.cpp)
+    target_link_libraries(iiGeneralDocumentOdfRobustnessTest PRIVATE
+        iiGeneralDocument::iiGeneralDocument)
+    target_compile_definitions(iiGeneralDocumentOdfRobustnessTest PRIVATE
+        IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output")
+    add_test(NAME iiGeneralDocument.OdfRobustness
+        COMMAND iiGeneralDocumentOdfRobustnessTest)
+
     find_program(IIGENERALDOCUMENT_TEST_SOFFICE_EXECUTABLE NAMES soffice libreoffice)
     if(IIGENERALDOCUMENT_TEST_SOFFICE_EXECUTABLE)
         add_executable(iiGeneralDocumentLegacyDocRoundTripTest
@@ -365,6 +389,16 @@ if(BUILD_TESTING)
             IIGENERALDOCUMENT_TEST_SOFFICE="${IIGENERALDOCUMENT_TEST_SOFFICE_EXECUTABLE}")
         add_test(NAME iiGeneralDocument.LegacyDocRoundTrip
             COMMAND iiGeneralDocumentLegacyDocRoundTripTest)
+
+        add_executable(iiGeneralDocumentOdfLibreOfficeInteropTest
+            tests/OdfLibreOfficeInteropTest.cpp)
+        target_link_libraries(iiGeneralDocumentOdfLibreOfficeInteropTest PRIVATE
+            iiGeneralDocument::iiGeneralDocument)
+        target_compile_definitions(iiGeneralDocumentOdfLibreOfficeInteropTest PRIVATE
+            IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output"
+            IIGENERALDOCUMENT_TEST_SOFFICE="${IIGENERALDOCUMENT_TEST_SOFFICE_EXECUTABLE}")
+        add_test(NAME iiGeneralDocument.OdfLibreOfficeInterop
+            COMMAND iiGeneralDocumentOdfLibreOfficeInteropTest)
     endif()
 
     add_executable(iiGeneralDocumentModelTest tests/ModelTest.cpp)
@@ -384,18 +418,6 @@ if(BUILD_TESTING)
     add_executable(iiGeneralDocumentValidationTest tests/ValidationTest.cpp)
     target_link_libraries(iiGeneralDocumentValidationTest PRIVATE iiGeneralDocument::iiGeneralDocument)
     add_test(NAME iiGeneralDocument.Validation COMMAND iiGeneralDocumentValidationTest)
-
-    add_executable(iiGeneralDocumentThinkingSpaceModelTest
-        tests/ThinkingSpaceDocumentModelTest.cpp)
-    target_link_libraries(iiGeneralDocumentThinkingSpaceModelTest PRIVATE
-        iiGeneralDocument::iiGeneralDocument)
-    add_test(NAME iiGeneralDocument.ThinkingSpaceModel
-        COMMAND iiGeneralDocumentThinkingSpaceModelTest)
-
-    add_test(NAME iiGeneralDocument.ThinkingSpaceModelContract
-        COMMAND ${CMAKE_COMMAND}
-            -DIIGENERALDOCUMENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
-            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/ThinkingSpaceModelContractTest.cmake)
 
     add_test(NAME iiGeneralDocument.ProjectContract
         COMMAND ${CMAKE_COMMAND}

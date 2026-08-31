@@ -4,7 +4,7 @@ include(CMakeFindDependencyMacro)
 
 find_dependency(iiXml 0.1.0 CONFIG REQUIRED)
 find_dependency(iiHtmlBlock 0.1.0 CONFIG REQUIRED)
-find_dependency(Qt6 6.5 REQUIRED COMPONENTS Core Gui Qml)
+find_dependency(Qt6 6.5 REQUIRED COMPONENTS Core)
 
 if(APPLE AND TARGET WrapOpenGL::WrapOpenGL)
     get_target_property(iigeneraldocument_wrap_opengl_links

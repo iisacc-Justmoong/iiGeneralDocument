@@ -2,6 +2,9 @@
 #include <iiHtmlBlock>
 #include <iiXml>
 
+#include <QTemporaryDir>
+
+#include <filesystem>
 #include <utility>
 
 int main()
@@ -14,6 +17,18 @@ int main()
     wordDocument.appendParagraph(std::move(wordParagraph));
     const auto unsupportedWordRead =
         ii::document::WordDocumentReader{}.read("unsupported.txt");
+    QTemporaryDir odfDirectory;
+    if (!odfDirectory.isValid()) {
+        return 1;
+    }
+    const auto odfDirectoryPath = std::filesystem::path(
+        odfDirectory.path().toStdString());
+    const auto odtPath = odfDirectoryPath / "install-consumer.odt";
+    const auto fodtPath = odfDirectoryPath / "install-consumer.fodt";
+    const auto odtWrite = ii::document::WordDocumentWriter{}.write(wordDocument, odtPath);
+    const auto fodtWrite = ii::document::WordDocumentWriter{}.write(wordDocument, fodtPath);
+    const auto odtRead = ii::document::WordDocumentReader{}.read(odtPath);
+    const auto fodtRead = ii::document::WordDocumentReader{}.read(fodtPath);
 
     auto htmlDocument = ii::document::HtmlBlockDocument::fromHtml(
         "<main><p>consumer</p></main>");
@@ -40,10 +55,6 @@ int main()
     const iiXml::Parser::TagParser parser;
     const auto parsed = parser.Parse("<p>text</p>");
     const iiHtmlBlock::GetHTML html;
-    const QString thinkingSpaceBody =
-        ThinkingSpace::NoteBodyPersistence::serializeBodyDocument(
-            QStringLiteral("consumer"), QStringLiteral("text"));
-
     return document.pages().size() == 1
             && parsed.has_value()
             && parsed->TagName == "p"
@@ -59,8 +70,13 @@ int main()
             && xmlEditor.read(createdNodeId) == nullptr
             && xmlDocument.xml() == "<root ></root>"
             && wordDocument.plainText() == "word consumer"
+            && !odtWrite.hasErrors()
+            && !fodtWrite.hasErrors()
+            && !odtRead.hasErrors()
+            && !fodtRead.hasErrors()
+            && odtRead.document.plainText() == "word consumer"
+            && fodtRead.document.plainText() == "word consumer"
             && unsupportedWordRead.hasErrors()
-            && thinkingSpaceBody.contains(QStringLiteral("THINKINGSPACENOTE"))
         ? 0
         : 1;
 }

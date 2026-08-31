@@ -9,9 +9,9 @@ source ranges; the public iiGeneralDocument API converts those dependency types
 into stable `HtmlBlockId` objects.
 
 This module is intentionally separate from the PDF page model, the Word flow
-model, and the Thinking Space note store. It performs in-memory block CRUD. The
-caller remains responsible for loading and persisting `HtmlBlockDocument::html()`
-when a file or database is involved.
+model, and application persistence layers. It performs in-memory block CRUD.
+The caller remains responsible for loading and persisting
+`HtmlBlockDocument::html()` when a file or database is involved.
 
 ## Public model
 

@@ -9,7 +9,7 @@ types into stable `XmlNodeId`, `XmlNode`, and `XmlAttribute` values and adds a
 strict single-root boundary suitable for subtree CRUD.
 
 This module is independent from the PDF page model, HTML block model, Word
-flow model, and Thinking Space persistence layer. It performs in-memory CRUD;
+flow model, and application persistence layers. It performs in-memory CRUD;
 the caller owns file or database loading and persists `XmlTreeDocument::xml()`.
 
 ## Public model

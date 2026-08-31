@@ -8,8 +8,7 @@ get_target_property(iiGeneralDocumentDependencies
 foreach(required_dependency IN ITEMS
         iiXml::iiXml
         iiHtmlBlock::iiHtmlBlock
-        Qt6::Core
-        Qt6::Gui)
+        Qt6::Core)
     if(NOT required_dependency IN_LIST iiGeneralDocumentDependencies)
         message(FATAL_ERROR
             "iiGeneralDocument package does not expose ${required_dependency}.")

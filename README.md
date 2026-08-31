@@ -1,9 +1,9 @@
 # iiGeneralDocument
 
 `iiGeneralDocument` is a C++20 general document library. It provides separate,
-editable models for PDF page content, hierarchical XML, HTML blocks, Microsoft
-Word flow documents, and Thinking Space structured notes while keeping format
-backends behind focused boundaries.
+editable models for PDF page content, hierarchical XML, HTML blocks, and
+flow-oriented text documents while keeping format backends behind focused
+boundaries.
 
 The first release provides:
 
@@ -22,16 +22,20 @@ The first release provides:
   atomic updates, recursive deletion, and overlap-safe range handling;
 - a flow-oriented Word model plus native DOCX read/write for paragraphs,
   formatted runs, tables, numbering, metadata, and section geometry;
+- native ODT and flat-XML FODT read/write through the same editable flow model,
+  with standard package validation and atomic output;
 - legacy Word 97-2003 `.doc` read/write through an isolated, timeout-bounded
   LibreOffice conversion backend with post-write reopening;
-- Thinking Space source/body editing, `.tsnote` package persistence,
-  header/body parsing, resources, tag and folder bindings, and version diffs;
-- the original Thinking Space editor command/session model under the
-  `ThinkingSpace` C++ namespace and class prefix.
 
 ## Build
 
-The build requires Qt 6.5 or newer with Core, Gui, and Qml plus the `iiXml` and `iiHtmlBlock` 0.1.0 CMake packages. Qt Core and Gui and both iisacc libraries are public package dependencies, so an installed consumer receives the same include and link contract. The standard installs at `~/.local/iiXml` and `~/.local/iiHtmlBlock` are discovered automatically; set `IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT` or `CMAKE_PREFIX_PATH` for another installation root.
+The build requires Qt Core 6.5 or newer plus the `iiXml` and `iiHtmlBlock`
+0.1.0 CMake packages. Qt Core and both iisacc libraries are public package
+dependencies, so an installed consumer receives the same include and link
+contract. The standard installs at `~/.local/iiXml` and
+`~/.local/iiHtmlBlock` are discovered automatically; set
+`IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT` or `CMAKE_PREFIX_PATH` for another
+installation root.
 
 The default build fetches and statically links pinned QPDF 12.3.2 and libzip
 1.11.4 sources in `build/`. Their tools, examples, tests, and unnecessary
@@ -39,7 +43,7 @@ compression or crypto backends are not added to the product build. Set
 `IIGENERALDOCUMENT_USE_SYSTEM_QPDF=ON` or
 `IIGENERALDOCUMENT_USE_SYSTEM_LIBZIP=ON` to require installed packages.
 Legacy `.doc` support also needs a local LibreOffice executable at runtime;
-native `.docx` support does not.
+native `.docx`, `.odt`, and `.fodt` support does not.
 
 ```sh
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
@@ -104,7 +108,7 @@ xmlEditor.update(createdNode, "<entry>Updated</entry>");
 xmlEditor.remove(createdNode);
 ```
 
-Word documents use their own flow model:
+Word and OpenDocument text files use the same flow model:
 
 ```cpp
 WordDocument word;
@@ -115,16 +119,9 @@ word.appendParagraph(std::move(heading));
 
 const auto wordWritten = WordDocumentWriter{}.write(word, "output.docx");
 auto wordRead = WordDocumentReader{}.read("output.docx");
+const auto odtWritten = WordDocumentWriter{}.write(wordRead.document, "output.odt");
+const auto fodtWritten = WordDocumentWriter{}.write(wordRead.document, "output.fodt");
+auto flatOdfRead = WordDocumentReader{}.read("output.fodt");
 ```
 
-Thinking Space consumers may include the complete surface through:
-
-```cpp
-#include <iiGeneralDocument/ThinkingSpace/DocumentModel.h>
-
-const QString body =
-    ThinkingSpace::NoteBodyPersistence::serializeBodyDocument(
-        QStringLiteral("note-id"), QStringLiteral("Hello Thinking Space"));
-```
-
-See [API](docs/API.md), [architecture](docs/ARCHITECTURE.md), the [PDF support contract](docs/PDF_SUPPORT.md), the [XML tree CRUD contract](docs/XML_TREE_CRUD.md), the [HTML block CRUD contract](docs/HTML_BLOCK_CRUD.md), the [Word support contract](docs/WORD_SUPPORT.md), and the [Thinking Space document model contract](docs/THINKING_SPACE_DOCUMENT_MODEL.md) before integrating editing into a product.
+See [API](docs/API.md), [architecture](docs/ARCHITECTURE.md), the [PDF support contract](docs/PDF_SUPPORT.md), the [XML tree CRUD contract](docs/XML_TREE_CRUD.md), the [HTML block CRUD contract](docs/HTML_BLOCK_CRUD.md), the [Word support contract](docs/WORD_SUPPORT.md), and the [OpenDocument support contract](docs/ODF_SUPPORT.md) before integrating editing into a product.

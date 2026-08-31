@@ -4,12 +4,11 @@ set(required_files
     "docs/API.md"
     "docs/ARCHITECTURE.md"
     "docs/HTML_BLOCK_CRUD.md"
+    "docs/ODF_SUPPORT.md"
     "docs/PDF_SUPPORT.md"
     "docs/WORD_SUPPORT.md"
     "docs/XML_TREE_CRUD.md"
-    "docs/THINKING_SPACE_DOCUMENT_MODEL.md"
     "src/iiGeneralDocument.h"
-    "src/ThinkingSpace/DocumentModel.h"
     "src/IO/DocumentReader.h"
     "src/IO/DocumentWriter.h"
     "src/Pdf/PdfDocumentReader.h"
@@ -20,6 +19,12 @@ list(APPEND required_files
     "src/Word/WordDocument.h"
     "src/Word/WordDocumentReader.h"
     "src/Word/WordDocumentWriter.h"
+    "src/Word/Private/AtomicFileCommit.cpp"
+    "src/Word/Private/AtomicFileCommit.h"
+    "src/Word/Private/OdfTextCodec.cpp"
+    "tests/OdfRobustnessTest.cpp"
+    "tests/OdfRoundTripTest.cpp"
+    "tests/OdfStyleCompatibilityTest.cpp"
     "src/Xml/XmlTreeDocument.h"
     "src/Xml/XmlTreeEditor.h")
 
@@ -53,23 +58,32 @@ if(EXISTS "${IIGENERALDOCUMENT_SOURCE_DIR}/include")
     message(FATAL_ERROR "Public headers and sources must remain colocated; include/ is forbidden.")
 endif()
 
+file(READ "${IIGENERALDOCUMENT_SOURCE_DIR}/src/Word/WordDocumentWriter.h"
+    word_writer_header)
+if(NOT word_writer_header MATCHES "maximumXmlPartBytes")
+    message(FATAL_ERROR
+        "WordWriteOptions must expose the pre-commit XML validation budget.")
+endif()
+
 file(READ "${IIGENERALDOCUMENT_SOURCE_DIR}/CMakeLists.txt" cmake_source)
 foreach(required_text
         "IIGENERALDOCUMENT_QPDF_VERSION 12.3.2"
         "IIGENERALDOCUMENT_LIBZIP_VERSION 1.11.4"
         "find_package(iiXml 0.1.0 CONFIG REQUIRED)"
         "find_package(iiHtmlBlock 0.1.0 CONFIG REQUIRED)"
-        "find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Qml)"
+        "find_package(Qt6 6.5 REQUIRED COMPONENTS Core)"
         "iiXml::iiXml"
         "iiHtmlBlock::iiHtmlBlock"
-        "IIGENERALDOCUMENT_THINKING_SPACE_SOURCES"
         "iiGeneralDocument::iiGeneralDocument"
         "iiGeneralDocument.XmlTreeCrud"
         "iiGeneralDocument.HtmlBlockCrud"
-        "iiGeneralDocument.ThinkingSpaceModel"
         "iiGeneralDocument.PdfRoundTrip"
         "iiGeneralDocument.WordModel"
         "iiGeneralDocument.WordRoundTrip"
+        "iiGeneralDocument.OdfRoundTrip"
+        "iiGeneralDocument.OdfStyleCompatibility"
+        "iiGeneralDocument.OdfRobustness"
+        "iiGeneralDocument.OdfLibreOfficeInterop"
         "iiGeneralDocument.LegacyDocRoundTrip")
     string(FIND "${cmake_source}" "${required_text}" match_index)
     if(match_index EQUAL -1)

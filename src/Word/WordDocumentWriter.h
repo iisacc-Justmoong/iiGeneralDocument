@@ -5,6 +5,7 @@
 #include "iiGeneralDocument/Export.h"
 
 #include <chrono>
+#include <cstdint>
 #include <filesystem>
 #include <vector>
 
@@ -13,6 +14,7 @@ namespace ii::document {
 struct WordWriteOptions {
     std::filesystem::path libreOfficeExecutable;
     std::chrono::milliseconds conversionTimeout{60000};
+    std::uint64_t maximumXmlPartBytes{64ULL * 1024ULL * 1024ULL};
 };
 
 struct IIGENERALDOCUMENT_EXPORT WordWriteResult {

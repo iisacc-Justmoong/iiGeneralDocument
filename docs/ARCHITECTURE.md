@@ -15,37 +15,31 @@ Core <- Model <- Editing
 
 Model <- Validation
 
-Word model <- Word reader/writer <- DOCX package adapter <- libzip + Qt XML
-                         ^
-                         |
-                 legacy DOC converter <- isolated LibreOffice process
+Flow text model <- Word reader/writer <- DOCX/ODT/FODT codecs <- libzip + Qt XML
+                              ^
+                              |
+                      legacy DOC converter <- isolated LibreOffice process
 
 XML tree document <- XML tree editor <- iiXml TagDocument/range parser
 
 HTML block document <- HTML block editor <- iiHtmlBlock range/serializer/delete
-
-ThinkingSpace editor -> note session -> note package/store -> filesystem
-        |                    |                 |
-        +-> components       +-> version diff +-> hierarchy/resources/tags
 ```
 
 `Core` owns diagnostics, PDF scalar/container values, and content instructions. `Model` owns documents and independently addressable elements. `Editing` performs use-case operations. `IO` contains abstract PDF-model reader and writer contracts. `Pdf` is the only layer that includes QPDF. `Validation` has no codec responsibility. `Xml` owns a strict source-preserving tree model and atomic subtree CRUD coordinator; only its implementation files translate iiXml node, range, declaration, and attribute types. `Html` owns an independent source-preserving block model and atomic CRUD coordinator; only its implementation files translate iiHtmlBlock range types. `Word` owns a separate flow-oriented model and public format dispatcher. Only `Word/Private` includes libzip or launches LibreOffice; those implementation types are not installed.
 
-At the package boundary, `iiGeneralDocument` publicly links Qt Core, Qt Gui,
-`iiXml::iiXml`, and `iiHtmlBlock::iiHtmlBlock`; Qt Qml is private. The Thinking
-Space note model owns the markup dependency and never reverses into the PDF
-`Core` or `Model` layers. The PDF model remains independent from Qt and the
-structured-note model. The XML and HTML public APIs also avoid exposing dependency
+At the package boundary, `iiGeneralDocument` publicly links Qt Core,
+`iiXml::iiXml`, and `iiHtmlBlock::iiHtmlBlock`. The PDF model remains
+independent from Qt. The XML and HTML public APIs also avoid exposing dependency
 objects even though iiXml and iiHtmlBlock remain public package dependencies. QPDF and libzip are privately linked and hidden from the
 public ABI. LibreOffice is an optional runtime process dependency only for
 legacy `.doc`; it is neither linked nor bundled.
 
-The Thinking Space source layout preserves the source application's domain
-boundaries. Editor commands depend on body persistence interfaces; local note
-storage coordinates header/body/version components; hierarchy and resource
-support remain below note/hub use cases. `ArchitecturePolicyLock` retains the
-original runtime dependency checks. The QML view layer is deliberately outside
-this library.
+The private ODF codec separates ODT ZIP transport from shared OpenDocument XML
+semantics; FODT bypasses ZIP and uses the same style, metadata, body, and page
+mapping. Both adapters depend inward on `WordDocument`, while the model has no
+ODF, OOXML, libzip, or LibreOffice dependency. Style identity is scoped by ODF
+family, font aliases are resolved within their package part before fallback,
+and list instance identity is independent from list presentation style.
 
 ## SOLID boundaries
 
@@ -87,3 +81,9 @@ untouched. Removing the root intentionally enters an editable empty state; a
 subsequent root create restores a complete XML document.
 
 Signed files are rejected by default because any rewrite invalidates their signatures. Encrypted input is rejected on write by default because the current writer emits an unencrypted result. Both behaviors require explicit writer options to override.
+
+ODT/FODT writes build and reopen a same-directory temporary artifact before an
+atomic destination replacement. Their readers fail closed on physical ZIP
+envelope violations, CRC/integrity errors, encrypted entries, manifest/package
+disagreement, and bounded semantic expansion. This transaction boundary keeps
+the previous destination intact when generation or validation fails.

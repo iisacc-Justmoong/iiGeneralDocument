@@ -38,6 +38,7 @@ struct IIGENERALDOCUMENT_EXPORT WordParagraphProperties {
     WordParagraphAlignment alignment{WordParagraphAlignment::automatic};
     std::optional<int> numberingId;
     int numberingLevel{0};
+    bool numberingContinuation{false};
 };
 
 struct IIGENERALDOCUMENT_EXPORT WordParagraph {
