@@ -23,9 +23,11 @@ Flow text model <- Word reader/writer <- DOCX/ODT/FODT codecs <- libzip + Qt XML
 XML tree document <- XML tree editor <- iiXml TagDocument/range parser
 
 HTML block document <- HTML block editor <- iiHtmlBlock range/serializer/delete
+
+Thinking Space Document -> header metadata + HTML block document body
 ```
 
-`Core` owns diagnostics, PDF scalar/container values, and content instructions. `Model` owns documents and independently addressable elements. `Editing` performs use-case operations. `IO` contains abstract PDF-model reader and writer contracts. `Pdf` is the only layer that includes QPDF. `Validation` has no codec responsibility. `Xml` owns a strict source-preserving tree model and atomic subtree CRUD coordinator; only its implementation files translate iiXml node, range, declaration, and attribute types. `Html` owns an independent source-preserving block model and atomic CRUD coordinator; only its implementation files translate iiHtmlBlock range types. `Word` owns a separate flow-oriented model and public format dispatcher. Only `Word/Private` includes libzip or launches LibreOffice; those implementation types are not installed.
+`Core` owns diagnostics, PDF scalar/container values, and content instructions. `Model` owns documents and independently addressable elements. `Editing` performs use-case operations. `IO` contains abstract PDF-model reader and writer contracts. `Pdf` is the only layer that includes QPDF. `Validation` has no codec responsibility. `Xml` owns a strict source-preserving tree model and atomic subtree CRUD coordinator; only its implementation files translate iiXml node, range, declaration, and attribute types. `Html` owns an independent source-preserving block model and atomic CRUD coordinator; only its implementation files translate iiHtmlBlock range types. `ThinkingSpace` currently owns only the `.tsdoc` aggregate declaration and composes `HtmlBlockDocument` as its body instead of duplicating HTML recognition. `Word` owns a separate flow-oriented model and public format dispatcher. Only `Word/Private` includes libzip or launches LibreOffice; those implementation types are not installed.
 
 At the package boundary, `iiGeneralDocument` publicly links Qt Core,
 `iiXml::iiXml`, and `iiHtmlBlock::iiHtmlBlock`. The PDF model remains

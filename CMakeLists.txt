@@ -227,6 +227,7 @@ add_library(iiGeneralDocument ${IIGENERALDOCUMENT_LIBRARY_TYPE}
     src/Pdf/PdfDocumentReader.h
     src/Pdf/PdfDocumentWriter.cpp
     src/Pdf/PdfDocumentWriter.h
+    src/ThinkingSpace/ThinkingSpaceDocument.h
     src/Word/WordDocument.cpp
     src/Word/WordDocument.h
     src/Word/WordDocumentReader.cpp
@@ -313,7 +314,7 @@ install(FILES
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/iiGeneralDocument)
 install(FILES README.md THIRD_PARTY_NOTICES.md docs/API.md docs/ARCHITECTURE.md docs/PDF_SUPPORT.md
     docs/HTML_BLOCK_CRUD.md docs/ODF_SUPPORT.md docs/WORD_SUPPORT.md
-    docs/XML_TREE_CRUD.md
+    docs/THINKING_SPACE_DOCUMENT.md docs/XML_TREE_CRUD.md
     DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/iiGeneralDocument)
 if(NOT IIGENERALDOCUMENT_USE_SYSTEM_QPDF)
     install(FILES
@@ -340,6 +341,13 @@ if(BUILD_TESTING)
         iiGeneralDocument::iiGeneralDocument)
     add_test(NAME iiGeneralDocument.HtmlBlockCrud
         COMMAND iiGeneralDocumentHtmlBlockCrudTest)
+
+    add_executable(iiGeneralDocumentThinkingSpaceDocumentModelTest
+        tests/ThinkingSpaceDocumentModelTest.cpp)
+    target_link_libraries(iiGeneralDocumentThinkingSpaceDocumentModelTest PRIVATE
+        iiGeneralDocument::iiGeneralDocument)
+    add_test(NAME iiGeneralDocument.ThinkingSpaceDocumentModel
+        COMMAND iiGeneralDocumentThinkingSpaceDocumentModelTest)
 
     add_executable(iiGeneralDocumentWordModelTest tests/WordModelTest.cpp)
     target_link_libraries(iiGeneralDocumentWordModelTest PRIVATE iiGeneralDocument::iiGeneralDocument)

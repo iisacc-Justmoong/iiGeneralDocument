@@ -96,6 +96,18 @@ See `WORD_SUPPORT.md` for the supported object matrix, fidelity boundaries,
 LibreOffice runtime contract, security limits, and verification gates. See
 `ODF_SUPPORT.md` for ODT/FODT packaging, semantic mapping, and CRUD limits.
 
+## Thinking Space documents
+
+`ThinkingSpaceDocument` declares the in-memory object boundary for the
+`.tsdoc` format. Its `ThinkingSpaceDocumentHeader` keeps string key-value
+metadata separate from its `ThinkingSpaceDocumentBody`, which owns an existing
+`HtmlBlockDocument` for independently addressable custom-tag blocks.
+
+The current surface is declaration-only: no `.tsdoc` reader, writer, physical
+envelope, required metadata schema, or custom-tag vocabulary is defined yet.
+See `THINKING_SPACE_DOCUMENT.md` for the exact implemented and deferred
+contracts.
+
 ## Document model
 
 `Document` owns pages, metadata, and terminal AcroForm fields. `Page` owns its media box, rotation, ordered elements, and annotations. Documents and pages are move-only so resource identity is not accidentally duplicated.

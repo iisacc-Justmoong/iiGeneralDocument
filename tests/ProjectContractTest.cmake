@@ -6,6 +6,7 @@ set(required_files
     "docs/HTML_BLOCK_CRUD.md"
     "docs/ODF_SUPPORT.md"
     "docs/PDF_SUPPORT.md"
+    "docs/THINKING_SPACE_DOCUMENT.md"
     "docs/WORD_SUPPORT.md"
     "docs/XML_TREE_CRUD.md"
     "src/iiGeneralDocument.h"
@@ -16,6 +17,7 @@ set(required_files
 list(APPEND required_files
     "src/Html/HtmlBlockDocument.h"
     "src/Html/HtmlBlockEditor.h"
+    "src/ThinkingSpace/ThinkingSpaceDocument.h"
     "src/Word/WordDocument.h"
     "src/Word/WordDocumentReader.h"
     "src/Word/WordDocumentWriter.h"
@@ -77,6 +79,7 @@ foreach(required_text
         "iiGeneralDocument::iiGeneralDocument"
         "iiGeneralDocument.XmlTreeCrud"
         "iiGeneralDocument.HtmlBlockCrud"
+        "iiGeneralDocument.ThinkingSpaceDocumentModel"
         "iiGeneralDocument.PdfRoundTrip"
         "iiGeneralDocument.WordModel"
         "iiGeneralDocument.WordRoundTrip"

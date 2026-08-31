@@ -13,6 +13,7 @@
 #include "Model/Page.h"
 #include "Pdf/PdfDocumentReader.h"
 #include "Pdf/PdfDocumentWriter.h"
+#include "ThinkingSpace/ThinkingSpaceDocument.h"
 #include "Validation/DocumentValidator.h"
 #include "Word/WordDocument.h"
 #include "Word/WordDocumentReader.h"

@@ -2,7 +2,8 @@
 
 `iiGeneralDocument` is a C++20 general document library. It provides separate,
 editable models for PDF page content, hierarchical XML, HTML blocks, and
-flow-oriented text documents while keeping format backends behind focused
+flow-oriented text documents, plus the declared Thinking Space `.tsdoc`
+object boundary, while keeping format backends behind focused
 boundaries.
 
 The first release provides:
@@ -20,6 +21,8 @@ The first release provides:
   single-root validation;
 - source-preserving HTML/iiXml block CRUD with stable IDs, nested creation,
   atomic updates, recursive deletion, and overlap-safe range handling;
+- a declaration-only `.tsdoc` aggregate with separate header metadata and an
+  `HtmlBlockDocument` body for custom-tag blocks;
 - a flow-oriented Word model plus native DOCX read/write for paragraphs,
   formatted runs, tables, numbering, metadata, and section geometry;
 - native ODT and flat-XML FODT read/write through the same editable flow model,
@@ -124,4 +127,4 @@ const auto fodtWritten = WordDocumentWriter{}.write(wordRead.document, "output.f
 auto flatOdfRead = WordDocumentReader{}.read("output.fodt");
 ```
 
-See [API](docs/API.md), [architecture](docs/ARCHITECTURE.md), the [PDF support contract](docs/PDF_SUPPORT.md), the [XML tree CRUD contract](docs/XML_TREE_CRUD.md), the [HTML block CRUD contract](docs/HTML_BLOCK_CRUD.md), the [Word support contract](docs/WORD_SUPPORT.md), and the [OpenDocument support contract](docs/ODF_SUPPORT.md) before integrating editing into a product.
+See [API](docs/API.md), [architecture](docs/ARCHITECTURE.md), the [PDF support contract](docs/PDF_SUPPORT.md), the [XML tree CRUD contract](docs/XML_TREE_CRUD.md), the [HTML block CRUD contract](docs/HTML_BLOCK_CRUD.md), the [Thinking Space Document declaration](docs/THINKING_SPACE_DOCUMENT.md), the [Word support contract](docs/WORD_SUPPORT.md), and the [OpenDocument support contract](docs/ODF_SUPPORT.md) before integrating editing into a product.
