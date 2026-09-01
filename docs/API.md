@@ -107,15 +107,27 @@ LibreOffice runtime contract, security limits, and verification gates. See
 
 ## Thinking Space documents
 
-`ThinkingSpaceDocument` declares the in-memory object boundary for the
-`.tsdoc` format. Its `ThinkingSpaceDocumentHeader` keeps string key-value
-metadata separate from its `ThinkingSpaceDocumentBody`, which owns an existing
+`ThinkingSpaceDocument` is the in-memory object boundary for the `.tsdoc`
+format. Its `ThinkingSpaceDocumentHeader` keeps string key-value metadata
+separate from its `ThinkingSpaceDocumentBody`, which owns an existing
 `HtmlBlockDocument` for independently addressable custom-tag blocks.
 
-The current surface is declaration-only: no `.tsdoc` reader, writer, physical
-envelope, required metadata schema, or custom-tag vocabulary is defined yet.
-See `THINKING_SPACE_DOCUMENT.md` for the exact implemented and deferred
-contracts.
+`recordVersion(label, createdAtUtc)` captures the current header and exact body
+HTML into `ThinkingSpaceDocumentVersionHistory`. Header/body blobs, snapshot
+trees, diffs, and version commits use Git-style content-addressed SHA-256 IDs.
+Each version points to its parent commit, target snapshot, and reversible diff
+object. Equal content produces equal blob/tree IDs. `verifyIntegrity()` checks
+the retained object graph and delta reconstruction.
+
+The newest 100 versions are retained in chronological order. Overflow removes
+old commits first and garbage-collects their unreferenced snapshot/diff objects.
+The first retained commit preserves its deleted parent ID as a shallow-history
+boundary rather than rewriting immutable IDs. Recording is explicit; ordinary
+header or body edits are not commits.
+
+No `.tsdoc` reader, writer, physical envelope, required metadata schema, or
+custom-tag vocabulary is defined yet. See `THINKING_SPACE_DOCUMENT.md` for the
+exact implemented and deferred contracts.
 
 ## Document model
 

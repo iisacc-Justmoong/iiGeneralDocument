@@ -2,9 +2,8 @@
 
 `iiGeneralDocument` is a C++20 general document library. It provides separate,
 editable models for PDF page content, hierarchical XML, HTML blocks, and
-flow-oriented text documents, plus the declared Thinking Space `.tsdoc`
-object boundary, while keeping format backends behind focused
-boundaries.
+flow-oriented text documents, plus a versioned Thinking Space `.tsdoc`
+object boundary, while keeping format backends behind focused boundaries.
 
 The first release provides:
 
@@ -22,8 +21,9 @@ The first release provides:
 - source-preserving HTML/iiXml block CRUD with ordered roots, stable IDs,
   parent/child navigation, depth and opening/closing-tag inspection, nested
   creation, atomic updates, recursive deletion, and overlap-safe range handling;
-- a declaration-only `.tsdoc` aggregate with separate header metadata and an
-  `HtmlBlockDocument` body for custom-tag blocks;
+- a `.tsdoc` aggregate with separate header metadata, an `HtmlBlockDocument`
+  body, Git-style SHA-256 snapshot/parent objects, reversible diff objects,
+  integrity verification, and newest-100 version retention;
 - a flow-oriented Word model plus native DOCX read/write for paragraphs,
   formatted runs, tables, numbering, metadata, and section geometry;
 - native ODT and flat-XML FODT read/write through the same editable flow model,
@@ -118,6 +118,23 @@ xmlEditor.update(createdNode, "<entry>Updated</entry>");
 xmlEditor.remove(createdNode);
 ```
 
+Thinking Space documents capture explicit, content-addressed versions:
+
+```cpp
+ThinkingSpaceDocument thinkingSpace;
+thinkingSpace.header.metadata["title"] = "Draft";
+thinkingSpace.body.htmlBlocks = HtmlBlockDocument::fromHtml(
+    "<main>Versioned body</main>");
+
+const ThinkingSpaceDocumentVersion version =
+    thinkingSpace.recordVersion("Initial draft");
+const ThinkingSpaceDocumentDiff* diff =
+    thinkingSpace.versionHistory.findDiff(version.diffObjectId);
+```
+
+`recordVersion()` is the commit boundary; ordinary header or HTML edits do not
+implicitly add history. At most the newest 100 versions are retained.
+
 Word and OpenDocument text files use the same flow model:
 
 ```cpp
@@ -134,4 +151,4 @@ const auto fodtWritten = WordDocumentWriter{}.write(wordRead.document, "output.f
 auto flatOdfRead = WordDocumentReader{}.read("output.fodt");
 ```
 
-See [API](docs/API.md), [architecture](docs/ARCHITECTURE.md), the [PDF support contract](docs/PDF_SUPPORT.md), the [XML tree CRUD contract](docs/XML_TREE_CRUD.md), the [HTML block CRUD contract](docs/HTML_BLOCK_CRUD.md), the [Thinking Space Document declaration](docs/THINKING_SPACE_DOCUMENT.md), the [Word support contract](docs/WORD_SUPPORT.md), and the [OpenDocument support contract](docs/ODF_SUPPORT.md) before integrating editing into a product.
+See [API](docs/API.md), [architecture](docs/ARCHITECTURE.md), the [PDF support contract](docs/PDF_SUPPORT.md), the [XML tree CRUD contract](docs/XML_TREE_CRUD.md), the [HTML block CRUD contract](docs/HTML_BLOCK_CRUD.md), the [Thinking Space Document contract](docs/THINKING_SPACE_DOCUMENT.md), the [Word support contract](docs/WORD_SUPPORT.md), and the [OpenDocument support contract](docs/ODF_SUPPORT.md) before integrating editing into a product.

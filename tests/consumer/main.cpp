@@ -61,6 +61,18 @@ int main()
         && xmlEditor.read(createdNodeId)->name() == "renamed";
     const bool removedNode = xmlEditor.remove(createdNodeId);
 
+    ii::document::ThinkingSpaceDocument thinkingSpaceDocument;
+    thinkingSpaceDocument.header.metadata["title"] = "consumer";
+    thinkingSpaceDocument.body.htmlBlocks =
+        ii::document::HtmlBlockDocument::fromHtml("<main>versioned</main>");
+    const auto thinkingSpaceVersion = thinkingSpaceDocument.recordVersion(
+        "consumer-version", "2026-09-01T00:00:00.000Z");
+    const bool thinkingSpaceHistoryReadable =
+        thinkingSpaceDocument.versionHistory.head() != nullptr
+        && thinkingSpaceDocument.versionHistory.head()->objectId
+            == thinkingSpaceVersion.objectId
+        && thinkingSpaceDocument.versionHistory.verifyIntegrity();
+
     const iiXml::Parser::TagParser parser;
     const auto parsed = parser.Parse("<p>text</p>");
     const iiHtmlBlock::GetHTML html;
@@ -78,6 +90,7 @@ int main()
             && removedNode
             && xmlEditor.read(createdNodeId) == nullptr
             && xmlDocument.xml() == "<root ></root>"
+            && thinkingSpaceHistoryReadable
             && wordDocument.plainText() == "word consumer"
             && !odtWrite.hasErrors()
             && !fodtWrite.hasErrors()

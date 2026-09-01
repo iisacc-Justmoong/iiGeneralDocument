@@ -227,6 +227,7 @@ add_library(iiGeneralDocument ${IIGENERALDOCUMENT_LIBRARY_TYPE}
     src/Pdf/PdfDocumentReader.h
     src/Pdf/PdfDocumentWriter.cpp
     src/Pdf/PdfDocumentWriter.h
+    src/ThinkingSpace/ThinkingSpaceDocument.cpp
     src/ThinkingSpace/ThinkingSpaceDocument.h
     src/Word/WordDocument.cpp
     src/Word/WordDocument.h

@@ -17,6 +17,7 @@ set(required_files
 list(APPEND required_files
     "src/Html/HtmlBlockDocument.h"
     "src/Html/HtmlBlockEditor.h"
+    "src/ThinkingSpace/ThinkingSpaceDocument.cpp"
     "src/ThinkingSpace/ThinkingSpaceDocument.h"
     "src/Word/WordDocument.h"
     "src/Word/WordDocumentReader.h"
@@ -59,6 +60,20 @@ endif()
 if(EXISTS "${IIGENERALDOCUMENT_SOURCE_DIR}/include")
     message(FATAL_ERROR "Public headers and sources must remain colocated; include/ is forbidden.")
 endif()
+
+file(READ "${IIGENERALDOCUMENT_SOURCE_DIR}/src/ThinkingSpace/ThinkingSpaceDocument.h"
+    thinking_space_document_header)
+foreach(required_text
+        "maximumVersionCount{100}"
+        "ThinkingSpaceDocumentDiff"
+        "ThinkingSpaceDocumentVersionHistory"
+        "recordVersion")
+    string(FIND "${thinking_space_document_header}" "${required_text}" match_index)
+    if(match_index EQUAL -1)
+        message(FATAL_ERROR
+            "Thinking Space version history contract is missing: ${required_text}")
+    endif()
+endforeach()
 
 file(READ "${IIGENERALDOCUMENT_SOURCE_DIR}/src/Word/WordDocumentWriter.h"
     word_writer_header)
