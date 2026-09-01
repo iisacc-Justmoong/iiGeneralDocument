@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <optional>
 #include <utility>
 
 namespace ii::document {
@@ -54,6 +55,13 @@ bool containsOnlyAsciiSpace(std::string_view value) noexcept
     return std::ranges::all_of(value, isAsciiSpace);
 }
 
+bool strictlyContains(const HtmlBlock& outer, const HtmlBlock& inner) noexcept
+{
+    return outer.rawBegin() <= inner.rawBegin()
+        && inner.rawEnd() <= outer.rawEnd()
+        && (outer.rawBegin() != inner.rawBegin() || outer.rawEnd() != inner.rawEnd());
+}
+
 } // namespace
 
 HtmlBlock::HtmlBlock(
@@ -87,6 +95,21 @@ HtmlBlockId HtmlBlock::id() const noexcept
     return id_;
 }
 
+const std::optional<HtmlBlockId>& HtmlBlock::parentId() const noexcept
+{
+    return parentId_;
+}
+
+const std::vector<HtmlBlockId>& HtmlBlock::childIds() const noexcept
+{
+    return childIds_;
+}
+
+std::size_t HtmlBlock::depth() const noexcept
+{
+    return depth_;
+}
+
 const std::string& HtmlBlock::tagName() const noexcept
 {
     return tagName_;
@@ -100,6 +123,27 @@ const std::string& HtmlBlock::value() const noexcept
 const std::string& HtmlBlock::html() const noexcept
 {
     return html_;
+}
+
+std::string_view HtmlBlock::openingTag() const noexcept
+{
+    if (valueBegin_ < rawBegin_ || valueBegin_ - rawBegin_ > html_.size()) {
+        return {};
+    }
+    return std::string_view(html_).substr(0, valueBegin_ - rawBegin_);
+}
+
+std::string_view HtmlBlock::closingTag() const noexcept
+{
+    if (valueEnd_ < rawBegin_ || valueEnd_ - rawBegin_ > html_.size()) {
+        return {};
+    }
+    return std::string_view(html_).substr(valueEnd_ - rawBegin_);
+}
+
+bool HtmlBlock::isSelfClosing() const noexcept
+{
+    return valueBegin_ == rawEnd_ && valueEnd_ == rawEnd_;
 }
 
 std::size_t HtmlBlock::rawBegin() const noexcept
@@ -136,6 +180,7 @@ HtmlBlockDocument HtmlBlockDocument::fromHtml(std::string html)
 {
     HtmlBlockDocument document;
     document.blocks_ = parseBlocks(html);
+    document.rootIds_ = rebuildHierarchy(document.blocks_);
     document.html_ = std::move(html);
 
     std::uint64_t maximumId = 0;
@@ -157,6 +202,11 @@ const std::string& HtmlBlockDocument::html() const noexcept
 const std::vector<HtmlBlock>& HtmlBlockDocument::blocks() const noexcept
 {
     return blocks_;
+}
+
+const std::vector<HtmlBlockId>& HtmlBlockDocument::rootIds() const noexcept
+{
+    return rootIds_;
 }
 
 const HtmlBlock* HtmlBlockDocument::find(HtmlBlockId id) const noexcept
@@ -207,6 +257,67 @@ std::vector<HtmlBlock> HtmlBlockDocument::parseBlocks(std::string_view html)
             tracked.element.display_value));
     }
     return blocks;
+}
+
+std::vector<HtmlBlockId> HtmlBlockDocument::rebuildHierarchy(
+    std::vector<HtmlBlock>& blocks)
+{
+    std::vector<std::optional<std::size_t>> parentIndexes(blocks.size());
+    for (std::size_t childIndex = 0; childIndex < blocks.size(); ++childIndex) {
+        for (std::size_t candidateIndex = 0; candidateIndex < blocks.size(); ++candidateIndex) {
+            if (candidateIndex == childIndex
+                || !strictlyContains(blocks[candidateIndex], blocks[childIndex])) {
+                continue;
+            }
+
+            const auto currentParent = parentIndexes[childIndex];
+            if (!currentParent.has_value()
+                || blocks[candidateIndex].rawBegin() > blocks[*currentParent].rawBegin()
+                || (blocks[candidateIndex].rawBegin() == blocks[*currentParent].rawBegin()
+                    && blocks[candidateIndex].rawEnd() < blocks[*currentParent].rawEnd())) {
+                parentIndexes[childIndex] = candidateIndex;
+            }
+        }
+    }
+
+    for (auto& block : blocks) {
+        block.parentId_.reset();
+        block.childIds_.clear();
+        block.depth_ = 0;
+    }
+
+    constexpr std::size_t unresolved = std::numeric_limits<std::size_t>::max();
+    std::vector<std::size_t> depths(blocks.size(), unresolved);
+    const auto resolveDepth = [&](const auto& self, std::size_t index) -> std::size_t {
+        if (depths[index] != unresolved) {
+            return depths[index];
+        }
+        if (!parentIndexes[index].has_value()) {
+            depths[index] = 0;
+            return 0;
+        }
+        const std::size_t parentDepth = self(self, *parentIndexes[index]);
+        if (parentDepth == std::numeric_limits<std::size_t>::max() - 1) {
+            throw DocumentError("HTML block hierarchy depth is exhausted");
+        }
+        depths[index] = parentDepth + 1;
+        return depths[index];
+    };
+
+    std::vector<HtmlBlockId> roots;
+    roots.reserve(blocks.size());
+    for (std::size_t index = 0; index < blocks.size(); ++index) {
+        blocks[index].depth_ = resolveDepth(resolveDepth, index);
+        if (!parentIndexes[index].has_value()) {
+            roots.push_back(blocks[index].id());
+            continue;
+        }
+
+        HtmlBlock& parent = blocks[*parentIndexes[index]];
+        blocks[index].parentId_ = parent.id();
+        parent.childIds_.push_back(blocks[index].id());
+    }
+    return roots;
 }
 
 } // namespace ii::document

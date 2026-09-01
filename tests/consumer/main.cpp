@@ -35,7 +35,13 @@ int main()
     ii::document::HtmlBlockEditor htmlEditor(htmlDocument);
     const auto mainBlockId = htmlDocument.blocks().front().id();
     const auto createdBlockId = htmlEditor.create("<p>created</p>", mainBlockId);
-    const bool createdBlockReadable = htmlEditor.read(createdBlockId) != nullptr;
+    const bool createdBlockReadable = htmlEditor.read(createdBlockId) != nullptr
+        && htmlEditor.read(createdBlockId)->parentId() == mainBlockId
+        && htmlEditor.read(createdBlockId)->depth() == 1
+        && htmlEditor.read(createdBlockId)->openingTag() == "<p>"
+        && htmlEditor.read(createdBlockId)->closingTag() == "</p>"
+        && htmlDocument.rootIds().size() == 1
+        && htmlDocument.rootIds().front() == mainBlockId;
     htmlEditor.update(createdBlockId, "<article>updated</article>");
     const bool updatedBlockReadable = htmlEditor.read(createdBlockId) != nullptr
         && htmlEditor.read(createdBlockId)->tagName() == "article";
@@ -46,7 +52,10 @@ int main()
     const auto rootNodeId = *xmlDocument.rootId();
     const auto createdNodeId = xmlEditor.create("<child>created</child>", rootNodeId);
     const bool createdNodeReadable = xmlEditor.read(createdNodeId) != nullptr
-        && xmlEditor.read(createdNodeId)->parentId() == rootNodeId;
+        && xmlEditor.read(createdNodeId)->parentId() == rootNodeId
+        && xmlEditor.read(createdNodeId)->depth() == 1
+        && xmlEditor.read(createdNodeId)->openingTag() == "<child>"
+        && xmlEditor.read(createdNodeId)->closingTag() == "</child>";
     xmlEditor.update(createdNodeId, "<renamed enabled=true>updated</renamed>");
     const bool updatedNodeReadable = xmlEditor.read(createdNodeId) != nullptr
         && xmlEditor.read(createdNodeId)->name() == "renamed";

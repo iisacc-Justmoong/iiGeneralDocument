@@ -5,6 +5,7 @@
 #include <compare>
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -21,9 +22,15 @@ struct IIGENERALDOCUMENT_EXPORT HtmlBlockId {
 class IIGENERALDOCUMENT_EXPORT HtmlBlock {
 public:
     [[nodiscard]] HtmlBlockId id() const noexcept;
+    [[nodiscard]] const std::optional<HtmlBlockId>& parentId() const noexcept;
+    [[nodiscard]] const std::vector<HtmlBlockId>& childIds() const noexcept;
+    [[nodiscard]] std::size_t depth() const noexcept;
     [[nodiscard]] const std::string& tagName() const noexcept;
     [[nodiscard]] const std::string& value() const noexcept;
     [[nodiscard]] const std::string& html() const noexcept;
+    [[nodiscard]] std::string_view openingTag() const noexcept;
+    [[nodiscard]] std::string_view closingTag() const noexcept;
+    [[nodiscard]] bool isSelfClosing() const noexcept;
     [[nodiscard]] std::size_t rawBegin() const noexcept;
     [[nodiscard]] std::size_t valueBegin() const noexcept;
     [[nodiscard]] std::size_t valueEnd() const noexcept;
@@ -49,6 +56,9 @@ private:
         std::string displayValue);
 
     HtmlBlockId id_;
+    std::optional<HtmlBlockId> parentId_;
+    std::vector<HtmlBlockId> childIds_;
+    std::size_t depth_{0};
     std::size_t sourceIndex_{0};
     std::string tagName_;
     std::string value_;
@@ -69,6 +79,7 @@ public:
 
     [[nodiscard]] const std::string& html() const noexcept;
     [[nodiscard]] const std::vector<HtmlBlock>& blocks() const noexcept;
+    [[nodiscard]] const std::vector<HtmlBlockId>& rootIds() const noexcept;
     [[nodiscard]] const HtmlBlock* find(HtmlBlockId id) const noexcept;
     [[nodiscard]] std::uint64_t revision() const noexcept;
 
@@ -76,9 +87,12 @@ private:
     friend class HtmlBlockEditor;
 
     [[nodiscard]] static std::vector<HtmlBlock> parseBlocks(std::string_view html);
+    [[nodiscard]] static std::vector<HtmlBlockId> rebuildHierarchy(
+        std::vector<HtmlBlock>& blocks);
 
     std::string html_;
     std::vector<HtmlBlock> blocks_;
+    std::vector<HtmlBlockId> rootIds_;
     std::uint64_t nextId_{1};
     std::uint64_t revision_{0};
 };

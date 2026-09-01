@@ -17,10 +17,11 @@ The first release provides:
 - validation before writes, source-PDF preservation, and post-write reopening;
 - fail-closed handling for digital signatures and encryption;
 - source-preserving, iiXml-backed hierarchical XML CRUD with stable node IDs,
-  parent/child navigation, typed attributes, subtree replacement, and strict
-  single-root validation;
-- source-preserving HTML/iiXml block CRUD with stable IDs, nested creation,
-  atomic updates, recursive deletion, and overlap-safe range handling;
+  parent/child navigation, depth and opening/closing-tag inspection, typed
+  attributes, subtree replacement, and strict single-root validation;
+- source-preserving HTML/iiXml block CRUD with ordered roots, stable IDs,
+  parent/child navigation, depth and opening/closing-tag inspection, nested
+  creation, atomic updates, recursive deletion, and overlap-safe range handling;
 - a declaration-only `.tsdoc` aggregate with separate header metadata and an
   `HtmlBlockDocument` body for custom-tag blocks;
 - a flow-oriented Word model plus native DOCX read/write for paragraphs,
@@ -93,6 +94,9 @@ auto htmlDocument = HtmlBlockDocument::fromHtml(
 HtmlBlockEditor htmlEditor(htmlDocument);
 const HtmlBlockId mainId = htmlDocument.blocks().front().id();
 const HtmlBlockId created = htmlEditor.create("<p>Created</p>", mainId);
+const HtmlBlock* createdBlock = htmlEditor.read(created);
+const auto parentId = createdBlock->parentId();
+const auto openingTag = createdBlock->openingTag();
 htmlEditor.update(created, "<article>Updated</article>");
 htmlEditor.remove(created);
 ```
@@ -107,6 +111,9 @@ XmlTreeEditor xmlEditor(xmlDocument);
 const XmlNodeId catalogId = *xmlDocument.rootId();
 const XmlNodeId createdNode = xmlEditor.create(
     "<item enabled=true>Created</item>", catalogId);
+const XmlNode* item = xmlEditor.read(createdNode);
+const auto childDepth = item->depth();
+const auto closingTag = item->closingTag();
 xmlEditor.update(createdNode, "<entry>Updated</entry>");
 xmlEditor.remove(createdNode);
 ```

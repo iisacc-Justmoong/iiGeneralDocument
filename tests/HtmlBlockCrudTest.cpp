@@ -53,7 +53,41 @@ void parsesAndReadsTrackedBlocks()
 
     expect(document.html() == source, "HTML source is preserved byte-for-byte on read");
     expect(document.blocks().size() == 5, "iiHtmlBlock identifies nested HTML block elements");
+    expect(document.rootIds().size() == 1, "HTML hierarchy exposes one top-level block root");
     expect(document.revision() == 0, "loading does not count as a mutation");
+
+    const HtmlBlock* html = document.find(document.rootIds().front());
+    expect(html != nullptr && html->tagName() == "html", "root id resolves to the html block");
+    expect(!html->parentId().has_value(), "top-level HTML block has no parent id");
+    expect(html->depth() == 0, "top-level HTML block has depth zero");
+    expect(html->openingTag() == "<html>", "HTML root exposes its opening tag boundary");
+    expect(html->closingTag() == "</html>", "HTML root exposes its closing tag boundary");
+    expect(!html->isSelfClosing(), "paired HTML root is not self-closing");
+    expect(html->childIds().size() == 1, "HTML root exposes its direct block child");
+
+    const HtmlBlock* body = document.find(html->childIds().front());
+    expect(body != nullptr && body->tagName() == "body", "child id resolves to body");
+    expect(body->parentId() == html->id(), "body exposes its parent block identity");
+    expect(body->depth() == 1, "body exposes its hierarchy depth");
+    expect(body->childIds().size() == 1, "body exposes section as its direct child");
+
+    const HtmlBlock* section = document.find(body->childIds().front());
+    expect(section != nullptr && section->tagName() == "section",
+           "nested hierarchy resolves section");
+    expect(section->parentId() == body->id(), "section exposes body as its parent");
+    expect(section->depth() == 2, "section exposes its hierarchy depth");
+    expect(section->childIds().size() == 2, "section exposes both direct paragraph children");
+
+    const HtmlBlock* koreanParagraph = document.find(section->childIds().front());
+    expect(koreanParagraph != nullptr && koreanParagraph->value() == "하나",
+           "ordered child ids preserve source order");
+    expect(koreanParagraph->parentId() == section->id(),
+           "paragraph exposes its direct parent identity");
+    expect(koreanParagraph->depth() == 3, "paragraph exposes its hierarchy depth");
+    expect(koreanParagraph->openingTag() == "<p lang=\"ko\">",
+           "opening tag preserves attributes exactly");
+    expect(koreanParagraph->closingTag() == "</p>",
+           "closing tag is separated from the value");
 
     std::unordered_set<std::uint64_t> ids;
     for (const auto& block : document.blocks()) {
@@ -75,6 +109,18 @@ void parsesAndReadsTrackedBlocks()
         "document creation rejects malformed block markup");
 }
 
+void distinguishesSelfClosingBlockTags()
+{
+    const auto document = HtmlBlockDocument::fromHtml("<main><hr/></main>");
+    const HtmlBlock& rule = findByTag(document, "hr");
+
+    expect(rule.isSelfClosing(), "self-closing HTML block is identified from its tag boundary");
+    expect(rule.openingTag() == "<hr/>", "self-closing markup is the complete opening tag");
+    expect(rule.closingTag().empty(), "self-closing HTML block has no closing tag");
+    expect(rule.parentId().has_value(), "self-closing child still belongs to its parent");
+    expect(rule.depth() == 1, "self-closing child participates in hierarchy depth");
+}
+
 void createsTopLevelAndChildBlocks()
 {
     auto document = HtmlBlockDocument::fromHtml("<main><p>One</p></main>");
@@ -89,6 +135,12 @@ void createsTopLevelAndChildBlocks()
     expect(editor.read(oneId) != nullptr, "existing child id survives sibling creation");
     expect(editor.read(twoId) != nullptr && editor.read(twoId)->value() == "Two",
            "create returns the new root block id");
+    expect(editor.read(twoId)->parentId() == mainId,
+           "created child receives the selected parent identity");
+    expect(editor.read(mainId)->childIds() == std::vector<HtmlBlockId>{oneId, twoId},
+           "parent child ids are rebuilt in source order after creation");
+    expect(document.rootIds() == std::vector<HtmlBlockId>{mainId},
+           "child creation preserves the existing root identity");
     expect(document.revision() == 1, "successful create increments revision exactly once");
 
     const HtmlBlockId cardId = editor.create(
@@ -100,6 +152,10 @@ void createsTopLevelAndChildBlocks()
     expect(editor.read(cardId) != nullptr && editor.read(cardId)->tagName() == "card",
            "iiHtmlBlock display overrides make custom tags addressable blocks");
     expect(editor.read(cardId)->hasDisplayOverride(), "display override metadata is retained");
+    expect(!editor.read(cardId)->parentId().has_value() && editor.read(cardId)->depth() == 0,
+           "top-level creation produces an independent hierarchy root");
+    expect(document.rootIds() == std::vector<HtmlBlockId>{mainId, cardId},
+           "document exposes ordered top-level block identities");
     expect(document.revision() == 2, "each successful create has one revision");
 }
 
@@ -137,6 +193,12 @@ void updatesOneBlockAndPreservesUnaffectedIds()
            "unrelated shifted block identity survives update");
     expect(findByValue(document, "하나").id() != oneId,
            "new nested blocks receive independent identities");
+    expect(editor.read(oneId)->parentId() == sectionId,
+           "updated replacement root remains attached to its ancestor");
+    expect(editor.read(oneId)->childIds().size() == 2,
+           "updated replacement exposes its newly parsed direct children");
+    expect(editor.read(twoId)->parentId() == sectionId,
+           "shifted sibling retains the correct parent relationship");
     expect(document.revision() == 1, "successful update increments revision exactly once");
 }
 
@@ -226,6 +288,14 @@ void rejectsEditsThatCrossIiXmlOverlayRanges()
     HtmlBlockEditor editor(document);
     const HtmlBlockId sectionId = findByTag(document, "section").id();
 
+    expect(document.rootIds().size() == 3,
+           "cross-closed block ranges remain independent hierarchy roots");
+    for (const HtmlBlockId rootId : document.rootIds()) {
+        const HtmlBlock* root = document.find(rootId);
+        expect(root != nullptr && !root->parentId().has_value() && root->depth() == 0,
+               "cross-closed ranges do not acquire a false parent");
+    }
+
     expectDocumentError(
         [&] { editor.update(sectionId, "<section>Changed</section>"); },
         "an edit that cuts through an iiXml overlay block is rejected");
@@ -270,6 +340,7 @@ void rejectsInvalidMutationsAtomically()
 int main()
 {
     parsesAndReadsTrackedBlocks();
+    distinguishesSelfClosingBlockTags();
     createsTopLevelAndChildBlocks();
     createsTheFirstBlockInAnEmptyDocument();
     updatesOneBlockAndPreservesUnaffectedIds();

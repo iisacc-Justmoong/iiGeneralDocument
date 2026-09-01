@@ -55,9 +55,12 @@ class IIGENERALDOCUMENT_EXPORT XmlNode {
 public:
     [[nodiscard]] XmlNodeId id() const noexcept;
     [[nodiscard]] const std::optional<XmlNodeId>& parentId() const noexcept;
+    [[nodiscard]] std::size_t depth() const noexcept;
     [[nodiscard]] const std::string& name() const noexcept;
     [[nodiscard]] const std::string& innerXml() const noexcept;
     [[nodiscard]] const std::string& rawXml() const noexcept;
+    [[nodiscard]] std::string_view openingTag() const noexcept;
+    [[nodiscard]] std::string_view closingTag() const noexcept;
     [[nodiscard]] const std::vector<XmlAttribute>& attributes() const noexcept;
     [[nodiscard]] const std::vector<XmlNodeId>& childIds() const noexcept;
     [[nodiscard]] bool isSelfClosing() const noexcept;
@@ -73,6 +76,7 @@ private:
     XmlNode(
         XmlNodeId id,
         std::optional<XmlNodeId> parentId,
+        std::size_t depth,
         std::string name,
         std::string innerXml,
         std::string rawXml,
@@ -86,6 +90,7 @@ private:
 
     XmlNodeId id_;
     std::optional<XmlNodeId> parentId_;
+    std::size_t depth_{0};
     std::string name_;
     std::string innerXml_;
     std::string rawXml_;

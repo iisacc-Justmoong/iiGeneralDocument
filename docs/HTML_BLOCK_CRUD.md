@@ -20,9 +20,16 @@ exposes an ordered, read-only collection of `HtmlBlock` views. Each block
 contains:
 
 - a document-wide `HtmlBlockId`;
+- an optional parent ID, ordered direct-child IDs, and hierarchy depth;
+- its exact opening tag and matching closing tag, separated at the value
+  boundaries reported by iiHtmlBlock/iiXml;
 - its tag name, inner value, and complete raw HTML;
 - full-document raw and value byte ranges;
 - any `display` override recognized by `iiHtmlBlock`.
+
+`HtmlBlockDocument::rootIds()` returns every top-level block ID in source order.
+`openingTag()` includes attributes and the final `>`. `closingTag()` contains
+the matched `</name>` markup, or is empty when `isSelfClosing()` is true.
 
 An empty document and a source containing only an XML declaration, DOCTYPE, or
 ASCII whitespace are valid and contain zero blocks. Parsing invalid markup
@@ -77,16 +84,20 @@ mutation.
 ## Atomicity and identity
 
 Every source-changing edit is prepared in temporary source and block state,
-reparsed, and only then committed. A successful source mutation increments
-`revision()` exactly once. An identical update and a missing-ID remove are
-no-ops. Parse failure, missing IDs, invalid fragments, range overflow, and
-identity reconciliation failure leave source, blocks, IDs, the next-ID
-sequence, and revision unchanged.
+reparsed, assigned stable IDs, rebuilt into roots and parent/child relations,
+and only then committed. A successful source mutation increments `revision()`
+exactly once. An identical update and a missing-ID remove are no-ops. Parse
+failure, missing IDs, invalid fragments, range overflow, identity
+reconciliation failure, and hierarchy rebuild failure leave source, blocks,
+relationships, IDs, the next-ID sequence, and revision unchanged.
 
 iiXml permits independently closed ranges that can overlap instead of forming a
 strict tree. An operation that would cut through another overlapping block is
 rejected rather than silently deleting or corrupting that block. Fully nested
-descendants remain part of their selected parent CRUD unit.
+descendants remain part of their selected parent CRUD unit. A parent is the
+nearest opening-tag range whose matching close fully encloses the child's
+matching close. Crossed ranges that do not contain each other are separate
+roots and never receive a false parent ID.
 
 ## Syntax boundary
 
@@ -94,15 +105,19 @@ Block classification follows `iiHtmlBlock::DivideBlock`, including standard
 block tags and explicit `display: block`, `flex`, `grid`, `table`, or related
 block display values. This is the iiHtmlBlock/iiXml range grammar, not a browser
 HTML5 error-recovery parser. Full namespace semantics, entity interpretation,
-CDATA, comments, and self-closing-tag handling are outside the dependency's
-current standards scope. Callers that accept arbitrary web HTML should
+and semantic DOM nodes for CDATA and comments are outside the dependency's
+current standards scope. Explicit self-closing markup is distinguished from a
+paired opening/closing tag, but browser-style implicit closing and void-element
+recovery are not performed. Callers that accept arbitrary web HTML should
 normalize it with an HTML5 parser before creating this model.
 
 ## Verification
 
-`iiGeneralDocument.HtmlBlockCrud` covers nested reads, Unicode ranges, custom
-display blocks, top-level and child creation, stable IDs across shifted ranges,
-update replacement, recursive deletion, final-root deletion, prefix
-preservation, invalid-fragment rollback, unknown IDs, empty documents, and
-overlapping iiXml ranges. `iiGeneralDocument.InstallConsumer` compiles and runs
-the same API from the installed CMake package.
+`iiGeneralDocument.HtmlBlockCrud` covers ordered roots, parent/child navigation,
+depth, opening/closing tag boundaries, self-closing blocks, nested reads,
+Unicode ranges, custom display blocks, top-level and child creation, stable IDs
+across shifted ranges, hierarchy rebuild after update, recursive deletion,
+final-root deletion, prefix preservation, invalid-fragment rollback, unknown
+IDs, empty documents, and overlapping iiXml ranges.
+`iiGeneralDocument.InstallConsumer` compiles and runs the same API from the
+installed CMake package.

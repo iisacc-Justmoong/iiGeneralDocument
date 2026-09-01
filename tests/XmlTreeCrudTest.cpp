@@ -72,7 +72,12 @@ void parsesHierarchyAndTypedAttributes()
     const XmlNode* root = document.find(*document.rootId());
     expect(root != nullptr && root->name() == "catalog", "root id resolves to catalog");
     expect(!root->parentId().has_value(), "root has no parent id");
+    expect(root->depth() == 0, "XML root has depth zero");
     expect(root->childIds().size() == 1, "root exposes its direct child id");
+    expect(root->openingTag() == "<catalog id=\"root\">",
+           "XML root exposes its complete opening tag");
+    expect(root->closingTag() == "</catalog>",
+           "XML root exposes its matching closing tag");
     expect(findAttribute(*root, "id").value() == "root", "quoted string attribute is readable");
     expect(findAttribute(*root, "id").valueType() == XmlAttributeValueType::string,
            "quoted attribute is typed as string by iiXml");
@@ -80,6 +85,7 @@ void parsesHierarchyAndTypedAttributes()
     const XmlNode* group = document.find(root->childIds().front());
     expect(group != nullptr && group->name() == "group", "child id resolves to group");
     expect(group->parentId() == root->id(), "child exposes its parent identity");
+    expect(group->depth() == 1, "XML child exposes its hierarchy depth");
     expect(group->childIds().size() == 2, "group exposes two direct item children");
     expect(findAttribute(*group, "order").valueType() == XmlAttributeValueType::integer,
            "integer attribute type is retained");
@@ -176,6 +182,12 @@ void expandsSelfClosingParentWhenCreatingAChild()
     XmlTreeEditor editor(document);
     const XmlNodeId rootId = *document.rootId();
     const XmlNodeId leafId = findByName(document, "leaf").id();
+    const XmlNode* leaf = editor.read(leafId);
+    expect(leaf != nullptr && leaf->isSelfClosing(),
+           "XML self-closing node is identified from its tag boundary");
+    expect(leaf->openingTag() == "<leaf code=1 />" && leaf->closingTag().empty(),
+           "XML self-closing node exposes only its opening tag");
+    expect(leaf->depth() == 1, "XML self-closing node participates in hierarchy depth");
 
     const XmlNodeId childId = editor.create("<child>value</child>", leafId);
 
@@ -185,6 +197,12 @@ void expandsSelfClosingParentWhenCreatingAChild()
            "self-closing expansion preserves ancestor and parent ids");
     expect(editor.read(childId) != nullptr && editor.read(childId)->parentId() == leafId,
            "created child receives an independent identity");
+    expect(editor.read(leafId)->openingTag() == "<leaf code=1 >"
+               && editor.read(leafId)->closingTag() == "</leaf>"
+               && !editor.read(leafId)->isSelfClosing(),
+           "expanded parent exposes separate opening and closing tags");
+    expect(editor.read(childId)->depth() == 2,
+           "created descendant receives its parsed hierarchy depth");
 }
 
 void updatesSubtreeAndPreservesUnaffectedIds()

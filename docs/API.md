@@ -5,9 +5,11 @@
 `XmlTreeDocument::fromXml()` adapts `iiXml::Parser::TagDocument` into a strict,
 single-root hierarchy without exposing iiXml types in public headers. Every
 `XmlNode` provides a runtime-stable ID, optional parent ID, ordered direct-child
-IDs, name, inner/raw XML, attributes, self-closing state, and full-document byte
-ranges. `XmlAttribute` retains iiXml's string, integer, real, and boolean type
-inference.
+IDs, hierarchy depth, name, inner/raw XML, exact opening and closing tag views,
+attributes, self-closing state, and full-document byte ranges. `openingTag()`
+includes attributes and the final `>`; `closingTag()` is empty for a
+self-closing node. `XmlAttribute` retains iiXml's string, integer, real, and
+boolean type inference.
 
 `XmlTreeEditor` provides subtree-level CRUD:
 
@@ -36,9 +38,16 @@ boundaries.
 ## HTML block documents
 
 `HtmlBlockDocument::fromHtml()` uses `iiHtmlBlock` to recognize every block
-element while preserving the complete source string. `HtmlBlock` exposes a
-stable ID, tag, value, raw HTML, source ranges, and display override metadata as
-an immutable view.
+element while preserving the complete source string. `rootIds()` exposes
+top-level block roots in source order. Every `HtmlBlock` exposes a stable ID,
+optional parent ID, ordered direct-child IDs, depth, exact opening and closing
+tag views, self-closing state, tag, value, raw HTML, source ranges, and display
+override metadata as an immutable view.
+
+Parenthood is determined from the matching opening/closing ranges supplied by
+iiHtmlBlock/iiXml: the nearest block range that fully contains a block is its
+parent. Cross-closed overlay ranges that do not fully contain each other remain
+independent roots instead of receiving a fabricated tree relationship.
 
 `HtmlBlockEditor` provides block-level CRUD:
 

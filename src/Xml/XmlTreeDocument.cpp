@@ -248,6 +248,7 @@ bool XmlAttribute::typeDeclared() const noexcept
 XmlNode::XmlNode(
     XmlNodeId id,
     std::optional<XmlNodeId> parentId,
+    std::size_t depth,
     std::string name,
     std::string innerXml,
     std::string rawXml,
@@ -260,6 +261,7 @@ XmlNode::XmlNode(
     std::size_t rawEnd)
     : id_(id),
       parentId_(parentId),
+      depth_(depth),
       name_(std::move(name)),
       innerXml_(std::move(innerXml)),
       rawXml_(std::move(rawXml)),
@@ -283,6 +285,11 @@ const std::optional<XmlNodeId>& XmlNode::parentId() const noexcept
     return parentId_;
 }
 
+std::size_t XmlNode::depth() const noexcept
+{
+    return depth_;
+}
+
 const std::string& XmlNode::name() const noexcept
 {
     return name_;
@@ -296,6 +303,22 @@ const std::string& XmlNode::innerXml() const noexcept
 const std::string& XmlNode::rawXml() const noexcept
 {
     return rawXml_;
+}
+
+std::string_view XmlNode::openingTag() const noexcept
+{
+    if (valueBegin_ < rawBegin_ || valueBegin_ - rawBegin_ > rawXml_.size()) {
+        return {};
+    }
+    return std::string_view(rawXml_).substr(0, valueBegin_ - rawBegin_);
+}
+
+std::string_view XmlNode::closingTag() const noexcept
+{
+    if (valueEnd_ < rawBegin_ || valueEnd_ - rawBegin_ > rawXml_.size()) {
+        return {};
+    }
+    return std::string_view(rawXml_).substr(valueEnd_ - rawBegin_);
 }
 
 const std::vector<XmlAttribute>& XmlNode::attributes() const noexcept
@@ -414,7 +437,8 @@ std::vector<XmlNode> XmlTreeDocument::parseNodes(
     std::vector<XmlNode> nodes;
     const auto appendNode = [&](const auto& self,
                                 const iiXml::Parser::TagNode& parsedNode,
-                                std::optional<XmlNodeId> parentId) -> XmlNodeId {
+                                std::optional<XmlNodeId> parentId,
+                                std::size_t depth) -> XmlNodeId {
         if (nodes.size() >= std::numeric_limits<std::uint64_t>::max()) {
             throw DocumentError("XML node id space is exhausted");
         }
@@ -442,6 +466,7 @@ std::vector<XmlNode> XmlTreeDocument::parseNodes(
         nodes.push_back(XmlNode(
             id,
             parentId,
+            depth,
             parsedNode.Range.TagName,
             std::string(xml.substr(valueBegin, valueEnd - valueBegin)),
             std::string(xml.substr(rawBegin, rawEnd - rawBegin)),
@@ -454,13 +479,16 @@ std::vector<XmlNode> XmlTreeDocument::parseNodes(
             rawEnd));
 
         for (const auto& child : parsedNode.Children) {
-            const XmlNodeId childId = self(self, child, id);
+            if (depth == std::numeric_limits<std::size_t>::max()) {
+                throw DocumentError("XML hierarchy depth is exhausted");
+            }
+            const XmlNodeId childId = self(self, child, id, depth + 1);
             nodes[index].childIds_.push_back(childId);
         }
         return id;
     };
 
-    static_cast<void>(appendNode(appendNode, root, std::nullopt));
+    static_cast<void>(appendNode(appendNode, root, std::nullopt, 0));
     return nodes;
 }
 

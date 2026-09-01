@@ -330,9 +330,12 @@ void HtmlBlockEditor::replaceRange(
         }
         nextBlocks[index].sourceIndex_ = index;
     }
+    std::vector<HtmlBlockId> nextRootIds =
+        HtmlBlockDocument::rebuildHierarchy(nextBlocks);
 
     document_.html_ = std::move(nextHtml);
     document_.blocks_ = std::move(nextBlocks);
+    document_.rootIds_ = std::move(nextRootIds);
     document_.nextId_ = nextId;
     ++document_.revision_;
 }

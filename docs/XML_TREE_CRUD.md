@@ -18,8 +18,9 @@ the caller owns file or database loading and persists `XmlTreeDocument::xml()`.
 preorder. Each `XmlNode` contains:
 
 - a document-wide runtime `XmlNodeId`;
-- an optional parent ID and ordered direct-child IDs;
-- its element name, inner XML, complete raw XML, and self-closing state;
+- an optional parent ID, ordered direct-child IDs, and hierarchy depth;
+- its element name, exact opening and matching closing tag views, inner XML,
+  complete raw XML, and self-closing state;
 - full-document raw and value byte ranges;
 - ordered attributes with name, optional value, inferred value type, and the
   iiXml declared-type flag.
@@ -30,6 +31,11 @@ iiXml's `<!Doctype root>` spelling and the standard `<!DOCTYPE root>` spelling
 are accepted at the adapter boundary. A loaded document must contain exactly
 one root. IDs live only inside one document instance and are not serialized;
 reloading assigns a new runtime identity set.
+
+`openingTag()` includes attributes and the final `>`. `closingTag()` is the
+matched `</name>` source view and is empty for a self-closing node. These views
+come directly from iiXml's matched start/end ranges; they do not normalize or
+re-serialize the original source.
 
 ## CRUD contract
 
@@ -103,10 +109,11 @@ domain objects from values.
 ## Verification
 
 `iiGeneralDocument.XmlTreeCrud` covers prolog preservation, standard and iiXml
-doctype spellings, Unicode ranges, hierarchy navigation, typed attributes,
-root and subtree creation, self-closing parent expansion, stable IDs across
-shifted ranges, subtree replacement, recursive deletion, root recreation,
-invalid-source rejection, no-op updates, rollback, and non-reused IDs.
+doctype spellings, Unicode ranges, hierarchy navigation and depth,
+opening/closing tag boundaries, typed attributes, root and subtree creation,
+self-closing parent expansion, stable IDs across shifted ranges, subtree
+replacement, recursive deletion, root recreation, invalid-source rejection,
+no-op updates, rollback, and non-reused IDs.
 `iiGeneralDocument.ProjectContract` prevents iiXml implementation types from
 leaking through public headers. `iiGeneralDocument.InstallConsumer` compiles
 and runs the CRUD surface from the installed CMake package.
