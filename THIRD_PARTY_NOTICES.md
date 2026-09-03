@@ -39,7 +39,12 @@ The installed LibreOffice distribution and its licenses govern that runtime.
 
 ## libjpeg-turbo
 
-QPDF uses the system JPEG implementation for DCT streams. The default build prefers an available static `libjpeg` archive for a self-contained iiGeneralDocument library and otherwise links the CMake `JPEG::JPEG` target. libjpeg-turbo carries IJG, BSD-style, and zlib licenses: https://github.com/libjpeg-turbo/libjpeg-turbo/blob/main/LICENSE.md.
+QPDF uses the system JPEG implementation for DCT streams. Static
+iiGeneralDocument builds and platforms without the ELF PIC constraint prefer
+an available static `libjpeg` archive. ELF shared builds link the CMake
+`JPEG::JPEG` shared target because common system static archives are not built
+as position-independent code. libjpeg-turbo carries IJG, BSD-style, and zlib
+licenses: https://github.com/libjpeg-turbo/libjpeg-turbo/blob/main/LICENSE.md.
 
 ## Qt Core 6.8.3
 

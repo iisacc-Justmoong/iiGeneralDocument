@@ -49,8 +49,16 @@ if(APPLE AND TARGET WrapOpenGL::WrapOpenGL)
     endif()
 endif()
 
-find_library(IIGENERALDOCUMENT_STATIC_JPEG_LIBRARY
-    NAMES "${CMAKE_STATIC_LIBRARY_PREFIX}jpeg${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set(IIGENERALDOCUMENT_SHARED_REQUIRES_PIC_JPEG OFF)
+if(IIGENERALDOCUMENT_BUILD_SHARED AND UNIX AND NOT APPLE)
+    set(IIGENERALDOCUMENT_SHARED_REQUIRES_PIC_JPEG ON)
+endif()
+
+set(IIGENERALDOCUMENT_STATIC_JPEG_LIBRARY "")
+if(NOT IIGENERALDOCUMENT_SHARED_REQUIRES_PIC_JPEG)
+    find_library(IIGENERALDOCUMENT_STATIC_JPEG_LIBRARY
+        NAMES "${CMAKE_STATIC_LIBRARY_PREFIX}jpeg${CMAKE_STATIC_LIBRARY_SUFFIX}")
+endif()
 if(IIGENERALDOCUMENT_STATIC_JPEG_LIBRARY)
     add_library(iiGeneralDocumentJpeg STATIC IMPORTED GLOBAL)
     set_target_properties(iiGeneralDocumentJpeg PROPERTIES
@@ -77,6 +85,17 @@ else()
     set(IIGENERALDOCUMENT_QPDF_INSTALL "${IIGENERALDOCUMENT_QPDF_PREFIX}/install")
     file(MAKE_DIRECTORY "${IIGENERALDOCUMENT_QPDF_INSTALL}/${CMAKE_INSTALL_INCLUDEDIR}")
 
+    set(IIGENERALDOCUMENT_QPDF_PIC_CMAKE_ARGS)
+    if(UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        # QPDF 12.3.2 explicitly disables PIC on its object target whenever
+        # the static library is enabled, overriding CMAKE_POSITION_INDEPENDENT_CODE.
+        # Force PIC at the compiler flag level so the private archive can be
+        # linked into the iiGeneralDocument shared library.
+        list(APPEND IIGENERALDOCUMENT_QPDF_PIC_CMAKE_ARGS
+            -DCMAKE_C_FLAGS=-fPIC
+            -DCMAKE_CXX_FLAGS=-fPIC)
+    endif()
+
     ExternalProject_Add(iiGeneralDocumentQpdf
         PREFIX "${IIGENERALDOCUMENT_QPDF_PREFIX}"
         GIT_REPOSITORY https://github.com/qpdf/qpdf.git
@@ -89,6 +108,7 @@ else()
             -DCMAKE_INSTALL_PREFIX=${IIGENERALDOCUMENT_QPDF_INSTALL}
             -DCMAKE_INSTALL_LIBDIR=${CMAKE_INSTALL_LIBDIR}
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+            ${IIGENERALDOCUMENT_QPDF_PIC_CMAKE_ARGS}
             -DBUILD_SHARED_LIBS=OFF
             -DBUILD_STATIC_LIBS=ON
             -DBUILD_DOC=OFF

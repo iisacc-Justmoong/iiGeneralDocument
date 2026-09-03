@@ -46,6 +46,11 @@ The default build fetches and statically links pinned QPDF 12.3.2 and libzip
 compression or crypto backends are not added to the product build. Set
 `IIGENERALDOCUMENT_USE_SYSTEM_QPDF=ON` or
 `IIGENERALDOCUMENT_USE_SYSTEM_LIBZIP=ON` to require installed packages.
+On Unix-like GNU or Clang builds, the pinned QPDF archive is compiled with an
+explicit `-fPIC` because QPDF 12.3.2 disables PIC on its static object target;
+this keeps the archive safe to link into the shared `iiGeneralDocument`
+library. ELF shared builds link the system `JPEG::JPEG` shared target instead
+of a non-PIC static JPEG archive.
 Legacy `.doc` support also needs a local LibreOffice executable at runtime;
 native `.docx`, `.odt`, and `.fodt` support does not.
 
