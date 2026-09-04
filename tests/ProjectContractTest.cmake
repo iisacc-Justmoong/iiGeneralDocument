@@ -1,4 +1,5 @@
 set(required_files
+    "install.sh"
     "README.md"
     "THIRD_PARTY_NOTICES.md"
     "docs/API.md"
@@ -84,6 +85,10 @@ endif()
 
 file(READ "${IIGENERALDOCUMENT_SOURCE_DIR}/CMakeLists.txt" cmake_source)
 foreach(required_text
+        "PROJECT_IS_TOP_LEVEL AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT"
+        "USERPROFILE"
+        ".local/SDK/iiGeneralDocument"
+        ".local/SDK"
         "IIGENERALDOCUMENT_QPDF_VERSION 12.3.2"
         "IIGENERALDOCUMENT_QPDF_PIC_CMAKE_ARGS"
         "-DCMAKE_C_FLAGS=-fPIC"

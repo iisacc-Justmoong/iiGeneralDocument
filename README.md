@@ -33,11 +33,31 @@ The first release provides:
 
 ## Build
 
+The source checkout is `Workspace/SDK/iiGeneralDocument`. Run `./install.sh`
+to configure a fresh `build/`, build and test the native library, install it to
+`~/.local/SDK/iiGeneralDocument`, and compile/run the actual installed consumer.
+Direct CMake configuration uses the same default install prefix; an explicit
+`CMAKE_INSTALL_PREFIX` is respected. The default applies only to a top-level
+build; an `add_subdirectory()` consumer retains its parent install prefix. If
+`HOME` is empty, `USERPROFILE` supplies the default user directory. The script accepts
+`IIGENERALDOCUMENT_INSTALL_PREFIX`, `IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT`,
+and `IIGENERALDOCUMENT_QT_PREFIX` overrides. All generated consumer and dependency
+build directories remain under `build/`. A moved checkout invalidates and removes
+the old build tree before configuration.
+
+On macOS, imported SDK targets restore the runtime search path when a shell's
+`LIBRARY_PATH` makes CMake classify the installed libraries as implicit linker
+directories. The installed-consumer test reproduces this environment for all
+three SDK libraries and runs with `DYLD_LIBRARY_PATH` and
+`DYLD_FALLBACK_LIBRARY_PATH` unset. Its staged consumer also clears ambient
+compiler include variables so another installed copy cannot shadow the package
+being tested.
+
 The build requires Qt Core 6.5 or newer plus the `iiXml` and `iiHtmlBlock`
 0.1.0 CMake packages. Qt Core and both iisacc libraries are public package
 dependencies, so an installed consumer receives the same include and link
-contract. The standard installs at `~/.local/iiXml` and
-`~/.local/iiHtmlBlock` are discovered automatically; set
+contract. The standard installs at `~/.local/SDK/iiXml` and
+`~/.local/SDK/iiHtmlBlock` are discovered automatically; set
 `IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT` or `CMAKE_PREFIX_PATH` for another
 installation root.
 

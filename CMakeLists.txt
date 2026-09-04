@@ -1,6 +1,16 @@
 cmake_minimum_required(VERSION 3.31)
 project(iiGeneralDocument VERSION 0.1.0 LANGUAGES C CXX)
 
+if(PROJECT_IS_TOP_LEVEL AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(_sdk_home "$ENV{HOME}")
+    if(_sdk_home STREQUAL "")
+        set(_sdk_home "$ENV{USERPROFILE}")
+    endif()
+    set(CMAKE_INSTALL_PREFIX "${_sdk_home}/.local/SDK/iiGeneralDocument" CACHE PATH
+        "Installation prefix for iiGeneralDocument." FORCE)
+    unset(_sdk_home)
+endif()
+
 include(CTest)
 include(ExternalProject)
 include(GNUInstallDirs)
@@ -11,7 +21,7 @@ option(IIGENERALDOCUMENT_BUILD_SHARED "Build iiGeneralDocument as a shared libra
 option(IIGENERALDOCUMENT_USE_SYSTEM_QPDF "Use an installed qpdf package instead of the pinned build dependency." OFF)
 option(IIGENERALDOCUMENT_USE_SYSTEM_LIBZIP "Use an installed libzip package instead of the pinned build dependency." OFF)
 
-set(IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT "$ENV{HOME}/.local" CACHE PATH
+set(IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT "$ENV{HOME}/.local/SDK" CACHE PATH
     "Root directory containing installed iisacc libraries.")
 foreach(package_name IN ITEMS iiXml iiHtmlBlock)
     set(package_prefix "${IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT}/${package_name}")
@@ -460,6 +470,8 @@ if(BUILD_TESTING)
             -DIIGENERALDOCUMENT_CMAKE_COMMAND=${CMAKE_COMMAND}
             "-DIIGENERALDOCUMENT_IIXML_DIR=${iiXml_DIR}"
             "-DIIGENERALDOCUMENT_IIHTMLBLOCK_DIR=${iiHtmlBlock_DIR}"
+            "-DIIGENERALDOCUMENT_IIXML_LIBRARY_DIR=$<TARGET_FILE_DIR:iiXml::iiXml>"
+            "-DIIGENERALDOCUMENT_IIHTMLBLOCK_LIBRARY_DIR=$<TARGET_FILE_DIR:iiHtmlBlock::iiHtmlBlock>"
             "-DIIGENERALDOCUMENT_QT6_DIR=${Qt6_DIR}"
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/InstallConsumerTest.cmake)
 

@@ -5,6 +5,8 @@ file(REMOVE_RECURSE "${install_prefix}" "${consumer_build}")
 foreach(required_variable IN ITEMS
         IIGENERALDOCUMENT_IIXML_DIR
         IIGENERALDOCUMENT_IIHTMLBLOCK_DIR
+        IIGENERALDOCUMENT_IIXML_LIBRARY_DIR
+        IIGENERALDOCUMENT_IIHTMLBLOCK_LIBRARY_DIR
         IIGENERALDOCUMENT_QT6_DIR)
     if(NOT DEFINED ${required_variable} OR "${${required_variable}}" STREQUAL "")
         message(FATAL_ERROR "Required dependency package directory is missing: ${required_variable}")
@@ -21,8 +23,21 @@ if(NOT install_result EQUAL 0)
     message(FATAL_ERROR "Install failed:\n${install_output}\n${install_error}")
 endif()
 
+set(consumer_environment_command "${IIGENERALDOCUMENT_CMAKE_COMMAND}" -E env
+    --unset=CPATH --unset=CPLUS_INCLUDE_PATH --unset=C_INCLUDE_PATH)
+set(consumer_configure_command ${consumer_environment_command}
+    "${IIGENERALDOCUMENT_CMAKE_COMMAND}")
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+    # Reproduce the SDK shell environment that caused @rpath load failures.
+    # All three SDK directories are implicit to the linker, but each imported
+    # package must still supply its runtime lookup path to the consumer.
+    set(consumer_configure_command ${consumer_environment_command}
+        "LIBRARY_PATH=${install_prefix}/lib:${IIGENERALDOCUMENT_IIXML_LIBRARY_DIR}:${IIGENERALDOCUMENT_IIHTMLBLOCK_LIBRARY_DIR}"
+        "${IIGENERALDOCUMENT_CMAKE_COMMAND}")
+endif()
+
 execute_process(
-    COMMAND "${IIGENERALDOCUMENT_CMAKE_COMMAND}"
+    COMMAND ${consumer_configure_command}
             -S "${IIGENERALDOCUMENT_SOURCE_DIR}/tests/consumer"
             -B "${consumer_build}"
             -G Ninja
@@ -38,7 +53,8 @@ if(NOT configure_result EQUAL 0)
 endif()
 
 execute_process(
-    COMMAND "${IIGENERALDOCUMENT_CMAKE_COMMAND}" --build "${consumer_build}"
+    COMMAND ${consumer_environment_command}
+            "${IIGENERALDOCUMENT_CMAKE_COMMAND}" --build "${consumer_build}"
     RESULT_VARIABLE build_result
     OUTPUT_VARIABLE build_output
     ERROR_VARIABLE build_error)
@@ -47,7 +63,9 @@ if(NOT build_result EQUAL 0)
 endif()
 
 execute_process(
-    COMMAND "${consumer_build}/iiGeneralDocumentConsumer"
+    COMMAND "${IIGENERALDOCUMENT_CMAKE_COMMAND}" -E env
+            --unset=DYLD_LIBRARY_PATH --unset=DYLD_FALLBACK_LIBRARY_PATH
+            "${consumer_build}/iiGeneralDocumentConsumer"
     RESULT_VARIABLE run_result
     OUTPUT_VARIABLE run_output
     ERROR_VARIABLE run_error)
