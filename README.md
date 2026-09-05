@@ -177,3 +177,15 @@ auto flatOdfRead = WordDocumentReader{}.read("output.fodt");
 ```
 
 See [API](docs/API.md), [architecture](docs/ARCHITECTURE.md), the [PDF support contract](docs/PDF_SUPPORT.md), the [XML tree CRUD contract](docs/XML_TREE_CRUD.md), the [HTML block CRUD contract](docs/HTML_BLOCK_CRUD.md), the [Thinking Space Document contract](docs/THINKING_SPACE_DOCUMENT.md), the [Word support contract](docs/WORD_SUPPORT.md), and the [OpenDocument support contract](docs/ODF_SUPPORT.md) before integrating editing into a product.
+
+## License
+
+SPDX-License-Identifier: AGPL-3.0-only
+
+The original code and documentation in iiGeneralDocument are distributed under
+the GNU Affero General Public License version 3.0 only. See [LICENSE](LICENSE)
+for the full license text.
+
+Third-party code, libraries, tools, and model weights retain their respective
+licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for dependency
+notices.
