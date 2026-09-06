@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BUILD_DIR="${ROOT_DIR}/build"
 PREFIX="${IIGENERALDOCUMENT_INSTALL_PREFIX:-${HOME}/.local/SDK/iiGeneralDocument}"
 SDK_ROOT="${IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT:-${HOME}/.local/SDK}"
-QT_PREFIX="${IIGENERALDOCUMENT_QT_PREFIX:-${HOME}/Qt/6.8.3/macos}"
+QT_PREFIX="${IIGENERALDOCUMENT_QT_PREFIX:-/Volumes/Storage/Qt/6.8.3/macos}"
 
 # A moved source tree invalidates all generated paths, including ExternalProject
 # dependency build trees, so regenerate the complete build directory.

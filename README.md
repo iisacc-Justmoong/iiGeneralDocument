@@ -54,7 +54,9 @@ compiler include variables so another installed copy cannot shadow the package
 being tested.
 
 The build requires Qt Core 6.5 or newer plus the `iiXml` and `iiHtmlBlock`
-0.1.0 CMake packages. Qt Core and both iisacc libraries are public package
+0.1.0 CMake packages. The installer defaults to `/Volumes/Storage/Qt/6.8.3/macos`;
+set `IIGENERALDOCUMENT_QT_PREFIX` to use a different Qt kit.
+Qt Core and both iisacc libraries are public package
 dependencies, so an installed consumer receives the same include and link
 contract. The standard installs at `~/.local/SDK/iiXml` and
 `~/.local/SDK/iiHtmlBlock` are discovered automatically; set
