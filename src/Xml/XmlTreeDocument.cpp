@@ -1,4 +1,5 @@
 #include "Xml/XmlTreeDocument.h"
+#include "Metadata/Authorship_p.hpp"
 
 #include "Core/Diagnostic.h"
 
@@ -490,6 +491,16 @@ std::vector<XmlNode> XmlTreeDocument::parseNodes(
 
     static_cast<void>(appendNode(appendNode, root, std::nullopt, 0));
     return nodes;
+}
+
+
+const iiFileProvider::Authorship& XmlTreeDocument::authorship() const noexcept { return authorship_; }
+bool XmlTreeDocument::setFileAuthor(const iiFileProvider::FileAuthor& author) { return authorship_.setAuthor(author); }
+QByteArray XmlTreeDocument::toFileBytes() const { return detail::markupBytes(xml_, authorship_); }
+XmlTreeDocument XmlTreeDocument::fromFileBytes(const QByteArray& bytes) {
+    auto parsed = detail::readMarkup(bytes);
+    auto document = fromXml(std::move(parsed.body));
+    document.authorship_ = std::move(parsed.author); return document;
 }
 
 } // namespace ii::document

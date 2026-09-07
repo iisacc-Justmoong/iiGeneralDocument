@@ -36,3 +36,5 @@ cmake --fresh -S "${ROOT_DIR}/tests/consumer" -B "${BUILD_DIR}/installed-consume
 cmake --build "${BUILD_DIR}/installed-consumer" --parallel "${CMAKE_BUILD_PARALLEL_LEVEL:-2}"
 "${BUILD_DIR}/installed-consumer/iiGeneralDocumentConsumer"
 echo "iiGeneralDocument installed and verified: ${PREFIX}"
+
+env -u DYLD_LIBRARY_PATH -u DYLD_FALLBACK_LIBRARY_PATH ctest --test-dir "${BUILD_DIR}/installed-consumer" --output-on-failure

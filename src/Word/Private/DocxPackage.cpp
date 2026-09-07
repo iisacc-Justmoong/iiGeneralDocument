@@ -204,6 +204,7 @@ std::optional<QByteArray> readPart(
 struct PackageRelationships {
     std::string mainDocumentPart;
     std::string corePropertiesPart;
+    std::string customPropertiesPart;
 };
 
 std::optional<std::string> normalizedPackageTarget(const QString& target)
@@ -252,6 +253,11 @@ PackageRelationships parsePackageRelationships(
             result.mainDocumentPart = *target;
         } else if (type.endsWith(QStringLiteral("/metadata/core-properties"))) {
             result.corePropertiesPart = *target;
+        } else if (type.endsWith(QStringLiteral("/custom-properties"))) {
+            if (!result.customPropertiesPart.empty()) {
+                diagnostics.push_back(diagnostic(DiagnosticSeverity::error, "authorship.duplicate", "Duplicate custom-properties relationship.", source));
+            }
+            result.customPropertiesPart = *target;
         }
     }
     if (xml.hasError()) {
@@ -269,6 +275,29 @@ PackageRelationships parsePackageRelationships(
             source));
     }
     return result;
+}
+
+const QString customNamespace = QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/custom-properties");
+const QString variantNamespace = QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes");
+void parseCustomProperties(const QByteArray &bytes, WordDocument &document,
+                          const std::filesystem::path &source, std::vector<Diagnostic> &diagnostics) {
+    QXmlStreamReader xml(bytes);
+    bool sawAuthor = false;
+    while (!xml.atEnd()) {
+        xml.readNext();
+        if (!xml.isStartElement() || xml.namespaceUri() != customNamespace || xml.name() != u"property") continue;
+        if (xml.attributes().value(u"name") != QLatin1String(iiFileProvider::Authorship::MetadataKey)) {
+            xml.skipCurrentElement(); continue;
+        }
+        if (sawAuthor || !xml.readNextStartElement() || xml.namespaceUri() != variantNamespace || xml.name() != u"lpwstr") {
+            xml.raiseError(QStringLiteral("Invalid or duplicate authorship property")); break;
+        }
+        sawAuthor = true;
+        document.metadata()[iiFileProvider::Authorship::MetadataKey] = toUtf8(xml.readElementText());
+        if (xml.readNextStartElement()) { xml.raiseError(QStringLiteral("Extra authorship property values")); break; }
+    }
+    if (xml.hasError()) diagnostics.push_back(diagnostic(DiagnosticSeverity::error, "authorship.invalid_xml",
+        "Invalid DOCX authorship properties.", source));
 }
 
 void parseCoreProperties(
@@ -615,9 +644,9 @@ void parseDocumentXml(
         foundBody = true;
         while (xml.readNextStartElement()) {
             if (xml.name() == QStringLiteral("p")) {
-                document.appendParagraph(parseParagraph(xml, source, diagnostics));
+                document.blocks().emplace_back(parseParagraph(xml, source, diagnostics));
             } else if (xml.name() == QStringLiteral("tbl")) {
-                document.appendTable(parseTable(xml, source, diagnostics));
+                document.blocks().emplace_back(parseTable(xml, source, diagnostics));
             } else if (xml.name() == QStringLiteral("sectPr")) {
                 parseSectionProperties(xml, document.section());
             } else {
@@ -1141,6 +1170,9 @@ QByteArray packageRelationshipsXml()
             QStringLiteral("rId3"),
             QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties"),
             QStringLiteral("docProps/app.xml"));
+        relationship(QStringLiteral("rId4"),
+            QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/relationships/custom-properties"),
+            QStringLiteral("docProps/custom.xml"));
         xml.writeEndElement();
     });
 }
@@ -1210,6 +1242,25 @@ QByteArray contentTypesXml(bool hasNumbering)
         overrideType(
             QStringLiteral("/docProps/app.xml"),
             QStringLiteral("application/vnd.openxmlformats-officedocument.extended-properties+xml"));
+        overrideType(QStringLiteral("/docProps/custom.xml"),
+            QStringLiteral("application/vnd.openxmlformats-officedocument.custom-properties+xml"));
+        xml.writeEndElement();
+    });
+}
+
+QByteArray customPropertiesXml(const WordDocument &document) {
+    return xmlDocument([&](QXmlStreamWriter &xml) {
+        xml.writeStartElement(QStringLiteral("Properties"));
+        xml.writeDefaultNamespace(customNamespace);
+        xml.writeNamespace(variantNamespace, QStringLiteral("vt"));
+        if (!document.authorship().isEmpty()) {
+            xml.writeStartElement(customNamespace, QStringLiteral("property"));
+            xml.writeAttribute(QStringLiteral("fmtid"), QStringLiteral("{D5CDD505-2E9C-101B-9397-08002B2CF9AE}"));
+            xml.writeAttribute(QStringLiteral("pid"), QStringLiteral("2"));
+            xml.writeAttribute(QStringLiteral("name"), QString::fromLatin1(iiFileProvider::Authorship::MetadataKey));
+            xml.writeTextElement(variantNamespace, QStringLiteral("lpwstr"), QString::fromUtf8(document.authorship().dump()));
+            xml.writeEndElement();
+        }
         xml.writeEndElement();
     });
 }
@@ -1484,6 +1535,16 @@ WordReadResult readDocxPackage(
             parseCoreProperties(*coreProperties, result.document, source, result.diagnostics);
         }
     }
+    if (!packageRelationships.customPropertiesPart.empty()) {
+        const auto custom = readPart(archive.get(), packageRelationships.customPropertiesPart,
+            options.maximumXmlPartBytes, source, result.diagnostics);
+        if (custom) parseCustomProperties(*custom, result.document, source, result.diagnostics);
+    }
+    try { result.document.restoreAuthorship(); }
+    catch (const std::exception&) {
+        result.diagnostics.push_back(diagnostic(DiagnosticSeverity::error, "authorship.invalid",
+            "Invalid file authorship metadata.", source));
+    }
     return result;
 }
 
@@ -1547,6 +1608,7 @@ WordWriteResult writeDocxPackage(
     parts.push_back({"[Content_Types].xml", contentTypesXml(hasNumbering)});
     parts.push_back({"_rels/.rels", packageRelationshipsXml()});
     parts.push_back({"docProps/core.xml", corePropertiesXml(document)});
+    parts.push_back({"docProps/custom.xml", customPropertiesXml(document)});
     parts.push_back({"docProps/app.xml", appPropertiesXml()});
     parts.push_back({"word/document.xml", documentXml(document)});
     parts.push_back({"word/styles.xml", stylesXml(document)});

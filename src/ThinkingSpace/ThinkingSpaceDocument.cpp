@@ -1,4 +1,5 @@
 #include "ThinkingSpace/ThinkingSpaceDocument.h"
+#include "Metadata/Authorship_p.hpp"
 
 #include "Core/Diagnostic.h"
 
@@ -546,6 +547,7 @@ ThinkingSpaceDocumentVersion ThinkingSpaceDocument::recordVersion(
     std::string label,
     std::string createdAtUtc)
 {
+    detail::storeAuthorship(authorship(), header.metadata);
     return versionHistory.record(
         header, body, std::move(label), std::move(createdAtUtc));
 }

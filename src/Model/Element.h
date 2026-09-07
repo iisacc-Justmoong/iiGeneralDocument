@@ -98,6 +98,7 @@ struct ImageInfo {
 };
 
 struct ImageReplacement {
+    bool operator==(const ImageReplacement&) const = default;
     std::vector<std::byte> bytes;
     int width{0};
     int height{0};

@@ -22,6 +22,8 @@ list(REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
 unset(_iigeneraldocument_sdk_root)
 unset(_iigeneraldocument_dependency)
 
+list(PREPEND CMAKE_PREFIX_PATH "${PACKAGE_PREFIX_DIR}/../iiFileProvider" "$ENV{HOME}/.local/SDK/iiFileProvider")
+find_dependency(iiFileProvider 0.2.0 CONFIG REQUIRED)
 find_dependency(iiXml 0.1.0 CONFIG REQUIRED)
 find_dependency(iiHtmlBlock 0.1.0 CONFIG REQUIRED)
 find_dependency(Qt6 6.5 REQUIRED COMPONENTS Core)

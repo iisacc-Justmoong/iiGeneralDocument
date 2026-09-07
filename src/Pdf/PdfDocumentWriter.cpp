@@ -341,9 +341,14 @@ void syncMetadata(QPDF& pdf, const Document& document)
         trailer.replaceKey("/Info", info);
     }
     for (const std::string key : {"Title", "Author", "Subject", "Keywords", "Creator",
-                                  "Producer", "CreationDate", "ModDate"}) {
+                                  "Producer", "CreationDate", "ModDate", "iisacc:authorship"}) {
         const auto value = document.metadata().find(key);
         const std::string pdfKey = "/" + key;
+        if (key == iiFileProvider::Authorship::MetadataKey) {
+            if (document.authorship().isEmpty()) info.removeKey(pdfKey);
+            else info.replaceKey(pdfKey, QPDFObjectHandle::newUnicodeString(document.authorship().dump().toStdString()));
+            continue;
+        }
         if (value == document.metadata().end()) {
             info.removeKey(pdfKey);
         } else {

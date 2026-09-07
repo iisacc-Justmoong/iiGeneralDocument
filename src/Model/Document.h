@@ -4,6 +4,7 @@
 #include "Model/Element.h"
 #include "Model/Page.h"
 #include "iiGeneralDocument/Export.h"
+#include <iiFileProvider.h>
 
 #include <compare>
 #include <cstdint>
@@ -77,6 +78,14 @@ public:
     [[nodiscard]] std::vector<Page>& pages() noexcept;
     void addPage(Page page);
 
+    [[nodiscard]] const iiFileProvider::Authorship& authorship() const noexcept;
+    bool setFileAuthor(const iiFileProvider::FileAuthor& author);
+    bool setMetadata(std::string key, std::string value);
+    // For legacy direct aggregate edits, call once after a successful change.
+    void recordChange();
+    // Reader boundary: validates stored metadata and clears the active identity.
+    void restoreAuthorship();
+
     [[nodiscard]] const std::map<std::string, std::string>& metadata() const noexcept;
     [[nodiscard]] std::map<std::string, std::string>& metadata() noexcept;
 
@@ -101,6 +110,7 @@ private:
 
     std::vector<Page> pages_;
     std::map<std::string, std::string> metadata_;
+    iiFileProvider::Authorship authorship_;
     std::vector<FormField> formFields_;
     std::string pdfVersion_{"1.7"};
     std::optional<Origin> origin_;

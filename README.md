@@ -5,8 +5,9 @@ editable models for PDF page content, hierarchical XML, HTML blocks, and
 flow-oriented text documents, plus a versioned Thinking Space `.tsdoc`
 object boundary, while keeping format backends behind focused boundaries.
 
-The first release provides:
+Version 0.2 provides:
 
+- iiFileProvider authorship with immediate metadata dumps and embedded file round trips;
 - ordered `Document`, `Page`, and stable `ElementId` objects;
 - `TextElement`, `PathElement`, `ImageElement`, `FormXObjectElement`, `InlineImageElement`, `ShadingElement`, `MarkedContentElement`, `GraphicsStateElement`, and `UnknownElement`;
 - recursive Form XObject contents, shared when the PDF resource is shared;
@@ -191,3 +192,14 @@ for the full license text.
 Third-party code, libraries, tools, and model weights retain their respective
 licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for dependency
 notices.
+
+## File authorship (0.2.0)
+
+All document models use required `iiFileProvider 0.2` author metadata. Select the
+editor with `setFileAuthor`, then use the model's editing APIs. Accepted changes
+immediately regenerate the cached contribution record. PDF, DOCX, DOC, ODT and
+FODT writers embed it in the document; HTML/XML and Thinking Space provide
+`toFileBytes` / `fromFileBytes` for authored file bytes. `.tsdoc` now preserves
+the complete retained history as well as current content and attribution. See
+[the mutation and file contract](docs/FILE_AUTHORSHIP.md) for raw-reference
+boundaries, native fields and token exclusion. Rebuild consumers for SOVERSION 0.2.

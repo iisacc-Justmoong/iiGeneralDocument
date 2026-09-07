@@ -92,3 +92,14 @@ atomic destination replacement. Their readers fail closed on physical ZIP
 envelope violations, CRC/integrity errors, encrypted entries, manifest/package
 disagreement, and bounded semantic expansion. This transaction boundary keeps
 the previous destination intact when generation or validation fails.
+
+## Authorship boundary (0.2)
+
+Each editable model owns a copyable iiFileProvider `Authorship` value. Mutation
+coordinators update the cached dump synchronously; codecs only embed/read its
+sanitized value. No file account is promoted to an authenticated current editor.
+PDF/Word retain legacy mutable aggregates; validated authoring uses their
+coordinators or explicit `recordChange`, and Word/Thinking Space additionally
+provide atomic draft callbacks for nested aggregate changes. The native `.tsdoc`
+codec preserves and verifies the existing history object store without introducing
+a second history implementation.

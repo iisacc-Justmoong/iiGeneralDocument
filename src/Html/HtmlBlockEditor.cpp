@@ -333,6 +333,8 @@ void HtmlBlockEditor::replaceRange(
     std::vector<HtmlBlockId> nextRootIds =
         HtmlBlockDocument::rebuildHierarchy(nextBlocks);
 
+    if (document_.html_ == nextHtml) return;
+    document_.authorship_.recordChange();
     document_.html_ = std::move(nextHtml);
     document_.blocks_ = std::move(nextBlocks);
     document_.rootIds_ = std::move(nextRootIds);

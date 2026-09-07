@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <map>
+#include <functional>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -88,6 +89,7 @@ public:
     [[nodiscard]] bool verifyIntegrity() const;
 
 private:
+    friend struct ThinkingSpaceDocument;
     void pruneOldestVersions();
     void collectUnreferencedObjects();
 
@@ -100,6 +102,11 @@ private:
 
 struct IIGENERALDOCUMENT_EXPORT ThinkingSpaceDocument {
     static constexpr std::string_view fileExtension{".tsdoc"};
+    [[nodiscard]] const iiFileProvider::Authorship& authorship() const noexcept;
+    bool setFileAuthor(const iiFileProvider::FileAuthor& author);
+    bool edit(const std::function<bool(ThinkingSpaceDocument&)>& callback);
+    [[nodiscard]] QByteArray toFileBytes() const;
+    [[nodiscard]] static ThinkingSpaceDocument fromFileBytes(const QByteArray& bytes);
 
     ThinkingSpaceDocumentHeader header;
     ThinkingSpaceDocumentBody body;

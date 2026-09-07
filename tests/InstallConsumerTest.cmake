@@ -24,7 +24,8 @@ if(NOT install_result EQUAL 0)
 endif()
 
 set(consumer_environment_command "${IIGENERALDOCUMENT_CMAKE_COMMAND}" -E env
-    --unset=CPATH --unset=CPLUS_INCLUDE_PATH --unset=C_INCLUDE_PATH)
+    --unset=CPLUS_INCLUDE_PATH --unset=C_INCLUDE_PATH
+    "CPATH=${IIGENERALDOCUMENT_SOURCE_DIR}/tests/foreign-headers")
 set(consumer_configure_command ${consumer_environment_command}
     "${IIGENERALDOCUMENT_CMAKE_COMMAND}")
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")

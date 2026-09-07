@@ -3,8 +3,10 @@
 ## Implemented scope
 
 Thinking Space Document uses the `.tsdoc` extension. The current model owns
-header metadata, one HTML-block body, and an in-memory version object store. It
-does not yet define a disk container, parser, writer, or migration policy.
+header metadata, one HTML-block body, and a version object store. Version 0.2
+adds schema-1 JSON file serialization through `toFileBytes` / `fromFileBytes`,
+including iiFileProvider authorship and the complete retained/pruned history.
+See [file authorship](FILE_AUTHORSHIP.md) for the exact container contract.
 
 The document composition has four parts:
 
@@ -31,8 +33,8 @@ const ThinkingSpaceDocumentVersion version = document.recordVersion(
 The body deliberately reuses the existing `HtmlBlockDocument` model and its
 `iiHtmlBlock` adapter rather than introducing a second HTML range model. Custom
 tags must satisfy that model's block-classification contract, such as an
-explicit block display override. Header serialization and the physical
-header/body boundary will be selected when `.tsdoc` I/O is implemented.
+explicit block display override. The schema-1 JSON container separates `header`,
+`bodyHtml`, and `history`; file reads validate authorship and history integrity.
 
 ## Git object principle
 

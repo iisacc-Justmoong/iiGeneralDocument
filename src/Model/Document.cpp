@@ -1,4 +1,5 @@
 #include "Model/Document.h"
+#include "Metadata/Authorship_p.hpp"
 
 #include <utility>
 
@@ -118,6 +119,7 @@ std::vector<Page>& Document::pages() noexcept
 void Document::addPage(Page page)
 {
     pages_.push_back(std::move(page));
+    recordChange();
 }
 
 const std::map<std::string, std::string>& Document::metadata() const noexcept
@@ -143,6 +145,7 @@ std::vector<FormField>& Document::formFields() noexcept
 void Document::addFormField(FormField field)
 {
     formFields_.push_back(std::move(field));
+    recordChange();
 }
 
 const std::string& Document::pdfVersion() const noexcept
@@ -152,6 +155,8 @@ const std::string& Document::pdfVersion() const noexcept
 
 void Document::setPdfVersion(std::string version)
 {
+    if (pdfVersion_ == version) return;
+    recordChange();
     pdfVersion_ = std::move(version);
 }
 
@@ -168,6 +173,26 @@ bool Document::hasDigitalSignatures() const noexcept
 bool Document::hasSourcePdf() const noexcept
 {
     return origin_.has_value();
+}
+
+
+const iiFileProvider::Authorship& Document::authorship() const noexcept { return authorship_; }
+bool Document::setFileAuthor(const iiFileProvider::FileAuthor& author) {
+    auto next = authorship_; const bool changed = next.setAuthor(author);
+    detail::storeAuthorship(next, metadata_); authorship_ = std::move(next); return changed;
+}
+void Document::recordChange() {
+    auto next = authorship_; next.recordChange();
+    detail::storeAuthorship(next, metadata_); authorship_ = std::move(next);
+}
+void Document::restoreAuthorship() { authorship_ = detail::readAuthorship(metadata_); }
+bool Document::setMetadata(std::string key, std::string value) {
+    if (key == iiFileProvider::Authorship::MetadataKey) throw DocumentError("Authorship is managed by iiFileProvider");
+    const auto found = metadata_.find(key);
+    if (found != metadata_.end() && found->second == value) return false;
+    auto next = metadata_; next[std::move(key)] = std::move(value);
+    auto author = authorship_; author.recordChange(); detail::storeAuthorship(author, next);
+    metadata_ = std::move(next); authorship_ = std::move(author); return true;
 }
 
 } // namespace ii::document

@@ -455,7 +455,7 @@ ReadResult PdfDocumentReader::read(
         const char* password = options.password.empty() ? nullptr : options.password.c_str();
         pdf.processMemoryFile(source.string().c_str(), bytes.data(), bytes.size(), password);
 
-        result.document.setPdfVersion(pdf.getPDFVersion());
+        result.document.pdfVersion_ = pdf.getPDFVersion();
         const bool encrypted = pdf.isEncrypted();
         bool digitallySigned = false;
         std::uint64_t nextElementId = 1;
@@ -467,7 +467,7 @@ ReadResult PdfDocumentReader::read(
         const auto info = pdf.getTrailer().getKey("/Info");
         if (info.isDictionary()) {
             for (const std::string key : {"/Title", "/Author", "/Subject", "/Keywords",
-                                          "/Creator", "/Producer", "/CreationDate", "/ModDate"}) {
+                                          "/Creator", "/Producer", "/CreationDate", "/ModDate", "/iisacc:authorship"}) {
                 const auto value = info.getKey(key);
                 if (value.isString()) {
                     result.document.metadata()[key.substr(1)] = value.getUTF8Value();
@@ -517,7 +517,7 @@ ReadResult PdfDocumentReader::read(
                 annotation.setSource(sourceReference(handle));
                 page.addAnnotation(std::move(annotation));
             }
-            result.document.addPage(std::move(page));
+            result.document.pages().push_back(std::move(page));
         }
 
         QPDFAcroFormDocumentHelper formHelper(pdf);
@@ -539,7 +539,7 @@ ReadResult PdfDocumentReader::read(
                 field.setChoices(sourceField.getChoices());
                 field.setSource(sourceReference(sourceField.getObjectHandle()));
                 digitallySigned = digitallySigned || field.type() == FormFieldType::signature;
-                result.document.addFormField(std::move(field));
+                result.document.formFields().push_back(std::move(field));
             }
         }
 
@@ -548,6 +548,7 @@ ReadResult PdfDocumentReader::read(
                                           warning.what(), source.string()});
         }
 
+        result.document.restoreAuthorship();
         result.document.origin_ = Document::Origin{
             std::move(bytes), source.string(), options.password, encrypted, digitallySigned};
     } catch (const std::exception& error) {

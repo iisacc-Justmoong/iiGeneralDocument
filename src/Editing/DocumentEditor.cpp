@@ -101,6 +101,7 @@ ElementId DocumentEditor::addText(
     const auto id = nextElementId();
     page(pageIndex).append(TextElement::create(
         id, std::move(textBytes), origin, fontSize, std::move(fontResource)));
+    document_.recordChange();
     return id;
 }
 
@@ -108,6 +109,7 @@ ElementId DocumentEditor::addRectangle(std::size_t pageIndex, Rect rect)
 {
     const auto id = nextElementId();
     page(pageIndex).append(PathElement::rectangle(id, rect));
+    document_.recordChange();
     return id;
 }
 
@@ -122,6 +124,7 @@ ElementId DocumentEditor::addRgbImage(
     const std::string resourceName = "/IiImage" + std::to_string(id.value);
     page(pageIndex).append(ImageElement::createRgb(
         id, pixels, width, height, placement, resourceName));
+    document_.recordChange();
     return id;
 }
 
@@ -130,6 +133,7 @@ ElementId DocumentEditor::addUnknown(
 {
     const auto id = nextElementId();
     page(pageIndex).append(std::make_unique<UnknownElement>(id, std::move(instructions)));
+    document_.recordChange();
     return id;
 }
 
@@ -140,7 +144,10 @@ void DocumentEditor::replaceText(
     if (!text) {
         throw DocumentError("Requested element is not editable text");
     }
+    const auto segments = text->textSegments();
+    if (segmentIndex < segments.size() && segments[segmentIndex] == textBytes) return;
     text->replaceTextSegment(segmentIndex, std::move(textBytes));
+    document_.recordChange();
 }
 
 void DocumentEditor::replaceImage(ElementId id, ImageReplacement replacement)
@@ -149,7 +156,9 @@ void DocumentEditor::replaceImage(ElementId id, ImageReplacement replacement)
     if (!image) {
         throw DocumentError("Requested element is not an image");
     }
+    if (image->replacement() && *image->replacement() == replacement) return;
     image->replace(std::move(replacement));
+    document_.recordChange();
 }
 
 bool DocumentEditor::remove(ElementId id)
@@ -157,6 +166,7 @@ bool DocumentEditor::remove(ElementId id)
     std::unordered_set<const FormContent*> visited;
     for (auto& page : document_.pages()) {
         if (removeFromElements(page.elements(), id, visited)) {
+            document_.recordChange();
             return true;
         }
     }
@@ -168,6 +178,7 @@ AnnotationId DocumentEditor::addAnnotation(std::size_t pageIndex, Annotation ann
     const auto id = nextAnnotationId();
     annotation.setId(id);
     page(pageIndex).addAnnotation(std::move(annotation));
+    document_.recordChange();
     return id;
 }
 
@@ -175,6 +186,7 @@ bool DocumentEditor::removeAnnotation(AnnotationId id)
 {
     for (auto& page : document_.pages()) {
         if (page.removeAnnotation(id)) {
+            document_.recordChange();
             return true;
         }
     }

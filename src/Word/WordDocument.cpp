@@ -1,4 +1,5 @@
 #include "Word/WordDocument.h"
+#include "Metadata/Authorship_p.hpp"
 
 #include <utility>
 
@@ -26,11 +27,13 @@ std::vector<WordBlock>& WordDocument::blocks() noexcept
 void WordDocument::appendParagraph(WordParagraph paragraph)
 {
     blocks_.emplace_back(std::move(paragraph));
+    recordChange();
 }
 
 void WordDocument::appendTable(WordTable table)
 {
     blocks_.emplace_back(std::move(table));
+    recordChange();
 }
 
 const std::map<std::string, std::string>& WordDocument::metadata() const noexcept
@@ -92,6 +95,35 @@ std::string WordDocument::plainText() const
         }
     }
     return result;
+}
+
+
+const iiFileProvider::Authorship& WordDocument::authorship() const noexcept { return authorship_; }
+bool WordDocument::setFileAuthor(const iiFileProvider::FileAuthor& author) {
+    auto next = authorship_; const bool changed = next.setAuthor(author);
+    detail::storeAuthorship(next, metadata_); authorship_ = std::move(next); return changed;
+}
+void WordDocument::recordChange() {
+    auto next = authorship_; next.recordChange();
+    detail::storeAuthorship(next, metadata_); authorship_ = std::move(next);
+}
+void WordDocument::restoreAuthorship() { authorship_ = detail::readAuthorship(metadata_); }
+bool WordDocument::setMetadata(std::string key, std::string value) {
+    if (key == iiFileProvider::Authorship::MetadataKey) throw DocumentError("Authorship is managed by iiFileProvider");
+    const auto found = metadata_.find(key);
+    if (found != metadata_.end() && found->second == value) return false;
+    auto next = metadata_; next[std::move(key)] = std::move(value);
+    auto author = authorship_; author.recordChange(); detail::storeAuthorship(author, next);
+    metadata_ = std::move(next); authorship_ = std::move(author); return true;
+}
+
+bool WordDocument::edit(const std::function<bool(WordDocument&)>& callback) {
+    if (!callback) throw DocumentError("Empty Word edit callback");
+    auto draft = *this;
+    if (!callback(draft)) return false;
+    const bool changed = draft.blocks_ != blocks_ || draft.section_ != section_ || draft.metadata_ != metadata_;
+    if (changed && draft.authorship_.dump() == authorship_.dump()) draft.recordChange();
+    *this = std::move(draft); return changed;
 }
 
 } // namespace ii::document

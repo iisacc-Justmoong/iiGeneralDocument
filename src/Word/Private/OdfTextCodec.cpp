@@ -1732,7 +1732,7 @@ void parseBlockContainer(
             if (context.expansionFailed) {
                 return;
             }
-            document.appendParagraph(std::move(paragraph));
+            document.blocks().emplace_back(std::move(paragraph));
         } else if (isElement(xml, textNamespace(), QStringLiteral("list"))) {
             std::vector<WordParagraph> paragraphs;
             parseListParagraphs(xml, paragraphs, context, 0);
@@ -1740,14 +1740,14 @@ void parseBlockContainer(
                 return;
             }
             for (auto& paragraph : paragraphs) {
-                document.appendParagraph(std::move(paragraph));
+                document.blocks().emplace_back(std::move(paragraph));
             }
         } else if (isElement(xml, tableNamespace(), QStringLiteral("table"))) {
             auto table = parseTable(xml, context);
             if (context.expansionFailed) {
                 return;
             }
-            document.appendTable(std::move(table));
+            document.blocks().emplace_back(std::move(table));
         } else if (isElement(xml, textNamespace(), QStringLiteral("section"))) {
             parseBlockContainer(xml, document, context, semanticDepth + 1);
             if (context.expansionFailed) {
@@ -1836,6 +1836,17 @@ void parseMetadata(
                 else if (name == QStringLiteral("creation-date")) key = "Created";
                 else if (name == QStringLiteral("keyword")) key = "Keywords";
                 else if (name == QStringLiteral("generator")) key = "Application";
+                else if (name == QStringLiteral("user-defined")
+                    && xml.attributes().value(metaNamespace(), QStringLiteral("name")) == QLatin1String(iiFileProvider::Authorship::MetadataKey)) {
+                    if (document.metadata().contains(iiFileProvider::Authorship::MetadataKey)
+                        || (!xml.attributes().value(metaNamespace(), QStringLiteral("value-type")).isEmpty()
+                            && xml.attributes().value(metaNamespace(), QStringLiteral("value-type")) != u"string")) {
+                        diagnostics.push_back(diagnostic(DiagnosticSeverity::error, "authorship.invalid",
+                            "Invalid or duplicate OpenDocument authorship metadata.", source));
+                        xml.skipCurrentElement(); continue;
+                    }
+                    key = iiFileProvider::Authorship::MetadataKey;
+                }
             }
             if (key.empty()) {
                 xml.skipCurrentElement();
@@ -2744,7 +2755,7 @@ void writeMetadataSection(QXmlStreamWriter& xml, const WordDocument& document)
 {
     xml.writeStartElement(officeNamespace(), QStringLiteral("meta"));
     xml.writeTextElement(
-        metaNamespace(), QStringLiteral("generator"), QStringLiteral("iiGeneralDocument/0.1"));
+        metaNamespace(), QStringLiteral("generator"), QStringLiteral("iiGeneralDocument/0.2"));
     const auto write = [&](const QString& namespaceUri, const QString& name,
                            const std::string& key) {
         if (const auto value = metadataValue(document, key)) {
@@ -2763,6 +2774,13 @@ void writeMetadataSection(QXmlStreamWriter& xml, const WordDocument& document)
     write(metaNamespace(), QStringLiteral("keyword"), "Keywords");
     write(metaNamespace(), QStringLiteral("creation-date"), "Created");
     write(dcNamespace(), QStringLiteral("date"), "Modified");
+    if (!document.authorship().isEmpty()) {
+        xml.writeStartElement(metaNamespace(), QStringLiteral("user-defined"));
+        xml.writeAttribute(metaNamespace(), QStringLiteral("name"), QString::fromLatin1(iiFileProvider::Authorship::MetadataKey));
+        xml.writeAttribute(metaNamespace(), QStringLiteral("value-type"), QStringLiteral("string"));
+        xml.writeCharacters(QString::fromUtf8(document.authorship().dump()));
+        xml.writeEndElement();
+    }
     xml.writeEndElement();
 }
 
@@ -3227,6 +3245,11 @@ WordReadResult readOdtPackage(
     parseBody(
         *content, styles, result.document, source, result.diagnostics,
         options.maximumXmlPartBytes);
+    try { result.document.restoreAuthorship(); }
+    catch (const std::exception&) {
+        result.diagnostics.push_back(diagnostic(DiagnosticSeverity::error, "authorship.invalid",
+            "Invalid file authorship metadata.", source));
+    }
     return result;
 }
 
@@ -3254,6 +3277,11 @@ WordReadResult readFodtDocument(
     parseBody(
         *bytes, styles, result.document, source, result.diagnostics,
         options.maximumXmlPartBytes);
+    try { result.document.restoreAuthorship(); }
+    catch (const std::exception&) {
+        result.diagnostics.push_back(diagnostic(DiagnosticSeverity::error, "authorship.invalid",
+            "Invalid file authorship metadata.", source));
+    }
     return result;
 }
 

@@ -345,6 +345,8 @@ void XmlTreeEditor::replaceRange(
         }
     }
 
+    if (document_.xml_ == nextXml) return;
+    document_.authorship_.recordChange();
     document_.xml_ = std::move(nextXml);
     document_.nodes_ = std::move(nextNodes);
     document_.rootId_ = document_.nodes_.empty()

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.31)
-project(iiGeneralDocument VERSION 0.1.0 LANGUAGES C CXX)
+project(iiGeneralDocument VERSION 0.2.0 LANGUAGES C CXX)
 
 if(PROJECT_IS_TOP_LEVEL AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(_sdk_home "$ENV{HOME}")
@@ -23,7 +23,7 @@ option(IIGENERALDOCUMENT_USE_SYSTEM_LIBZIP "Use an installed libzip package inst
 
 set(IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT "$ENV{HOME}/.local/SDK" CACHE PATH
     "Root directory containing installed iisacc libraries.")
-foreach(package_name IN ITEMS iiXml iiHtmlBlock)
+foreach(package_name IN ITEMS iiXml iiHtmlBlock iiFileProvider)
     set(package_prefix "${IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT}/${package_name}")
     if(EXISTS "${package_prefix}")
         list(APPEND CMAKE_PREFIX_PATH "${package_prefix}")
@@ -35,6 +35,7 @@ if(CMAKE_PREFIX_PATH)
     list(REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
 endif()
 
+find_package(iiFileProvider 0.2.0 CONFIG REQUIRED)
 find_package(iiXml 0.1.0 CONFIG REQUIRED)
 find_package(iiHtmlBlock 0.1.0 CONFIG REQUIRED)
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core)
@@ -257,6 +258,7 @@ add_library(iiGeneralDocument ${IIGENERALDOCUMENT_LIBRARY_TYPE}
     src/Pdf/PdfDocumentReader.h
     src/Pdf/PdfDocumentWriter.cpp
     src/Pdf/PdfDocumentWriter.h
+    src/ThinkingSpace/ThinkingSpaceFile.cpp
     src/ThinkingSpace/ThinkingSpaceDocument.cpp
     src/ThinkingSpace/ThinkingSpaceDocument.h
     src/Word/WordDocument.cpp
@@ -293,6 +295,7 @@ target_include_directories(iiGeneralDocument PUBLIC
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/iiGeneralDocument>)
 target_link_libraries(iiGeneralDocument
     PUBLIC
+        iiFileProvider::iiFileProvider
         iiXml::iiXml
         iiHtmlBlock::iiHtmlBlock
         Qt6::Core
@@ -309,11 +312,12 @@ else()
 endif()
 set_target_properties(iiGeneralDocument PROPERTIES
     AUTOMOC ON
+    EXPORT_NO_SYSTEM TRUE
     CXX_VISIBILITY_PRESET hidden
     VISIBILITY_INLINES_HIDDEN YES
     WINDOWS_EXPORT_ALL_SYMBOLS YES
     VERSION ${PROJECT_VERSION}
-    SOVERSION ${PROJECT_VERSION_MAJOR})
+    SOVERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
 
 install(TARGETS iiGeneralDocument
     EXPORT iiGeneralDocumentTargets
@@ -323,7 +327,7 @@ install(TARGETS iiGeneralDocument
 install(DIRECTORY src/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iiGeneralDocument
     FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
-    PATTERN "*/Private/*" EXCLUDE)
+    PATTERN "*/Private/*" EXCLUDE PATTERN "*_p.hpp" EXCLUDE)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/generated/iiGeneralDocument/Export.h"
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iiGeneralDocument)
 install(EXPORT iiGeneralDocumentTargets
@@ -343,6 +347,7 @@ install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/iiGeneralDocumentConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/iiGeneralDocumentConfigVersion.cmake"
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/iiGeneralDocument)
+install(FILES docs/FILE_AUTHORSHIP.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/iiGeneralDocument)
 install(FILES README.md THIRD_PARTY_NOTICES.md docs/API.md docs/ARCHITECTURE.md docs/PDF_SUPPORT.md
     docs/HTML_BLOCK_CRUD.md docs/ODF_SUPPORT.md docs/WORD_SUPPORT.md
     docs/THINKING_SPACE_DOCUMENT.md docs/XML_TREE_CRUD.md
@@ -483,4 +488,10 @@ if(BUILD_TESTING)
                 -DIIGENERALDOCUMENT_APPLE=${APPLE}
                 -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/SymbolIsolationTest.cmake)
     endif()
+endif()
+
+if(BUILD_TESTING)
+    add_executable(iiGeneralDocumentAuthorshipTest tests/AuthorshipTest.cpp)
+    target_link_libraries(iiGeneralDocumentAuthorshipTest PRIVATE iiGeneralDocument::iiGeneralDocument)
+    add_test(NAME iiGeneralDocument.Authorship COMMAND iiGeneralDocumentAuthorshipTest)
 endif()

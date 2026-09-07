@@ -1,4 +1,5 @@
 #include "Html/HtmlBlockDocument.h"
+#include "Metadata/Authorship_p.hpp"
 
 #include "Core/Diagnostic.h"
 
@@ -318,6 +319,17 @@ std::vector<HtmlBlockId> HtmlBlockDocument::rebuildHierarchy(
         parent.childIds_.push_back(blocks[index].id());
     }
     return roots;
+}
+
+
+const iiFileProvider::Authorship& HtmlBlockDocument::authorship() const noexcept { return authorship_; }
+void HtmlBlockDocument::recordChange() { authorship_.recordChange(); }
+bool HtmlBlockDocument::setFileAuthor(const iiFileProvider::FileAuthor& author) { return authorship_.setAuthor(author); }
+QByteArray HtmlBlockDocument::toFileBytes() const { return detail::markupBytes(html_, authorship_); }
+HtmlBlockDocument HtmlBlockDocument::fromFileBytes(const QByteArray& bytes) {
+    auto parsed = detail::readMarkup(bytes);
+    auto document = fromHtml(std::move(parsed.body));
+    document.authorship_ = std::move(parsed.author); return document;
 }
 
 } // namespace ii::document
