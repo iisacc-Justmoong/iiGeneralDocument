@@ -103,3 +103,7 @@ coordinators or explicit `recordChange`, and Word/Thinking Space additionally
 provide atomic draft callbacks for nested aggregate changes. The native `.tsdoc`
 codec preserves and verifies the existing history object store without introducing
 a second history implementation.
+
+## 파일 저장 소유권
+
+파일 CRUD는 iiFileProvider 0.5가 소유한다. PDF는 메모리에서 생성·검증한 뒤 provider가 원자적으로 공개한다. DOCX/ODT는 provider가 연 읽기 장치와 소유한 임시 파일을 사용하고, FODT/DOC 변환 결과도 provider를 통해 기록·공개한다. Thinking Space/HTML/XML 바이트 코덱은 File::create/read/update/remove와 조합한다. iiFileProvider에서 이 SDK로의 역참조는 금지한다.

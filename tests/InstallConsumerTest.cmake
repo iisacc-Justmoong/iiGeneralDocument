@@ -3,6 +3,7 @@ set(consumer_build "${IIGENERALDOCUMENT_BINARY_DIR}/install-consumer-build")
 file(REMOVE_RECURSE "${install_prefix}" "${consumer_build}")
 
 foreach(required_variable IN ITEMS
+        IIGENERALDOCUMENT_IIFILEPROVIDER_DIR
         IIGENERALDOCUMENT_IIXML_DIR
         IIGENERALDOCUMENT_IIHTMLBLOCK_DIR
         IIGENERALDOCUMENT_IIXML_LIBRARY_DIR
@@ -43,6 +44,7 @@ execute_process(
             -B "${consumer_build}"
             -G Ninja
             "-DCMAKE_PREFIX_PATH=${install_prefix}"
+            "-DiiFileProvider_DIR=${IIGENERALDOCUMENT_IIFILEPROVIDER_DIR}"
             "-DiiXml_DIR=${IIGENERALDOCUMENT_IIXML_DIR}"
             "-DiiHtmlBlock_DIR=${IIGENERALDOCUMENT_IIHTMLBLOCK_DIR}"
             "-DQt6_DIR=${IIGENERALDOCUMENT_QT6_DIR}"

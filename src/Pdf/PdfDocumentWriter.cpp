@@ -10,6 +10,7 @@
 #include <qpdf/QPDFPageDocumentHelper.hh>
 #include <qpdf/QPDFPageObjectHelper.hh>
 #include <qpdf/QPDFWriter.hh>
+#include <iiFileProvider.h>
 
 #include <algorithm>
 #include <cstddef>
@@ -447,12 +448,12 @@ void syncFormFields(QPDF& pdf, const Document& document, WriteResult& result)
 }
 
 void verifyWrittenPdf(
-    const std::filesystem::path& destination, std::size_t expectedPages, WriteResult& result)
+    const QByteArray& bytes, const std::filesystem::path& destination, std::size_t expectedPages, WriteResult& result)
 {
     QPDF verification;
     verification.setSuppressWarnings(true);
     const std::string filename = destination.string();
-    verification.processFile(filename.c_str());
+    verification.processMemoryFile(filename.c_str(), bytes.constData(), static_cast<std::size_t>(bytes.size()));
     const auto pages = QPDFPageDocumentHelper::get(verification).getAllPages();
     if (pages.size() != expectedPages) {
         throw DocumentError("Written PDF page count does not match the document model");
@@ -544,10 +545,15 @@ WriteResult PdfDocumentWriter::write(
         }
 
         const std::string filename = destination.string();
-        QPDFWriter writer(pdf, filename.c_str());
+        QPDFWriter writer(pdf);
+        writer.setOutputMemory();
         writer.setLinearization(options.linearize);
         writer.write();
-        verifyWrittenPdf(destination, document.pages().size(), result);
+        const auto buffer = writer.getBufferSharedPointer();
+        const QByteArray bytes(reinterpret_cast<const char *>(buffer->getBuffer()),
+                               static_cast<qsizetype>(buffer->getSize()));
+        verifyWrittenPdf(bytes, destination, document.pages().size(), result);
+        iiFileProvider::File::write(iiFileProvider::File::pathString(destination), bytes);
     } catch (const std::exception& error) {
         result.diagnostics.push_back({DiagnosticSeverity::error, "pdf.write_failed",
                                       error.what(), destination.string()});

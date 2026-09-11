@@ -15,7 +15,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
-#include <fstream>
+#include <iiFileProvider.h>
 #include <iterator>
 #include <map>
 #include <memory>
@@ -430,11 +430,8 @@ FormFieldType formFieldType(const std::string& pdfType)
 
 std::vector<char> readFile(const std::filesystem::path& source)
 {
-    std::ifstream stream(source, std::ios::binary);
-    if (!stream) {
-        throw DocumentError("Unable to open PDF source: " + source.string());
-    }
-    return {std::istreambuf_iterator<char>(stream), std::istreambuf_iterator<char>()};
+    const auto bytes = iiFileProvider::File::read(iiFileProvider::File::pathString(source));
+    return {bytes.begin(), bytes.end()};
 }
 
 } // namespace

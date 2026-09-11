@@ -1,11 +1,10 @@
 #include "Word/Private/LegacyDocConverter.h"
 
 #include <QDir>
-#include <QFile>
+#include <iiFileProvider.h>
 #include <QFileInfo>
 #include <QProcess>
 #include <QProcessEnvironment>
-#include <QSaveFile>
 #include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QUrl>
@@ -70,41 +69,8 @@ Diagnostic error(std::string code, std::string message, const std::filesystem::p
 
 bool copyAtomically(const QString& source, const QString& destination, QString& message)
 {
-    QFile input(source);
-    if (!input.open(QIODevice::ReadOnly)) {
-        message = input.errorString();
-        return false;
-    }
-
-    QSaveFile output(destination);
-    if (!output.open(QIODevice::WriteOnly)) {
-        message = output.errorString();
-        return false;
-    }
-
-    std::array<char, 64 * 1024> buffer{};
-    while (true) {
-        const auto read = input.read(buffer.data(), static_cast<qint64>(buffer.size()));
-        if (read < 0) {
-            message = input.errorString();
-            output.cancelWriting();
-            return false;
-        }
-        if (read == 0) {
-            break;
-        }
-        if (output.write(buffer.data(), read) != read) {
-            message = output.errorString();
-            output.cancelWriting();
-            return false;
-        }
-    }
-
-    if (!output.commit()) {
-        message = output.errorString();
-        return false;
-    }
-    return true;
+    try { iiFileProvider::File::copy(source, destination, true); return true; }
+    catch (const iiFileProvider::FileError &error) { message = QString::fromUtf8(error.what()); return false; }
 }
 
 } // namespace

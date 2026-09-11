@@ -35,7 +35,7 @@ if(CMAKE_PREFIX_PATH)
     list(REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
 endif()
 
-find_package(iiFileProvider 0.2.0 CONFIG REQUIRED)
+find_package(iiFileProvider 0.5.0 CONFIG REQUIRED)
 find_package(iiXml 0.1.0 CONFIG REQUIRED)
 find_package(iiHtmlBlock 0.1.0 CONFIG REQUIRED)
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core)
@@ -271,6 +271,7 @@ add_library(iiGeneralDocument ${IIGENERALDOCUMENT_LIBRARY_TYPE}
     src/Word/Private/AtomicFileCommit.h
     src/Word/Private/DocxPackage.cpp
     src/Word/Private/DocxPackage.h
+    src/Word/Private/ProviderZipSource.h
     src/Word/Private/LegacyDocConverter.cpp
     src/Word/Private/LegacyDocConverter.h
     src/Word/Private/OdfTextCodec.cpp
@@ -473,6 +474,7 @@ if(BUILD_TESTING)
             -DIIGENERALDOCUMENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}
             -DIIGENERALDOCUMENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DIIGENERALDOCUMENT_CMAKE_COMMAND=${CMAKE_COMMAND}
+            "-DIIGENERALDOCUMENT_IIFILEPROVIDER_DIR=${iiFileProvider_DIR}"
             "-DIIGENERALDOCUMENT_IIXML_DIR=${iiXml_DIR}"
             "-DIIGENERALDOCUMENT_IIHTMLBLOCK_DIR=${iiHtmlBlock_DIR}"
             "-DIIGENERALDOCUMENT_IIXML_LIBRARY_DIR=$<TARGET_FILE_DIR:iiXml::iiXml>"

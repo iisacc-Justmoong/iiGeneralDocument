@@ -1,4 +1,5 @@
 #include <iiGeneralDocument.h>
+#include <iiFileProvider.h>
 #include "TestSupport.h"
 #include <QCoreApplication>
 #include <QDir>
@@ -87,5 +88,13 @@ int main(int argc, char **argv) {
     rejected = false;
     try { (void)invalidUtf8.toFileBytes(); } catch (const DocumentError &) { rejected = true; }
     expect(rejected, "invalid UTF-8 cannot be silently rewritten by tsdoc serialization");
+    const auto stored = dir.filePath("provider.thinking-space");
+    iiFileProvider::File::create(stored, tsdoc);
+    auto storedDocument = ThinkingSpaceDocument::fromFileBytes(iiFileProvider::File::read(stored));
+    expect(storedDocument.authorship().dump() == thinking.authorship().dump(), "provider preserves native authorship");
+    storedDocument.edit([](ThinkingSpaceDocument &draft) { draft.header.metadata["Title"] = "Provider update"; return true; });
+    iiFileProvider::File::update(stored, tsdoc, storedDocument.toFileBytes());
+    expect(ThinkingSpaceDocument::fromFileBytes(iiFileProvider::File::read(stored)).header.metadata.at("Title") == "Provider update", "provider updates native document");
+    expect(iiFileProvider::File::remove(stored), "provider deletes native document");
     return 0;
 }

@@ -1,12 +1,11 @@
+#include "Word/Private/ProviderZipSource.h"
 #include "Word/Private/OdfTextCodec.h"
 
 #include "Word/Private/AtomicFileCommit.h"
 
 #include <QBuffer>
 #include <QByteArray>
-#include <QFile>
 #include <QString>
-#include <QTemporaryFile>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
@@ -351,29 +350,15 @@ std::optional<QByteArray> readFlatXml(
         return std::nullopt;
     }
 
-    QFile file(QString::fromStdString(source.string()));
-    if (!file.open(QIODevice::ReadOnly)) {
-        diagnostics.push_back(diagnostic(
-            DiagnosticSeverity::error,
-            "fodt.open_failed",
-            "The FODT XML could not be opened: " + toUtf8(file.errorString()),
-            source));
+    try {
+        return iiFileProvider::File::read(iiFileProvider::File::pathString(source), static_cast<qint64>(std::min(
+            options.maximumXmlPartBytes, static_cast<std::uint64_t>(std::numeric_limits<qsizetype>::max() - 1))));
+    } catch (const iiFileProvider::FileError &error) {
+        diagnostics.push_back(diagnostic(DiagnosticSeverity::error,
+            error.code() == iiFileProvider::FileCode::LimitExceeded ? "fodt.part_too_large" : "fodt.open_failed",
+            error.what(), source));
         return std::nullopt;
     }
-    const auto boundedLimit = std::min(
-        options.maximumXmlPartBytes,
-        static_cast<std::uint64_t>(std::numeric_limits<qint64>::max() - 1));
-    auto bytes = file.read(static_cast<qint64>(boundedLimit + 1));
-    if (file.error() != QFileDevice::NoError
-        || static_cast<std::uint64_t>(bytes.size()) > options.maximumXmlPartBytes) {
-        diagnostics.push_back(diagnostic(
-            DiagnosticSeverity::error,
-            "fodt.part_too_large",
-            "The FODT XML changed while reading or exceeds the configured read limit.",
-            source));
-        return std::nullopt;
-    }
-    return bytes;
 }
 
 bool validateXmlEnvelope(
@@ -2908,15 +2893,13 @@ bool validateLocalMimetypeHeader(
     const std::filesystem::path& source,
     std::vector<Diagnostic>& diagnostics)
 {
-    QFile file(QString::fromStdString(source.string()));
-    if (!file.open(QIODevice::ReadOnly)) {
-        diagnostics.push_back(diagnostic(
-            DiagnosticSeverity::error,
-            "odf.local_header_open_failed",
-            "The ODT local ZIP header could not be opened.",
-            source));
+    std::unique_ptr<QIODevice> input;
+    try { input = iiFileProvider::File::openRead(iiFileProvider::File::pathString(source)); }
+    catch (const iiFileProvider::FileError &error) {
+        diagnostics.push_back(diagnostic(DiagnosticSeverity::error, "odf.local_header_open_failed", error.what(), source));
         return false;
     }
+    QIODevice &file = *input;
     const auto header = file.read(30);
     const bool signatureValid = header.size() == 30
         && static_cast<unsigned char>(header[0]) == 0x50U
@@ -3054,7 +3037,8 @@ bool ensureDestinationDirectory(
     }
     std::error_code error;
     if (!destination.parent_path().empty()) {
-        std::filesystem::create_directories(destination.parent_path(), error);
+        try { iiFileProvider::File::createDirectories(iiFileProvider::File::pathString(destination.parent_path())); }
+        catch (const iiFileProvider::FileError &) { error = std::make_error_code(std::errc::io_error); }
     }
     if (error) {
         diagnostics.push_back(diagnostic(
@@ -3102,7 +3086,7 @@ WordReadResult readOdtPackage(
     }
 
     int openError = 0;
-    ZipArchive archive(zip_open(source.string().c_str(), ZIP_RDONLY, &openError));
+    ZipArchive archive(openProviderZip(source, &openError));
     if (!archive.get()) {
         result.diagnostics.push_back(diagnostic(
             DiagnosticSeverity::error,
@@ -3319,22 +3303,15 @@ WordWriteResult writeOdtPackage(
     parts.push_back({"settings.xml", settingsXml(), ZIP_CM_DEFLATE});
     parts.push_back({"META-INF/manifest.xml", manifestXml(), ZIP_CM_DEFLATE});
 
-    const auto parent = destination.parent_path().empty()
-        ? std::filesystem::current_path() : destination.parent_path();
-    const auto temporaryTemplate = parent
-        / ("." + destination.filename().string() + ".XXXXXX");
-    QTemporaryFile temporary(QString::fromStdString(temporaryTemplate.string()));
-    temporary.setAutoRemove(true);
-    if (!temporary.open()) {
-        result.diagnostics.push_back(diagnostic(
-            DiagnosticSeverity::error,
-            "odf.temporary_file_failed",
-            "Unable to create a same-directory temporary ODT package.",
-            destination));
+    std::unique_ptr<iiFileProvider::StagedFile> temporary;
+    try {
+        temporary = std::make_unique<iiFileProvider::StagedFile>(iiFileProvider::File::pathString(destination));
+    } catch (const iiFileProvider::FileError &error) {
+        result.diagnostics.push_back(diagnostic(DiagnosticSeverity::error,
+            "odf.temporary_file_failed", error.what(), destination));
         return result;
     }
-    const auto temporaryPath = std::filesystem::path(temporary.fileName().toStdString());
-    temporary.close();
+    const auto temporaryPath = std::filesystem::path(temporary->path().toStdU16String());
 
     int openError = 0;
     ZipArchive archive(zip_open(
@@ -3422,7 +3399,6 @@ WordWriteResult writeOdtPackage(
             destination));
         return result;
     }
-    temporary.setAutoRemove(false);
     return result;
 }
 
@@ -3454,33 +3430,16 @@ WordWriteResult writeFodtDocument(
         return result;
     }
 
-    const auto parent = destination.parent_path().empty()
-        ? std::filesystem::current_path() : destination.parent_path();
-    const auto temporaryTemplate = parent
-        / ("." + destination.filename().string() + ".XXXXXX");
-    QTemporaryFile temporary(QString::fromStdString(temporaryTemplate.string()));
-    temporary.setAutoRemove(true);
-    if (!temporary.open()) {
-        result.diagnostics.push_back(diagnostic(
-            DiagnosticSeverity::error,
-            "fodt.temporary_file_failed",
-            "Unable to create a same-directory temporary FODT document: "
-                + toUtf8(temporary.errorString()),
-            destination));
+    std::unique_ptr<iiFileProvider::StagedFile> temporary;
+    try {
+        temporary = std::make_unique<iiFileProvider::StagedFile>(iiFileProvider::File::pathString(destination));
+        iiFileProvider::File::write(temporary->path(), bytes);
+    } catch (const iiFileProvider::FileError &error) {
+        result.diagnostics.push_back(diagnostic(DiagnosticSeverity::error,
+            "fodt.temporary_file_failed", error.what(), destination));
         return result;
     }
-    if (temporary.write(bytes) != bytes.size() || !temporary.flush()) {
-        result.diagnostics.push_back(diagnostic(
-            DiagnosticSeverity::error,
-            "fodt.temporary_write_failed",
-            "The temporary FODT document could not be written: "
-                + toUtf8(temporary.errorString()),
-            destination));
-        return result;
-    }
-    const auto temporaryPath = std::filesystem::path(
-        temporary.fileName().toStdString());
-    temporary.close();
+    const auto temporaryPath = std::filesystem::path(temporary->path().toStdU16String());
 
     WordReadOptions validationOptions;
     validationOptions.maximumXmlPartBytes = options.maximumXmlPartBytes;
@@ -3505,7 +3464,6 @@ WordWriteResult writeFodtDocument(
             destination));
         return result;
     }
-    temporary.setAutoRemove(false);
     return result;
 }
 

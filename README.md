@@ -203,3 +203,7 @@ FODT writers embed it in the document; HTML/XML and Thinking Space provide
 the complete retained history as well as current content and attribution. See
 [the mutation and file contract](docs/FILE_AUTHORSHIP.md) for raw-reference
 boundaries, native fields and token exclusion. Rebuild consumers for SOVERSION 0.2.
+
+## 파일 저장 소유권
+
+파일 CRUD는 iiFileProvider 0.5가 소유한다. PDF는 메모리에서 생성·검증한 뒤 provider가 원자적으로 공개한다. DOCX/ODT는 provider가 연 읽기 장치와 소유한 임시 파일을 사용하고, FODT/DOC 변환 결과도 provider를 통해 기록·공개한다. Thinking Space/HTML/XML 바이트 코덱은 File::create/read/update/remove와 조합한다. iiFileProvider에서 이 SDK로의 역참조는 금지한다.

@@ -1,3 +1,4 @@
+#include "Word/Private/ProviderZipSource.h"
 #include "Word/Private/DocxPackage.h"
 
 #include "Word/Private/AtomicFileCommit.h"
@@ -6,7 +7,6 @@
 #include <QByteArray>
 #include <QDir>
 #include <QString>
-#include <QTemporaryFile>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
@@ -1497,7 +1497,7 @@ WordReadResult readDocxPackage(
     }
 
     int openError = 0;
-    ZipArchive archive(zip_open(source.string().c_str(), ZIP_RDONLY, &openError));
+    ZipArchive archive(openProviderZip(source, &openError));
     if (!archive.get()) {
         result.diagnostics.push_back(diagnostic(
             DiagnosticSeverity::error,
@@ -1590,7 +1590,8 @@ WordWriteResult writeDocxPackage(
 
     std::error_code directoryError;
     if (!destination.parent_path().empty()) {
-        std::filesystem::create_directories(destination.parent_path(), directoryError);
+        try { iiFileProvider::File::createDirectories(iiFileProvider::File::pathString(destination.parent_path())); }
+        catch (const iiFileProvider::FileError &) { directoryError = std::make_error_code(std::errc::io_error); }
     }
     if (directoryError) {
         result.diagnostics.push_back(diagnostic(
@@ -1633,23 +1634,15 @@ WordWriteResult writeDocxPackage(
         return result;
     }
 
-    const auto parent = destination.parent_path().empty()
-        ? std::filesystem::current_path() : destination.parent_path();
-    const auto temporaryTemplate = parent
-        / ("." + destination.filename().string() + ".XXXXXX");
-    QTemporaryFile temporary(QString::fromStdString(temporaryTemplate.string()));
-    temporary.setAutoRemove(true);
-    if (!temporary.open()) {
-        result.diagnostics.push_back(diagnostic(
-            DiagnosticSeverity::error,
-            "docx.temporary_file_failed",
-            "Unable to create a same-directory temporary DOCX package.",
-            destination));
+    std::unique_ptr<iiFileProvider::StagedFile> temporary;
+    try {
+        temporary = std::make_unique<iiFileProvider::StagedFile>(iiFileProvider::File::pathString(destination));
+    } catch (const iiFileProvider::FileError &error) {
+        result.diagnostics.push_back(diagnostic(DiagnosticSeverity::error,
+            "docx.temporary_file_failed", error.what(), destination));
         return result;
     }
-    const auto temporaryPath = std::filesystem::path(
-        temporary.fileName().toStdString());
-    temporary.close();
+    const auto temporaryPath = std::filesystem::path(temporary->path().toStdU16String());
 
     int openError = 0;
     ZipArchive archive(zip_open(
@@ -1737,7 +1730,6 @@ WordWriteResult writeDocxPackage(
             destination));
         return result;
     }
-    temporary.setAutoRemove(false);
     return result;
 }
 
