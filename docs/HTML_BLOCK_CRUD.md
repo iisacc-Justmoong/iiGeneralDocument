@@ -1,43 +1,35 @@
-# HTML block CRUD support
+<a id="html-block-crud-support"></a>
 
-## Scope
+# HTML 블록 CRUD 지원
 
-`HtmlBlockDocument` is an editable HTML/iiXml source model built on
-`iiHtmlBlock 0.1.0`. The original source byte string is the document's source of
-truth. `iiHtmlBlock::BlockRangeTracker` recognizes block elements and their
-source ranges; the public iiGeneralDocument API converts those dependency types
-into stable `HtmlBlockId` objects.
+<a id="scope"></a>
 
-This module is intentionally separate from the PDF page model, the Word flow
-model, and application persistence layers. It performs in-memory block CRUD.
-The caller remains responsible for loading and persisting
-`HtmlBlockDocument::html()` when a file or database is involved.
+## 범위
 
-## Public model
+`HtmlBlockDocument` 는 `iiHtmlBlock 0.1.0` 위에 구축된 편집 가능한 HTML / iiXml 소스 모델입니다. 원래 소스 바이트 문자열은 문서의 기준 원본 입니다. `iiHtmlBlock::BlockRangeTracker` 은 블록 요소와 그 소스 범위를 인식하며, 공개 iiGeneralDocument API 는 이러한 의존성 타입을 안정된 `HtmlBlockId` 객체로 변환합니다.
 
-`HtmlBlockDocument::fromHtml()` preserves the supplied source byte-for-byte and
-exposes an ordered, read-only collection of `HtmlBlock` views. Each block
-contains:
+이 모듈은 의도적으로 PDF 페이지 모델, Word 흐름 모델 및 애플리케이션 지속성 레이어와 분리되어 있습니다. 메모리 내 블록 CRUD를 수행합니다. 파일이나 데이터베이스가 관련되어 있는 경우 호출자는 `HtmlBlockDocument::html()`를 로드하고 유지하는 책임을 집니다.
 
-- a document-wide `HtmlBlockId`;
-- an optional parent ID, ordered direct-child IDs, and hierarchy depth;
-- its exact opening tag and matching closing tag, separated at the value
-  boundaries reported by iiHtmlBlock/iiXml;
-- its tag name, inner value, and complete raw HTML;
-- full-document raw and value byte ranges;
-- any `display` override recognized by `iiHtmlBlock`.
+<a id="public-model"></a>
 
-`HtmlBlockDocument::rootIds()` returns every top-level block ID in source order.
-`openingTag()` includes attributes and the final `>`. `closingTag()` contains
-the matched `</name>` markup, or is empty when `isSelfClosing()` is true.
+## 공개 모델
 
-An empty document and a source containing only an XML declaration, DOCTYPE, or
-ASCII whitespace are valid and contain zero blocks. Parsing invalid markup
-throws `DocumentError` without producing a partially initialized document.
-IDs are stable only within one `HtmlBlockDocument` instance. They are not added
-to the source or persisted; reloading HTML creates a new runtime identity set.
+`HtmlBlockDocument::fromHtml()`는 제공된 소스를 바이트 단위로 보존하고 `HtmlBlock` 뷰의 순서가 지정된 읽기 전용 컬렉션을 노출합니다. 각 블록에는 다음이 포함됩니다.
 
-## CRUD contract
+- 문서 전체 `HtmlBlockId`;
+- 선택적 상위 ID, 순서가 지정된 직계 하위 ID 및 계층 구조 깊이
+- 정확한 시작 태그와 일치하는 종료 태그는 iiHtmlBlock / iiXml에 의해 보고된 값 경계에서 구분됩니다;
+- 태그 이름, 내부 값 및 완전한 원시 HTML;
+- 전체 문서 원시 및 값 바이트 범위;
+- `iiHtmlBlock`에서 인식되는 모든 `display` 재정의.
+
+`HtmlBlockDocument::rootIds()`는 모든 최상위 블록 ID를 소스 순서대로 반환합니다. `openingTag()`에는 속성과 최종 `>`가 포함되어 있습니다. `closingTag()`에는 일치하는 `</name>` 마크업이 포함되어 있거나 `isSelfClosing()`가 true인 경우 비어 있습니다.
+
+빈 문서와 XML, DOCTYPE, 또는 ASCII 공백만 포함하는 소스는 유효하며 0 블록을 포함합니다. 유효하지 않은 마크업은 `DocumentError` 를 던지고 부분적으로 초기화된 문서를 생성하지 않습니다. ID 는 하나의 `HtmlBlockDocument` 인스턴스 내에서만 안정적입니다. 소스에 추가되거나 영속화되지 않으며 HTML 를 다시 로드하면 새로운 런타임 정체성 집합이 생성됩니다.
+
+<a id="crud-contract"></a>
+
+## CRUD 계약
 
 ```cpp
 #include <iiGeneralDocument/iiGeneralDocument.h>
@@ -57,67 +49,30 @@ editor.remove(created);
 const std::string& result = document.html();
 ```
 
-`create(fragment)` appends one top-level block to the document.
-`create(fragment, parentId)` appends it as the parent's last child. Leading and
-trailing ASCII whitespace around a fragment is discarded. The fragment itself
-must serialize through `iiHtmlBlock::BlockHTMLSerializer` as exactly one
-top-level block; inline-only, malformed, or multiple-root fragments are
-rejected.
+`create(fragment)` 는 문서에 최상위 블록 하나를 추가합니다. `create(fragment, parentId)` 는 이를 부모의 마지막 자식으로 추가합니다. 프래그먼트 주변의 앞뒤 ASCII 공백은 버려집니다. 프래그먼트 자체는 `iiHtmlBlock::BlockHTMLSerializer` 를 통해 정확히 하나의 최상위 블록으로 직렬화되어야 하며, 인라인 전용, 잘못된 형식, 또는 여러 루트 프래그먼트는 거부됩니다.
 
-`read(id)` returns a pointer to the current immutable block view or `nullptr`
-for an unknown ID. A successful mutation rebuilds the view collection, so a
-previously returned pointer must not be retained across `create`, `update`, or
-`remove`.
+`read(id)`는 현재 불변 블록 뷰에 대한 포인터를 반환하거나 알 수 없는 ID에 대해 `nullptr`를 반환합니다. 성공적인 변형은 뷰 컬렉션을 다시 작성하므로 이전에 반환된 포인터가 `create`, `update` 또는 `remove`에서 유지되어서는 안 됩니다.
 
-`update(id, fragment)` replaces exactly the selected raw range. The selected
-block keeps its ID even when the tag changes. Existing ancestors and unrelated
-blocks also keep their IDs; replacement descendants receive new IDs. Updating
-with the same serialized block HTML is a no-op that preserves every descendant
-ID and does not increment the revision.
+`update(id, fragment)` 는 선택된 원시 범위를 정확히 대체합니다. 태그가 변경되더라도 선택된 블록은 ID 를 유지합니다. 기존 조상과 관련 없는 블록도 ID 를 유지하며, 대체 후손은 새로운 ID 를 받습니다. 동일한 직렬화된 블록 HTML 로 업데이트하는 것은 모든 후손 ID 를 보존하고 리비전을 증가시키지 않는 무작위 작업입니다.
 
-`remove(id)` uses the `iiHtmlBlock::DeleteBlock` result when that backend can
-represent the remainder. Removing the last block is also supported, including
-when only an XML declaration or DOCTYPE remains. Removing a parent removes all
-of its descendant block identities. An unknown ID returns `false` without a
-mutation.
+`remove(id)` 는 해당 백엔드가 나머지를 표현할 수 있을 때 `iiHtmlBlock::DeleteBlock` 결과를 사용합니다. 마지막 블록을 제거하는 것도 지원되며, XML 선언이나 DOCTYPE 만 남는 경우에도 해당됩니다. 부모를 제거하면 모든 후손 블록 정체성이 제거됩니다. 알 수 없는 ID 는 변형 없이 `false` 를 반환합니다.
 
-## Atomicity and identity
+<a id="atomicity-and-identity"></a>
 
-Every source-changing edit is prepared in temporary source and block state,
-reparsed, assigned stable IDs, rebuilt into roots and parent/child relations,
-and only then committed. A successful source mutation increments `revision()`
-exactly once. An identical update and a missing-ID remove are no-ops. Parse
-failure, missing IDs, invalid fragments, range overflow, identity
-reconciliation failure, and hierarchy rebuild failure leave source, blocks,
-relationships, IDs, the next-ID sequence, and revision unchanged.
+## 원자성과 정체성
 
-iiXml permits independently closed ranges that can overlap instead of forming a
-strict tree. An operation that would cut through another overlapping block is
-rejected rather than silently deleting or corrupting that block. Fully nested
-descendants remain part of their selected parent CRUD unit. A parent is the
-nearest opening-tag range whose matching close fully encloses the child's
-matching close. Crossed ranges that do not contain each other are separate
-roots and never receive a false parent ID.
+각 소스 변경 편집은 임시 소스와 블록 상태로 준비되어 재해석되고, 안정적 ID 가 할당되며, 루트와 부모/자식 관계로 다시 구축된 후에만 커밋됩니다. 성공적인 소스 변형은 `revision()` 를 정확히 한 번 증가시킵니다. 동일한 업데이트와 누락된 ID 제거는 무작위 작업입니다. 파싱 실패, 누락된 ID, 유효하지 않은 조각, 범위 오버플로우, 동일성 조정 실패, 및 계층 구조 재구성 실패는 소스, 블록, 관계, ID, 다음 ID 시퀀스, 및 리버전을 변경하지 않습니다.
 
-## Syntax boundary
+iiXml는 엄격한 트리를 형성하는 대신 서로 겹칠 수 있는 독립적으로 닫힌 범위를 허용한다. 다른 겹치는 블록을 가르는 작업은 아무런 알림 없이 해당 블록을 삭제하거나 손상시키는 대신 거부한다. 완전히 중첩된 자손은 선택한 부모 CRUD 단위에 계속 포함된다. 부모는 자식의 대응 닫기 태그를 자신의 대응 닫기 태그가 완전히 감싸는 가장 가까운 열기 태그 범위이다. 서로를 포함하지 않는 교차 범위는 별도의 루트이며 잘못된 부모 ID를 받지 않는다.
 
-Block classification follows `iiHtmlBlock::DivideBlock`, including standard
-block tags and explicit `display: block`, `flex`, `grid`, `table`, or related
-block display values. This is the iiHtmlBlock/iiXml range grammar, not a browser
-HTML5 error-recovery parser. Full namespace semantics, entity interpretation,
-and semantic DOM nodes for CDATA and comments are outside the dependency's
-current standards scope. Explicit self-closing markup is distinguished from a
-paired opening/closing tag, but browser-style implicit closing and void-element
-recovery are not performed. Callers that accept arbitrary web HTML should
-normalize it with an HTML5 parser before creating this model.
+<a id="syntax-boundary"></a>
 
-## Verification
+## 구문 경계
 
-`iiGeneralDocument.HtmlBlockCrud` covers ordered roots, parent/child navigation,
-depth, opening/closing tag boundaries, self-closing blocks, nested reads,
-Unicode ranges, custom display blocks, top-level and child creation, stable IDs
-across shifted ranges, hierarchy rebuild after update, recursive deletion,
-final-root deletion, prefix preservation, invalid-fragment rollback, unknown
-IDs, empty documents, and overlapping iiXml ranges.
-`iiGeneralDocument.InstallConsumer` compiles and runs the same API from the
-installed CMake package.
+블록 분류는 `iiHtmlBlock::DivideBlock` 를 따르며, 표준 블록 태그와 명시적 `display: block` , `flex` , `grid` , `table` , 또는 관련 블록 표시 값을 포함합니다. 이것은 iiHtmlBlock / iiXml 범위 문법이며 브라우저 HTML5 오류 복구 파서가 아닙니다. 전체 네임스페이스 의미론, 엔티티 해석, 및 의미론 DOM 노드는 CDATA 와 주석에 대한 의존성의 현재 표준 범위를 벗어납니다. 명시적인 자기 닫기 마크업은 짝을 이루는 열기/닫기 태그와 구별되지만, 브라우저 스타일의 암시적인 닫기와 빈 요소 복구 수행은 이루어지지 않습니다. 임의의 웹 HTML 를 허용하는 호출자는 이 모델을 생성하기 전에 HTML5 파서로 이를 정규화해야 합니다.
+
+<a id="verification"></a>
+
+## 검증
+
+`iiGeneralDocument.HtmlBlockCrud` 는 순차적인 루트, 부모/자식 탐색, 깊이, 열기/닫기 태그 경계, 자기 닫힘 블록, 중첩 읽기, Unicode 범위, 사용자 지정 표시 블록, 최상위 및 자식 생성, 이동된 범위 전반에 걸친 안정적인 ID, 업데이트 후 계층 구조 재구성, 재귀적 삭제, 최종 루트 삭제, 접두어 보존, 유효하지 않은 조각 롤백, 알 수 없는 ID, 빈 문서, 그리고 중첩된 iiXml 범위를 포함합니다. `iiGeneralDocument.InstallConsumer` 는 설치된 CMake 패키지에서 동일한 API 를 컴파일하고 실행합니다.

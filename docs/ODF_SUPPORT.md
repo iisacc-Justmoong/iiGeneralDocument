@@ -78,7 +78,7 @@ Unicode 공백은 그대로 보존한다. 다시 쓸 때 필요한 공백은 `te
 
 다음 `WordRunProperties`를 ODF text style과 상호 변환한다.
 
-- bold, italic, underline
+- 볼드체, 이탤릭체, 밑줄체
 - Latin font family와 East Asian font family
 - point 단위 font size
 - 여섯 자리 RGB color

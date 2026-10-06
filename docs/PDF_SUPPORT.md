@@ -1,37 +1,47 @@
-# PDF support contract
+<a id="pdf-support-contract"></a>
 
-## First-class editable objects
+# PDF 지원 계약
 
-| PDF concern | Read | Edit | Write |
+<a id="first-class-editable-objects"></a>
+
+## 최고 수준의 편집 가능한 객체
+
+|PDF 문제|읽기||쓰기|
 | --- | --- | --- | --- |
-| Page media box and rotation | Yes | Yes | Yes |
-| Text objects and string operands | Yes | Yes | Yes |
-| Vector paths and paint operators | Yes | Yes | Yes |
-| Image XObjects and encoded bytes | Yes | Yes | Yes |
-| Recursive Form XObjects | Yes | Yes, shared-resource semantics | Yes |
-| Inline images | Yes | Instruction-level | Yes |
-| Shadings | Yes | Instruction-level | Yes |
-| Marked content | Yes | Instruction-level | Yes |
-| Graphics state and color operators | Yes | Instruction-level | Yes |
-| Unknown/future operators | Preserved | Instruction-level | Yes |
-| Annotations | Yes | Yes | Yes |
-| Existing terminal AcroForm fields | Yes | Yes | Yes |
-| Document information dictionary | Common keys | Yes | Yes |
+|페이지 미디어 상자 및 회전|예|예|예|
+|텍스트 개체 및 문자열 피연산자|예|예|예|
+|벡터 경로 및 페인트 연산자|예|예|예|
+|이미지 XObject 및 인코딩된 바이트|예|예|예|
+|재귀 양식 XObjects|예|예, 공유 리소스 의미 체계|예|
+|인라인 이미지|예|명령어 수준|예|
+|음영|예|명령어 수준|예|
+|표시된 내용|예|명령어 수준|예|
+|그래픽 상태 및 색상 연산자|예|명령어 수준|예|
+|알 수 없는/미래 연산자|보존됨|명령어 수준|예|
+|주석|예|예|예|
+|기존 터미널 AcroForm 필드|예|예|예|
+|문서 정보 사전|공통 키|예|예|
 
-## Preserved but not first-class in 0.1
+<a id="preserved-but-not-first-class-in-01"></a>
 
-Outlines, destinations, optional-content groups, embedded files, structure trees, page labels, JavaScript, and arbitrary catalog extensions remain in the QPDF source object graph when a loaded document is rewritten. They do not yet have dedicated domain objects. Replacing a page content stream can still affect signatures, tagged-PDF associations, or producer-specific assumptions, so product workflows must test representative files.
+## 0.1에서는 보존되었으나 일류는 아님
 
-## Explicit limits
+개요, 목적지, 선택적 콘텐츠 그룹, 내장 파일, 구조 트리, 페이지 레이블, JavaScript, 그리고 임의의 카탈로그 확장자는 로드된 문서가 다시 작성될 때 QPDF 소스 객체 그래프에 남아 있습니다. 아직 전용 도메인 객체가 없습니다. 페이지 콘텐츠 스트림을 교체하면 서명, 태그된 PDF 연결, 또는 프로덕트별 가정에도 여전히 영향을 미칠 수 있으므로 제품 워크플로우는 대표 파일을 테스트해야 합니다.
 
-- Text operands are font-encoded bytes. Universal Unicode extraction and automatic re-encoding for arbitrary embedded fonts are not claimed.
-- New documents use a Helvetica/WinAnsi fallback. Embedding and subsetting a caller-supplied font is not implemented.
-- Existing page count and order must remain unchanged. New documents may contain any number of newly created pages.
-- Existing AcroForm fields can be updated; constructing a new field/widget/appearance hierarchy is not implemented.
-- Digital signatures are never preserved after a rewrite. The writer rejects signed input unless `allowInvalidatingDigitalSignatures` is true.
-- Encryption settings are not reproduced. The writer rejects encrypted input unless `allowRemovingEncryption` is true.
-- QPDF recovery warnings are surfaced; successful recovery is not proof that a damaged source matches its producer's original intent.
+<a id="explicit-limits"></a>
 
-## Verification
+## 명시적 제한
 
-The writer validates the model before mutation, writes through QPDF, reopens the destination, parses every page content stream, checks the page count, and returns warnings. Release verification additionally renders representative PDFs with Poppler and visually checks text, paths, images, annotations, clipping, and page geometry.
+- 텍스트 피연산자는 글꼴로 인코딩된 바이트입니다. 임의의 내장 글꼴에 대한 범용 Unicode 추출 및 자동 재인코딩은 주장되지 않습니다.
+- 새 문서에서는 Helvetica/WinAnsi 대체 경로를 사용합니다. 호출자 제공 글꼴을 포함하고 하위 설정하는 것은 구현되지 않습니다.
+- 기존 페이지 수와 순서는 변경되지 않고 유지되어야 합니다. 새 문서에는 새로 생성된 페이지가 얼마든지 포함될 수 있습니다.
+- 기존 AcroForm 필드를 업데이트할 수 있습니다. 새로운 필드/위젯/모양 계층 구조를 구성하는 것은 구현되지 않습니다.
+- 다시 작성한 후에는 디지털 서명이 보존되지 않습니다. 작성자는 `allowInvalidatingDigitalSignatures`가 true가 아닌 한 서명된 입력을 거부합니다.
+- 암호화 설정은 재현되지 않습니다. 작성자는 `allowRemovingEncryption`가 true가 아닌 이상 암호화된 입력을 거부합니다.
+- QPDF 복구 경고가 표시됩니다. 성공적인 복구는 손상된 소스가 제작자의 원래 의도와 일치한다는 증거가 아닙니다.
+
+<a id="verification"></a>
+
+## 검증
+
+작가는 변형 전에 모델을 검증하고 QPDF 를 통해 작성하며, 목적지를 다시 엽니다. 모든 페이지 콘텐츠 스트림을 파싱하고 페이지 수를 확인한 후 경고 메시지를 반환합니다. 릴리스 검증은 추가로 Poppler 를 사용하여 대표 PDF 를 렌더링하고 텍스트, 경로, 이미지, 주석, 클리핑, 및 페이지 기하학을 시각적으로 확인합니다.
