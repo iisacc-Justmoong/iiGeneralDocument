@@ -288,7 +288,7 @@ add_library(iiGeneralDocument::iiGeneralDocument ALIAS iiGeneralDocument)
 generate_export_header(iiGeneralDocument
     EXPORT_FILE_NAME "${CMAKE_CURRENT_BINARY_DIR}/generated/iiGeneralDocument/Export.h")
 
-target_compile_features(iiGeneralDocument PUBLIC cxx_std_20)
+target_compile_features(iiGeneralDocument PUBLIC cxx_std_23)
 target_include_directories(iiGeneralDocument PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>
@@ -305,6 +305,12 @@ target_link_libraries(iiGeneralDocument
         ${IIGENERALDOCUMENT_LIBZIP_TARGET}
         ZLIB::ZLIB
         ${IIGENERALDOCUMENT_JPEG_TARGET})
+if(WIN32 AND IIGENERALDOCUMENT_USE_SYSTEM_QPDF)
+    # Native qpdf packages may export zlib/jpeg as bare transitive names.
+    # Resolve these alongside the imported qpdf archive, including consumers.
+    target_link_directories(iiGeneralDocument PRIVATE
+        "$<TARGET_FILE_DIR:${IIGENERALDOCUMENT_QPDF_TARGET}>")
+endif()
 if(MSVC)
     target_compile_options(iiGeneralDocument PRIVATE /W4)
 else()
