@@ -47,6 +47,9 @@ void Annotation::setContents(std::string utf8Contents)
     contents_ = std::move(utf8Contents);
 }
 
+const std::string& Annotation::author() const noexcept { return author_; }
+void Annotation::setAuthor(std::string utf8Author) { author_ = std::move(utf8Author); }
+
 int Annotation::flags() const noexcept
 {
     return flags_;
@@ -103,6 +106,11 @@ void Page::setMediaBox(Rect mediaBox) noexcept
 {
     mediaBox_ = mediaBox;
 }
+
+const Rect& Page::cropBox() const noexcept { return cropBox_ ? *cropBox_ : mediaBox_; }
+void Page::setCropBox(std::optional<Rect> cropBox) noexcept { cropBox_ = cropBox; }
+double Page::userUnit() const noexcept { return userUnit_; }
+void Page::setUserUnit(double unit) noexcept { userUnit_ = unit; }
 
 int Page::rotation() const noexcept
 {

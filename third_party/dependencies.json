@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "networkNeededAtBuildTime": false,
+  "authoredProductLanguage": "C++23",
+  "commercialFrameworksUsed": false,
+  "qtUsed": false,
+  "dependencies": [
+    {
+      "name": "qpdf",
+      "version": "12.3.2",
+      "archive": "archives/qpdf-12.3.2.tar.gz",
+      "sha256": "6cba2f9f2cd887d905faeb99e0e51a307b217920d1bbf3e9cfbb2e8178a2deda",
+      "bytes": 19640678,
+      "officialSourceUrl": "https://github.com/qpdf/qpdf/releases/download/v12.3.2/qpdf-12.3.2.tar.gz",
+      "upstreamSourcesModified": false,
+      "productDependency": true,
+      "licenses": [
+        "LICENSE.txt",
+        "NOTICE.md",
+        "Artistic-2.0"
+      ],
+      "compiledLanguage": "93 upstream C++23 units and 2 original sphlib C units",
+      "analysisClass": "independent open-source backend; not recovered Adobe implementation",
+      "gitCommit": "a898bb3a7289d1d05789d6d3f0d5dd534943a8da",
+      "license": "Apache-2.0; original optional Artistic-2.0 notice preserved",
+      "compiledUnits": {
+        "C++23": 93,
+        "C": 2,
+        "assembly": 0
+      },
+      "originalCUnits": [
+        "libqpdf/sha2.c",
+        "libqpdf/sha2big.c"
+      ],
+      "licenseSha256": {
+        "LICENSE.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+        "NOTICE.md": "b207f65a9e5491195ded63b2941199b19a4d30148871f2742c88eae7bfc513a6",
+        "Artistic-2.0": "fb929ac30decb4dc3a2eea2bec6c43296a797c5d2d602deb3784ee39430583d5"
+      }
+    },
+    {
+      "name": "zlib",
+      "version": "1.3.1",
+      "archive": "archives/zlib-1.3.1.tar.gz",
+      "sha256": "9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23",
+      "bytes": 1512791,
+      "officialSourceUrl": "https://zlib.net/fossils/zlib-1.3.1.tar.gz",
+      "upstreamSourcesModified": false,
+      "productDependency": true,
+      "licenses": [
+        "LICENSE"
+      ],
+      "compiledLanguage": "upstream C",
+      "analysisClass": "independent open-source backend; not recovered Adobe implementation",
+      "license": "Zlib",
+      "compiledUnits": {
+        "C": 15,
+        "assembly": 0
+      },
+      "licenseSha256": {
+        "LICENSE": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243"
+      }
+    },
+    {
+      "name": "libjpeg-turbo",
+      "version": "3.2.0",
+      "archive": "archives/libjpeg-turbo-3.2.0.tar.gz",
+      "sha256": "6f30092cef9fb839779646608f4ee14ae3cbac989c47fa05e841b0841f09878e",
+      "bytes": 2537858,
+      "officialSourceUrl": "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.2.0/libjpeg-turbo-3.2.0.tar.gz",
+      "upstreamSourcesModified": false,
+      "productDependency": true,
+      "licenses": [
+        "LICENSE.md",
+        "README.ijg"
+      ],
+      "compiledLanguage": "upstream C",
+      "analysisClass": "independent open-source backend; not recovered Adobe implementation",
+      "license": "IJG, BSD-3-Clause, Zlib; full upstream texts preserved",
+      "compiledUnits": {
+        "C": 101,
+        "assembly": 0
+      },
+      "buildOptions": {
+        "static": true,
+        "SIMD": false,
+        "TurboJPEG": false,
+        "JNA": false,
+        "tools": false,
+        "upstreamTests": false
+      },
+      "licenseSha256": {
+        "LICENSE.md": "ba6bceebcba0fdd35488477c2cca8c4632ce82c74dbfbc87d886ce6fc4433579",
+        "README.ijg": "75815e3bf6484201a3c3d17a1bbf10f2e8e3237f84df10a2357ea896db2a81d6"
+      }
+    }
+  ],
+  "scope": "iiGeneralDocument::Pdf component only; legacy full document target retains Qt"
+}

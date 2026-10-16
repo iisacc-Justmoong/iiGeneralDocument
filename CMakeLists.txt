@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.31)
-project(iiGeneralDocument VERSION 0.2.0 LANGUAGES C CXX)
+project(iiGeneralDocument VERSION 0.4.0 LANGUAGES C CXX)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(PROJECT_IS_TOP_LEVEL AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(_sdk_home "$ENV{HOME}")
@@ -18,149 +21,31 @@ include(CMakePackageConfigHelpers)
 include(GenerateExportHeader)
 
 option(IIGENERALDOCUMENT_BUILD_SHARED "Build iiGeneralDocument as a shared library." ON)
-option(IIGENERALDOCUMENT_USE_SYSTEM_QPDF "Use an installed qpdf package instead of the pinned build dependency." OFF)
 option(IIGENERALDOCUMENT_USE_SYSTEM_LIBZIP "Use an installed libzip package instead of the pinned build dependency." OFF)
+
+option(IIGENERALDOCUMENT_SANITIZERS "Instrument the full document module and tests" OFF)
+if(IIGENERALDOCUMENT_SANITIZERS)
+    if(MSVC)
+        message(FATAL_ERROR "Document sanitizer validation requires Clang or GCC")
+    endif()
+    add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address,undefined)
+    set(IIGENERALDOCUMENT_PDF_SANITIZERS ON CACHE BOOL "Instrument private PDF dependencies" FORCE)
+endif()
+option(IIGENERALDOCUMENT_PDF_ONLY "Build only the independent PDF object component." OFF)
+option(IIGENERALDOCUMENT_PDF_SANITIZERS "Instrument the PDF component and its private dependencies." OFF)
+include(cmake/PdfObjects.cmake)
+if(IIGENERALDOCUMENT_PDF_ONLY)
+    return()
+endif()
 
 set(IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT "$ENV{HOME}/.local/SDK" CACHE PATH
     "Root directory containing installed iisacc libraries.")
-foreach(package_name IN ITEMS iiXml iiHtmlBlock iiFileProvider)
-    set(package_prefix "${IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT}/${package_name}")
-    if(EXISTS "${package_prefix}")
-        list(APPEND CMAKE_PREFIX_PATH "${package_prefix}")
-    endif()
-endforeach()
-unset(package_prefix)
-unset(package_name)
-if(CMAKE_PREFIX_PATH)
-    list(REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
-endif()
-
-find_package(iiFileProvider 0.5.0 CONFIG REQUIRED)
-find_package(iiXml 0.1.0 CONFIG REQUIRED)
-find_package(iiHtmlBlock 0.1.0 CONFIG REQUIRED)
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core)
-find_package(ZLIB REQUIRED)
-find_package(JPEG REQUIRED)
-
-if(APPLE AND TARGET WrapOpenGL::WrapOpenGL)
-    get_target_property(iigeneraldocument_wrap_opengl_links
-        WrapOpenGL::WrapOpenGL INTERFACE_LINK_LIBRARIES)
-    if(iigeneraldocument_wrap_opengl_links)
-        set(iigeneraldocument_filtered_wrap_opengl_links)
-        foreach(iigeneraldocument_wrap_link IN LISTS iigeneraldocument_wrap_opengl_links)
-            if(iigeneraldocument_wrap_link STREQUAL "-framework AGL"
-                    OR iigeneraldocument_wrap_link MATCHES "AGL\\.framework")
-                continue()
-            endif()
-            list(APPEND iigeneraldocument_filtered_wrap_opengl_links
-                "${iigeneraldocument_wrap_link}")
-        endforeach()
-        set_property(TARGET WrapOpenGL::WrapOpenGL PROPERTY
-            INTERFACE_LINK_LIBRARIES "${iigeneraldocument_filtered_wrap_opengl_links}")
-    endif()
-endif()
-
-set(IIGENERALDOCUMENT_SHARED_REQUIRES_PIC_JPEG OFF)
-if(IIGENERALDOCUMENT_BUILD_SHARED AND UNIX AND NOT APPLE)
-    set(IIGENERALDOCUMENT_SHARED_REQUIRES_PIC_JPEG ON)
-endif()
-
-set(IIGENERALDOCUMENT_STATIC_JPEG_LIBRARY "")
-if(NOT IIGENERALDOCUMENT_SHARED_REQUIRES_PIC_JPEG)
-    find_library(IIGENERALDOCUMENT_STATIC_JPEG_LIBRARY
-        NAMES "${CMAKE_STATIC_LIBRARY_PREFIX}jpeg${CMAKE_STATIC_LIBRARY_SUFFIX}")
-endif()
-if(IIGENERALDOCUMENT_STATIC_JPEG_LIBRARY)
-    add_library(iiGeneralDocumentJpeg STATIC IMPORTED GLOBAL)
-    set_target_properties(iiGeneralDocumentJpeg PROPERTIES
-        IMPORTED_LOCATION "${IIGENERALDOCUMENT_STATIC_JPEG_LIBRARY}")
-    set(IIGENERALDOCUMENT_JPEG_TARGET iiGeneralDocumentJpeg)
-else()
-    set(IIGENERALDOCUMENT_JPEG_TARGET JPEG::JPEG)
-endif()
-
-set(IIGENERALDOCUMENT_QPDF_TARGET "")
-if(IIGENERALDOCUMENT_USE_SYSTEM_QPDF)
-    find_package(qpdf 12.3 CONFIG REQUIRED)
-    if(TARGET qpdf::libqpdf)
-        set(IIGENERALDOCUMENT_QPDF_TARGET qpdf::libqpdf)
-    elseif(TARGET qpdf::libqpdf_static)
-        set(IIGENERALDOCUMENT_QPDF_TARGET qpdf::libqpdf_static)
-    else()
-        message(FATAL_ERROR "The qpdf package does not export a supported library target.")
-    endif()
-else()
-    set(IIGENERALDOCUMENT_QPDF_VERSION 12.3.2)
-    set(IIGENERALDOCUMENT_QPDF_COMMIT a898bb3a7289d1d05789d6d3f0d5dd534943a8da)
-    set(IIGENERALDOCUMENT_QPDF_PREFIX "${CMAKE_BINARY_DIR}/_deps/qpdf")
-    set(IIGENERALDOCUMENT_QPDF_INSTALL "${IIGENERALDOCUMENT_QPDF_PREFIX}/install")
-    file(MAKE_DIRECTORY "${IIGENERALDOCUMENT_QPDF_INSTALL}/${CMAKE_INSTALL_INCLUDEDIR}")
-
-    set(IIGENERALDOCUMENT_QPDF_PIC_CMAKE_ARGS)
-    if(UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        # QPDF 12.3.2 explicitly disables PIC on its object target whenever
-        # the static library is enabled, overriding CMAKE_POSITION_INDEPENDENT_CODE.
-        # Force PIC at the compiler flag level so the private archive can be
-        # linked into the iiGeneralDocument shared library.
-        list(APPEND IIGENERALDOCUMENT_QPDF_PIC_CMAKE_ARGS
-            -DCMAKE_C_FLAGS=-fPIC
-            -DCMAKE_CXX_FLAGS=-fPIC)
-    endif()
-
-    ExternalProject_Add(iiGeneralDocumentQpdf
-        PREFIX "${IIGENERALDOCUMENT_QPDF_PREFIX}"
-        GIT_REPOSITORY https://github.com/qpdf/qpdf.git
-        GIT_TAG "${IIGENERALDOCUMENT_QPDF_COMMIT}"
-        GIT_SHALLOW TRUE
-        GIT_PROGRESS TRUE
-        UPDATE_DISCONNECTED TRUE
-        CMAKE_ARGS
-            -DCMAKE_BUILD_TYPE=$<CONFIG>
-            -DCMAKE_INSTALL_PREFIX=${IIGENERALDOCUMENT_QPDF_INSTALL}
-            -DCMAKE_INSTALL_LIBDIR=${CMAKE_INSTALL_LIBDIR}
-            -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-            ${IIGENERALDOCUMENT_QPDF_PIC_CMAKE_ARGS}
-            -DBUILD_SHARED_LIBS=OFF
-            -DBUILD_STATIC_LIBS=ON
-            -DBUILD_DOC=OFF
-            -DINSTALL_MANUAL=OFF
-            -DINSTALL_EXAMPLES=OFF
-            -DINSTALL_PKGCONFIG=OFF
-            -DINSTALL_CMAKE_PACKAGE=OFF
-            -DUSE_IMPLICIT_CRYPTO=OFF
-            -DREQUIRE_CRYPTO_NATIVE=ON
-        BUILD_COMMAND
-            ${CMAKE_COMMAND} --build <BINARY_DIR> --config $<CONFIG> --target libqpdf
-        INSTALL_COMMAND
-            ${CMAKE_COMMAND} --install <BINARY_DIR> --config $<CONFIG> --component dev
-        BUILD_BYPRODUCTS
-            "${IIGENERALDOCUMENT_QPDF_INSTALL}/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}qpdf${CMAKE_STATIC_LIBRARY_SUFFIX}")
-
-    if(APPLE)
-        # Apple ld's hidden archive form prevents the private QPDF ABI from
-        # leaking through the iiGeneralDocument shared-library symbol table.
-        add_library(iiGeneralDocumentQpdfLibrary INTERFACE)
-        target_include_directories(iiGeneralDocumentQpdfLibrary INTERFACE
-            "${IIGENERALDOCUMENT_QPDF_INSTALL}/${CMAKE_INSTALL_INCLUDEDIR}")
-        target_link_directories(iiGeneralDocumentQpdfLibrary INTERFACE
-            "${IIGENERALDOCUMENT_QPDF_INSTALL}/${CMAKE_INSTALL_LIBDIR}")
-        target_link_libraries(iiGeneralDocumentQpdfLibrary INTERFACE
-            "-Wl,-hidden-lqpdf")
-    else()
-        add_library(iiGeneralDocumentQpdfLibrary STATIC IMPORTED GLOBAL)
-        set_target_properties(iiGeneralDocumentQpdfLibrary PROPERTIES
-            IMPORTED_LOCATION
-                "${IIGENERALDOCUMENT_QPDF_INSTALL}/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}qpdf${CMAKE_STATIC_LIBRARY_SUFFIX}"
-            INTERFACE_INCLUDE_DIRECTORIES
-                "${IIGENERALDOCUMENT_QPDF_INSTALL}/${CMAKE_INSTALL_INCLUDEDIR}")
-        if(UNIX)
-            set_property(TARGET iiGeneralDocumentQpdfLibrary APPEND PROPERTY
-                INTERFACE_LINK_OPTIONS "LINKER:--exclude-libs,libqpdf.a")
-        endif()
-    endif()
-    add_dependencies(iiGeneralDocumentQpdfLibrary iiGeneralDocumentQpdf)
-    set(IIGENERALDOCUMENT_QPDF_TARGET iiGeneralDocumentQpdfLibrary)
-endif()
+list(APPEND CMAKE_PREFIX_PATH "${IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT}/iiFileProvider")
+include(cmake/DocumentDependencies.cmake)
+find_package(iiFileProviderNative 0.5.0 CONFIG REQUIRED)
+set(IIGENERALDOCUMENT_QPDF_TARGET iiGeneralDocumentPdfQpdf)
+set(IIGENERALDOCUMENT_JPEG_TARGET iiGeneralDocumentPdfJpeg)
 
 set(IIGENERALDOCUMENT_LIBZIP_TARGET "")
 if(IIGENERALDOCUMENT_USE_SYSTEM_LIBZIP)
@@ -202,6 +87,7 @@ else()
             -DENABLE_BZIP2=OFF
             -DENABLE_LZMA=OFF
             -DENABLE_ZSTD=OFF
+            -DCMAKE_C_FLAGS=${dep_flags}
         BUILD_BYPRODUCTS
             "${IIGENERALDOCUMENT_LIBZIP_INSTALL}/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}zip${CMAKE_STATIC_LIBRARY_SUFFIX}")
 
@@ -282,7 +168,17 @@ add_library(iiGeneralDocument ${IIGENERALDOCUMENT_LIBRARY_TYPE}
     src/Xml/XmlTreeEditor.h
     src/Validation/DocumentValidator.cpp
     src/Validation/DocumentValidator.h
-    src/iiGeneralDocument.h)
+    src/iiGeneralDocument.h
+    src/Word/Private/ConversionProcess.cpp
+    src/Codec/Private/Markup/Diagnostics.cpp
+    src/Codec/Private/Markup/InlineProperties.cpp
+    src/Codec/Private/Markup/OpenTag.cpp
+    src/Codec/Private/Markup/Doctype.cpp
+    src/Codec/Private/Markup/TagParser.cpp
+    src/Codec/Private/Markup/GetTagInfo.cpp
+    src/Codec/Private/Markup/DivideBlock.cpp
+    src/Codec/Private/Markup/BlockRangeTracker.cpp
+    third_party/pugixml/pugixml.cpp)
 add_library(iiGeneralDocument::iiGeneralDocument ALIAS iiGeneralDocument)
 
 generate_export_header(iiGeneralDocument
@@ -294,18 +190,25 @@ target_include_directories(iiGeneralDocument PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/iiGeneralDocument>)
+target_include_directories(iiGeneralDocument PRIVATE third_party)
 target_link_libraries(iiGeneralDocument
     PUBLIC
-        iiFileProvider::iiFileProvider
-        iiXml::iiXml
-        iiHtmlBlock::iiHtmlBlock
-        Qt6::Core
+        iiFileProvider::Native
+        iiGeneralDocumentPdf
     PRIVATE
         ${IIGENERALDOCUMENT_QPDF_TARGET}
         ${IIGENERALDOCUMENT_LIBZIP_TARGET}
-        ZLIB::ZLIB
+        iiGeneralDocumentPdfZlib
         ${IIGENERALDOCUMENT_JPEG_TARGET})
-if(WIN32 AND IIGENERALDOCUMENT_USE_SYSTEM_QPDF)
+if(APPLE)
+    target_link_directories(iiGeneralDocument PRIVATE "${IIGENERALDOCUMENT_PDF_DEP_PREFIX}/lib")
+    foreach(_archive IN ITEMS qpdf jpeg z)
+        target_link_options(iiGeneralDocument PRIVATE "LINKER:-hidden-l${_archive}")
+    endforeach()
+elseif(UNIX)
+    target_link_options(iiGeneralDocument PRIVATE "LINKER:--exclude-libs,ALL")
+endif()
+if(WIN32 AND IIGENERALDOCUMENT_USE_SYSTEM_LIBZIP)
     # Native qpdf packages may export zlib/jpeg as bare transitive names.
     # Resolve these alongside the imported qpdf archive, including consumers.
     target_link_directories(iiGeneralDocument PRIVATE
@@ -318,7 +221,8 @@ else()
         -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion)
 endif()
 set_target_properties(iiGeneralDocument PROPERTIES
-    AUTOMOC ON
+    AUTOMOC OFF
+    CXX_EXTENSIONS OFF
     EXPORT_NO_SYSTEM TRUE
     CXX_VISIBILITY_PRESET hidden
     VISIBILITY_INLINES_HIDDEN YES
@@ -356,16 +260,9 @@ install(FILES
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/iiGeneralDocument)
 install(FILES docs/FILE_AUTHORSHIP.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/iiGeneralDocument)
 install(FILES README.md THIRD_PARTY_NOTICES.md docs/API.md docs/ARCHITECTURE.md docs/PDF_SUPPORT.md
-    docs/HTML_BLOCK_CRUD.md docs/ODF_SUPPORT.md docs/WORD_SUPPORT.md
+    docs/ACROBAT_ABSORPTION.md docs/HTML_BLOCK_CRUD.md docs/ODF_SUPPORT.md docs/WORD_SUPPORT.md
     docs/THINKING_SPACE_DOCUMENT.md docs/XML_TREE_CRUD.md
     DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/iiGeneralDocument)
-if(NOT IIGENERALDOCUMENT_USE_SYSTEM_QPDF)
-    install(FILES
-        "${IIGENERALDOCUMENT_QPDF_PREFIX}/src/iiGeneralDocumentQpdf/LICENSE.txt"
-        "${IIGENERALDOCUMENT_QPDF_PREFIX}/src/iiGeneralDocumentQpdf/NOTICE.md"
-        "${IIGENERALDOCUMENT_QPDF_PREFIX}/src/iiGeneralDocumentQpdf/Artistic-2.0"
-        DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument/qpdf)
-endif()
 if(NOT IIGENERALDOCUMENT_USE_SYSTEM_LIBZIP)
     install(FILES
         "${IIGENERALDOCUMENT_LIBZIP_PREFIX}/src/iiGeneralDocumentLibzip/LICENSE"
@@ -373,6 +270,11 @@ if(NOT IIGENERALDOCUMENT_USE_SYSTEM_LIBZIP)
 endif()
 
 if(BUILD_TESTING)
+    add_executable(iiGeneralDocumentPdfAbsorptionTest tests/PdfAbsorptionTest.cpp)
+    target_link_libraries(iiGeneralDocumentPdfAbsorptionTest PRIVATE iiGeneralDocument::iiGeneralDocument)
+    target_compile_definitions(iiGeneralDocumentPdfAbsorptionTest PRIVATE
+        IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output/acrobat-absorption")
+    add_test(NAME iiGeneralDocument.PdfAbsorption COMMAND iiGeneralDocumentPdfAbsorptionTest)
     add_executable(iiGeneralDocumentXmlTreeCrudTest tests/XmlTreeCrudTest.cpp)
     target_link_libraries(iiGeneralDocumentXmlTreeCrudTest PRIVATE
         iiGeneralDocument::iiGeneralDocument)
@@ -414,7 +316,7 @@ if(BUILD_TESTING)
     target_link_libraries(iiGeneralDocumentOdfStyleCompatibilityTest PRIVATE
         iiGeneralDocument::iiGeneralDocument
         ${IIGENERALDOCUMENT_LIBZIP_TARGET}
-        ZLIB::ZLIB)
+        iiGeneralDocumentPdfZlib)
     target_compile_definitions(iiGeneralDocumentOdfStyleCompatibilityTest PRIVATE
         IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output")
     add_test(NAME iiGeneralDocument.OdfStyleCompatibility
@@ -442,7 +344,7 @@ if(BUILD_TESTING)
             COMMAND iiGeneralDocumentLegacyDocRoundTripTest)
 
         add_executable(iiGeneralDocumentOdfLibreOfficeInteropTest
-            tests/OdfLibreOfficeInteropTest.cpp)
+            tests/OdfLibreOfficeInteropTest.cpp src/Word/Private/ConversionProcess.cpp)
         target_link_libraries(iiGeneralDocumentOdfLibreOfficeInteropTest PRIVATE
             iiGeneralDocument::iiGeneralDocument)
         target_compile_definitions(iiGeneralDocumentOdfLibreOfficeInteropTest PRIVATE
@@ -475,18 +377,16 @@ if(BUILD_TESTING)
             -DIIGENERALDOCUMENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/ProjectContractTest.cmake)
 
+    if(NOT IIGENERALDOCUMENT_SANITIZERS)
     add_test(NAME iiGeneralDocument.InstallConsumer
         COMMAND ${CMAKE_COMMAND}
             -DIIGENERALDOCUMENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}
             -DIIGENERALDOCUMENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DIIGENERALDOCUMENT_CMAKE_COMMAND=${CMAKE_COMMAND}
-            "-DIIGENERALDOCUMENT_IIFILEPROVIDER_DIR=${iiFileProvider_DIR}"
-            "-DIIGENERALDOCUMENT_IIXML_DIR=${iiXml_DIR}"
-            "-DIIGENERALDOCUMENT_IIHTMLBLOCK_DIR=${iiHtmlBlock_DIR}"
-            "-DIIGENERALDOCUMENT_IIXML_LIBRARY_DIR=$<TARGET_FILE_DIR:iiXml::iiXml>"
-            "-DIIGENERALDOCUMENT_IIHTMLBLOCK_LIBRARY_DIR=$<TARGET_FILE_DIR:iiHtmlBlock::iiHtmlBlock>"
-            "-DIIGENERALDOCUMENT_QT6_DIR=${Qt6_DIR}"
+            "-DIIGENERALDOCUMENT_NATIVE_PROVIDER_DIR=${iiFileProviderNative_DIR}"
+            "-DIIGENERALDOCUMENT_NATIVE_PROVIDER_LIBRARY_DIR=$<TARGET_FILE_DIR:iiFileProvider::Native>"
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/InstallConsumerTest.cmake)
+    endif()
 
     if(UNIX)
         add_test(NAME iiGeneralDocument.SymbolIsolation
@@ -500,6 +400,42 @@ endif()
 
 if(BUILD_TESTING)
     add_executable(iiGeneralDocumentAuthorshipTest tests/AuthorshipTest.cpp)
+    target_include_directories(iiGeneralDocumentAuthorshipTest PRIVATE third_party)
     target_link_libraries(iiGeneralDocumentAuthorshipTest PRIVATE iiGeneralDocument::iiGeneralDocument)
     add_test(NAME iiGeneralDocument.Authorship COMMAND iiGeneralDocumentAuthorshipTest)
 endif()
+
+if(BUILD_TESTING)
+    add_test(NAME iiGeneralDocument.NativeDependencies COMMAND ${CMAKE_COMMAND}
+        -DIIGENERALDOCUMENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DIIGENERALDOCUMENT_LIBRARY=$<TARGET_FILE:iiGeneralDocument>
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/NativeDependenciesTest.cmake)
+endif()
+install(DIRECTORY third_party/licenses/ DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument)
+install(FILES third_party/document-dependencies.json DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument)
+
+if(BUILD_TESTING)
+    add_executable(iiGeneralDocumentNativeMigrationTest tests/NativeMigrationTest.cpp)
+    target_link_libraries(iiGeneralDocumentNativeMigrationTest PRIVATE iiGeneralDocument::iiGeneralDocument)
+    target_include_directories(iiGeneralDocumentNativeMigrationTest PRIVATE third_party)
+    target_compile_definitions(iiGeneralDocumentNativeMigrationTest PRIVATE
+        IIGENERALDOCUMENT_MIGRATION_FIXTURES="${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/native-upgrade")
+    add_test(NAME iiGeneralDocument.NativeMigration COMMAND iiGeneralDocumentNativeMigrationTest)
+endif()
+
+if(BUILD_TESTING)
+    add_executable(iiGeneralDocumentCodecValidationTest tests/CodecValidationTest.cpp third_party/pugixml/pugixml.cpp)
+    target_link_libraries(iiGeneralDocumentCodecValidationTest PRIVATE iiGeneralDocument::iiGeneralDocument)
+    target_include_directories(iiGeneralDocumentCodecValidationTest PRIVATE third_party)
+    add_test(NAME iiGeneralDocument.CodecValidation COMMAND iiGeneralDocumentCodecValidationTest)
+endif()
+
+install(FILES docs/QT_REMOVAL.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/iiGeneralDocument)
+
+if(BUILD_TESTING)
+    add_executable(iiGeneralDocumentConversionProcessTest tests/ConversionProcessTest.cpp src/Word/Private/ConversionProcess.cpp)
+    target_link_libraries(iiGeneralDocumentConversionProcessTest PRIVATE iiGeneralDocument::iiGeneralDocument)
+    add_test(NAME iiGeneralDocument.ConversionProcess COMMAND iiGeneralDocumentConversionProcessTest)
+endif()
+
+install(FILES third_party/first-party-markup-provenance.json DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument)

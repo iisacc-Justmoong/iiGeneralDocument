@@ -1,0 +1,86 @@
+[
+  {
+    "source": "/Volumes/Storage/Workspace/SDK/iiXml/src/Elements/InlineProperties.h",
+    "sha256": "ef75b47d242931c3e817ef4403608333ed3d3e3bf073a1a6ae6e59567a6a522a",
+    "destination": "InlineProperties.h",
+    "adaptedSha256": "1ce8fbd3a24a7bd9c7a21c5b6c2625f22e5bd1cbf456cce321a9a895a027b168"
+  },
+  {
+    "source": "/Volumes/Storage/Workspace/SDK/iiXml/src/Elements/InlineProperties.cpp",
+    "sha256": "c1fd6da98fce2736ff03a17f910d2b02843cd75ebc682eb6adcdcb469fdd9359",
+    "destination": "InlineProperties.cpp",
+    "adaptedSha256": "f7c04672ebc7f7cbd1af01afdf50a63f698ed2e29f1be5210ccf63737de60d62"
+  },
+  {
+    "source": "/Volumes/Storage/Workspace/SDK/iiXml/src/Elements/OpenTag.h",
+    "sha256": "73f99a0634ea116665ee97497a7569143d449ad8f43f773fd90f64ef570099e5",
+    "destination": "OpenTag.h",
+    "adaptedSha256": "40e0dafcd8bc158fb9131181dd1186385f1ca3a99e8bcd14d471b39324cbfa25"
+  },
+  {
+    "source": "/Volumes/Storage/Workspace/SDK/iiXml/src/Elements/OpenTag.cpp",
+    "sha256": "cef0f642a0a60ce481b586711d2a951b21e864a093e14acb1e0dad6aa0e9f5b4",
+    "destination": "OpenTag.cpp",
+    "adaptedSha256": "bb1b4609e76bc3bc176370897f3d594b3fa018ce0cc4906dc3b1ca2997fc0a95"
+  },
+  {
+    "source": "/Volumes/Storage/Workspace/SDK/iiXml/src/Elements/Doctype.h",
+    "sha256": "17eedc907bb253abdbbeca40167df49d9d7b2fdc078edc4b2fd21461737b5774",
+    "destination": "Doctype.h",
+    "adaptedSha256": "7e65202b85393a67d56264b3bbd201e9b0011357517754863a31e3777a2f921a"
+  },
+  {
+    "source": "/Volumes/Storage/Workspace/SDK/iiXml/src/Elements/Doctype.cpp",
+    "sha256": "b8393316f511a2539ad00b062fb8e822240e1c4d0776fc2ffd702a89c68558a3",
+    "destination": "Doctype.cpp",
+    "adaptedSha256": "108e12ab4c5d1cd5541209e5677018ff0ef166ae41744afed158af65b57a67b5"
+  },
+  {
+    "source": "/Volumes/Storage/Workspace/SDK/iiXml/src/Parser/TagParser.h",
+    "sha256": "56482f9d206471727edf46781f4d1308255154f7e44fedb239006513b0b07acf",
+    "destination": "TagParser.h",
+    "adaptedSha256": "763edb43aeb2164eb1ee7a4d41767a6556ca7caeb09cda1d8d0bc59e1a71c1a7"
+  },
+  {
+    "source": "/Volumes/Storage/Workspace/SDK/iiXml/src/Parser/TagParser.cpp",
+    "sha256": "a7a2173af3e862fc01ade323422bd223789e46ec05bdd837d1f922330d0983ed",
+    "destination": "TagParser.cpp",
+    "adaptedSha256": "d72baf6acf4041106da07ce91dfc019475640201acde9261c794448922183989"
+  },
+  {
+    "source": "/Volumes/Storage/Workspace/SDK/iiHtmlBlock/src/Parser/GetTagInfo.h",
+    "sha256": "0ba38bd903bc930608232999d7654c6f4d2fdac8b93cabae70fc85397e9d3f33",
+    "destination": "GetTagInfo.h",
+    "adaptedSha256": "e76dcacbe636552591c6262ef5cb2dd46ae5a94e7398e396ab9da51e770f8257"
+  },
+  {
+    "source": "/Volumes/Storage/Workspace/SDK/iiHtmlBlock/src/Parser/GetTagInfo.cpp",
+    "sha256": "89b5061de624acdae4a60119ba1c1488803e84278e1dc748afabf36270d1f03e",
+    "destination": "GetTagInfo.cpp",
+    "adaptedSha256": "b33677e93873320c798bd95d812eb71bb86f00d1f8cce04b97db1846eb3ffe78"
+  },
+  {
+    "source": "/Volumes/Storage/Workspace/SDK/iiHtmlBlock/src/Modifier/DivideBlock.h",
+    "sha256": "acf07e2d90566e4e3d4bd38ed3bc728990e1ecc11831be652aef6f078b57dcea",
+    "destination": "DivideBlock.h",
+    "adaptedSha256": "6d133b59503c527466c766b38343fb4906fb534ead85c925281a52fdf3adf7c4"
+  },
+  {
+    "source": "/Volumes/Storage/Workspace/SDK/iiHtmlBlock/src/Modifier/DivideBlock.cpp",
+    "sha256": "b655e6ebff1513da871d69e54f1e3ee0f6e93cbd16003d26029b9fde3fc7c305",
+    "destination": "DivideBlock.cpp",
+    "adaptedSha256": "1129da4d71b57f982274778aa7027826ca15378465a4f5516a183b44f0ba9284"
+  },
+  {
+    "source": "/Volumes/Storage/Workspace/SDK/iiHtmlBlock/src/Modifier/BlockRangeTracker.h",
+    "sha256": "44423844910d67e570f93cb9be5d17878a4a472dae0b43877263b854f37d96fe",
+    "destination": "BlockRangeTracker.h",
+    "adaptedSha256": "b75c022ef736bd994c7d1e448f7616289e0349af9ee27dab4969836ec7e23ae8"
+  },
+  {
+    "source": "/Volumes/Storage/Workspace/SDK/iiHtmlBlock/src/Modifier/BlockRangeTracker.cpp",
+    "sha256": "111c0742ddc95852987ed76615036953e1c3b71cf40856736919d4e337b7ee7e",
+    "destination": "BlockRangeTracker.cpp",
+    "adaptedSha256": "b7f0b8b1da0faf81841899053ec71401bbfaeea18143eb7b9de2581dc836dd26"
+  }
+]

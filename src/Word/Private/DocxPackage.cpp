@@ -1,14 +1,9 @@
+#include "Codec/Private/Xml.h"
 #include "Word/Private/ProviderZipSource.h"
 #include "Word/Private/DocxPackage.h"
 
 #include "Word/Private/AtomicFileCommit.h"
 
-#include <QBuffer>
-#include <QByteArray>
-#include <QDir>
-#include <QString>
-#include <QXmlStreamReader>
-#include <QXmlStreamWriter>
 
 #include <zip.h>
 
@@ -32,29 +27,29 @@
 namespace ii::document::detail {
 namespace {
 
-const QString& wordNamespace()
+const Text& wordNamespace()
 {
-    static const QString value =
-        QStringLiteral("http://schemas.openxmlformats.org/wordprocessingml/2006/main");
+    static const Text value =
+        Text("http://schemas.openxmlformats.org/wordprocessingml/2006/main");
     return value;
 }
 
-const QString& relationshipNamespace()
+const Text& relationshipNamespace()
 {
-    static const QString value =
-        QStringLiteral("http://schemas.openxmlformats.org/package/2006/relationships");
+    static const Text value =
+        Text("http://schemas.openxmlformats.org/package/2006/relationships");
     return value;
 }
 
-std::string toUtf8(const QString& value)
+std::string toUtf8(const Text& value)
 {
     const auto bytes = value.toUtf8();
     return {bytes.constData(), static_cast<std::size_t>(bytes.size())};
 }
 
-QString attribute(const QXmlStreamReader& xml, const char* localName)
+Text attribute(const XmlReader& xml, const char* localName)
 {
-    const auto requested = QString::fromLatin1(localName);
+    const auto requested = Text::fromLatin1(localName);
     for (const auto& item : xml.attributes()) {
         if (item.name() == requested) {
             return item.value().toString();
@@ -127,7 +122,7 @@ private:
     zip_t* archive_{nullptr};
 };
 
-std::optional<QByteArray> readPart(
+std::optional<ByteBuffer> readPart(
     zip_t* archive,
     std::string_view name,
     std::uint64_t maximumBytes,
@@ -149,7 +144,7 @@ std::optional<QByteArray> readPart(
         return std::nullopt;
     }
     if ((status.valid & ZIP_STAT_SIZE) == 0U || status.size > maximumBytes
-        || status.size > static_cast<zip_uint64_t>(std::numeric_limits<qsizetype>::max())) {
+        || status.size > static_cast<zip_uint64_t>(std::numeric_limits<std::ptrdiff_t>::max())) {
         diagnostics.push_back(diagnostic(
             DiagnosticSeverity::error,
             "docx.part_too_large",
@@ -168,12 +163,12 @@ std::optional<QByteArray> readPart(
         return std::nullopt;
     }
 
-    QByteArray bytes(static_cast<qsizetype>(status.size), Qt::Uninitialized);
+    ByteBuffer bytes(static_cast<std::ptrdiff_t>(status.size), '\0');
     zip_uint64_t offset = 0;
     while (offset < status.size) {
         const auto remaining = status.size - offset;
         const auto count = zip_fread(
-            file, bytes.data() + static_cast<qsizetype>(offset), remaining);
+            file, bytes.data() + static_cast<std::ptrdiff_t>(offset), remaining);
         if (count < 0) {
             const std::string message = zip_file_strerror(file);
             zip_fclose(file);
@@ -207,37 +202,38 @@ struct PackageRelationships {
     std::string customPropertiesPart;
 };
 
-std::optional<std::string> normalizedPackageTarget(const QString& target)
+std::optional<std::string> normalizedPackageTarget(const Text& target)
 {
     auto value = target;
-    value.replace(QLatin1Char('\\'), QLatin1Char('/'));
-    while (value.startsWith(QLatin1Char('/'))) {
+    value.replace('\\', '/');
+    while (value.startsWith('/')) {
         value.remove(0, 1);
     }
-    const auto cleaned = QDir::cleanPath(value);
-    if (cleaned.isEmpty() || cleaned == QStringLiteral(".")
-        || cleaned == QStringLiteral("..") || cleaned.startsWith(QStringLiteral("../"))
-        || QDir::isAbsolutePath(cleaned)) {
+    const auto path = std::filesystem::path(value.toStdString()).lexically_normal();
+    const Text cleaned(path.generic_string());
+    if (cleaned.isEmpty() || cleaned == Text(".")
+        || cleaned == Text("..") || cleaned.startsWith(Text("../"))
+        || path.is_absolute() || path.has_root_name()) {
         return std::nullopt;
     }
     return toUtf8(cleaned);
 }
 
 PackageRelationships parsePackageRelationships(
-    const QByteArray& bytes,
+    const ByteBuffer& bytes,
     const std::filesystem::path& source,
     std::vector<Diagnostic>& diagnostics)
 {
     PackageRelationships result;
-    QXmlStreamReader xml(bytes);
+    XmlReader xml(bytes);
     while (!xml.atEnd()) {
         xml.readNext();
-        if (!xml.isStartElement() || xml.name() != QStringLiteral("Relationship")) {
+        if (!xml.isStartElement() || xml.name() != Text("Relationship")) {
             continue;
         }
         const auto type = attribute(xml, "Type");
         const auto targetMode = attribute(xml, "TargetMode");
-        if (targetMode.compare(QStringLiteral("External"), Qt::CaseInsensitive) == 0) {
+        if (targetMode.toLower() == Text("External").toLower()) {
             continue;
         }
         const auto target = normalizedPackageTarget(attribute(xml, "Target"));
@@ -249,11 +245,11 @@ PackageRelationships parsePackageRelationships(
                 source));
             continue;
         }
-        if (type.endsWith(QStringLiteral("/officeDocument"))) {
+        if (type.endsWith(Text("/officeDocument"))) {
             result.mainDocumentPart = *target;
-        } else if (type.endsWith(QStringLiteral("/metadata/core-properties"))) {
+        } else if (type.endsWith(Text("/metadata/core-properties"))) {
             result.corePropertiesPart = *target;
-        } else if (type.endsWith(QStringLiteral("/custom-properties"))) {
+        } else if (type.endsWith(Text("/custom-properties"))) {
             if (!result.customPropertiesPart.empty()) {
                 diagnostics.push_back(diagnostic(DiagnosticSeverity::error, "authorship.duplicate", "Duplicate custom-properties relationship.", source));
             }
@@ -277,47 +273,47 @@ PackageRelationships parsePackageRelationships(
     return result;
 }
 
-const QString customNamespace = QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/custom-properties");
-const QString variantNamespace = QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes");
-void parseCustomProperties(const QByteArray &bytes, WordDocument &document,
+const Text customNamespace = Text("http://schemas.openxmlformats.org/officeDocument/2006/custom-properties");
+const Text variantNamespace = Text("http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes");
+void parseCustomProperties(const ByteBuffer &bytes, WordDocument &document,
                           const std::filesystem::path &source, std::vector<Diagnostic> &diagnostics) {
-    QXmlStreamReader xml(bytes);
+    XmlReader xml(bytes);
     bool sawAuthor = false;
     while (!xml.atEnd()) {
         xml.readNext();
-        if (!xml.isStartElement() || xml.namespaceUri() != customNamespace || xml.name() != u"property") continue;
-        if (xml.attributes().value(u"name") != QLatin1String(iiFileProvider::Authorship::MetadataKey)) {
+        if (!xml.isStartElement() || xml.namespaceUri() != customNamespace || xml.name() != Text("property")) continue;
+        if (xml.attributes().value(Text("name")) != Text::fromLatin1(iiFileProvider::native::Authorship::MetadataKey)) {
             xml.skipCurrentElement(); continue;
         }
-        if (sawAuthor || !xml.readNextStartElement() || xml.namespaceUri() != variantNamespace || xml.name() != u"lpwstr") {
-            xml.raiseError(QStringLiteral("Invalid or duplicate authorship property")); break;
+        if (sawAuthor || !xml.readNextStartElement() || xml.namespaceUri() != variantNamespace || xml.name() != Text("lpwstr")) {
+            xml.raiseError(Text("Invalid or duplicate authorship property")); break;
         }
         sawAuthor = true;
-        document.metadata()[iiFileProvider::Authorship::MetadataKey] = toUtf8(xml.readElementText());
-        if (xml.readNextStartElement()) { xml.raiseError(QStringLiteral("Extra authorship property values")); break; }
+        document.metadata()[iiFileProvider::native::Authorship::MetadataKey] = toUtf8(xml.readElementText());
+        if (xml.readNextStartElement()) { xml.raiseError(Text("Extra authorship property values")); break; }
     }
     if (xml.hasError()) diagnostics.push_back(diagnostic(DiagnosticSeverity::error, "authorship.invalid_xml",
         "Invalid DOCX authorship properties.", source));
 }
 
 void parseCoreProperties(
-    const QByteArray& bytes,
+    const ByteBuffer& bytes,
     WordDocument& document,
     const std::filesystem::path& source,
     std::vector<Diagnostic>& diagnostics)
 {
-    static const std::map<QString, std::string> names{
-        {QStringLiteral("title"), "Title"},
-        {QStringLiteral("creator"), "Author"},
-        {QStringLiteral("subject"), "Subject"},
-        {QStringLiteral("description"), "Description"},
-        {QStringLiteral("keywords"), "Keywords"},
-        {QStringLiteral("lastModifiedBy"), "LastModifiedBy"},
-        {QStringLiteral("created"), "Created"},
-        {QStringLiteral("modified"), "Modified"},
+    static const std::map<Text, std::string> names{
+        {Text("title"), "Title"},
+        {Text("creator"), "Author"},
+        {Text("subject"), "Subject"},
+        {Text("description"), "Description"},
+        {Text("keywords"), "Keywords"},
+        {Text("lastModifiedBy"), "LastModifiedBy"},
+        {Text("created"), "Created"},
+        {Text("modified"), "Modified"},
     };
 
-    QXmlStreamReader xml(bytes);
+    XmlReader xml(bytes);
     while (!xml.atEnd()) {
         xml.readNext();
         if (!xml.isStartElement()) {
@@ -337,30 +333,30 @@ void parseCoreProperties(
     }
 }
 
-bool onOffValue(const QXmlStreamReader& xml, bool defaultValue = true)
+bool onOffValue(const XmlReader& xml, bool defaultValue = true)
 {
     const auto value = attribute(xml, "val").toLower();
     if (value.isEmpty()) {
         return defaultValue;
     }
-    return value != QStringLiteral("0") && value != QStringLiteral("false")
-        && value != QStringLiteral("off") && value != QStringLiteral("none");
+    return value != Text("0") && value != Text("false")
+        && value != Text("off") && value != Text("none");
 }
 
-void parseRunProperties(QXmlStreamReader& xml, WordRunProperties& properties)
+void parseRunProperties(XmlReader& xml, WordRunProperties& properties)
 {
     while (xml.readNextStartElement()) {
         const auto name = xml.name();
-        if (name == QStringLiteral("b")) {
+        if (name == Text("b")) {
             properties.bold = onOffValue(xml);
             xml.skipCurrentElement();
-        } else if (name == QStringLiteral("i")) {
+        } else if (name == Text("i")) {
             properties.italic = onOffValue(xml);
             xml.skipCurrentElement();
-        } else if (name == QStringLiteral("u")) {
+        } else if (name == Text("u")) {
             properties.underline = onOffValue(xml);
             xml.skipCurrentElement();
-        } else if (name == QStringLiteral("rFonts")) {
+        } else if (name == Text("rFonts")) {
             auto font = attribute(xml, "ascii");
             if (font.isEmpty()) {
                 font = attribute(xml, "hAnsi");
@@ -368,16 +364,16 @@ void parseRunProperties(QXmlStreamReader& xml, WordRunProperties& properties)
             properties.fontFamily = toUtf8(font);
             properties.eastAsiaFontFamily = toUtf8(attribute(xml, "eastAsia"));
             xml.skipCurrentElement();
-        } else if (name == QStringLiteral("sz")) {
+        } else if (name == Text("sz")) {
             bool valid = false;
             const auto halfPoints = attribute(xml, "val").toInt(&valid);
             if (valid && halfPoints >= 0) {
                 properties.fontSizePoints = static_cast<double>(halfPoints) / 2.0;
             }
             xml.skipCurrentElement();
-        } else if (name == QStringLiteral("color")) {
+        } else if (name == Text("color")) {
             const auto value = attribute(xml, "val");
-            if (value.compare(QStringLiteral("auto"), Qt::CaseInsensitive) != 0) {
+            if (value.toLower() != Text("auto").toLower()) {
                 properties.color = toUtf8(value.toUpper());
             }
             xml.skipCurrentElement();
@@ -388,25 +384,25 @@ void parseRunProperties(QXmlStreamReader& xml, WordRunProperties& properties)
 }
 
 WordRun parseRun(
-    QXmlStreamReader& xml,
+    XmlReader& xml,
     const std::filesystem::path& source,
     std::vector<Diagnostic>& diagnostics)
 {
     WordRun run;
     while (xml.readNextStartElement()) {
         const auto name = xml.name();
-        if (name == QStringLiteral("rPr")) {
+        if (name == Text("rPr")) {
             parseRunProperties(xml, run.properties);
-        } else if (name == QStringLiteral("t") || name == QStringLiteral("delText")) {
+        } else if (name == Text("t") || name == Text("delText")) {
             run.text += toUtf8(xml.readElementText());
-        } else if (name == QStringLiteral("tab")) {
+        } else if (name == Text("tab")) {
             run.text.push_back('\t');
             xml.skipCurrentElement();
-        } else if (name == QStringLiteral("br") || name == QStringLiteral("cr")) {
+        } else if (name == Text("br") || name == Text("cr")) {
             run.text.push_back('\n');
             xml.skipCurrentElement();
-        } else if (name == QStringLiteral("drawing") || name == QStringLiteral("pict")
-                   || name == QStringLiteral("object")) {
+        } else if (name == Text("drawing") || name == Text("pict")
+                   || name == Text("object")) {
             warningOnce(
                 diagnostics,
                 "docx.non_text_run_content_omitted",
@@ -420,35 +416,35 @@ WordRun parseRun(
     return run;
 }
 
-void parseParagraphProperties(QXmlStreamReader& xml, WordParagraphProperties& properties)
+void parseParagraphProperties(XmlReader& xml, WordParagraphProperties& properties)
 {
     while (xml.readNextStartElement()) {
         const auto name = xml.name();
-        if (name == QStringLiteral("pStyle")) {
+        if (name == Text("pStyle")) {
             properties.styleId = toUtf8(attribute(xml, "val"));
             xml.skipCurrentElement();
-        } else if (name == QStringLiteral("jc")) {
+        } else if (name == Text("jc")) {
             const auto value = attribute(xml, "val").toLower();
-            if (value == QStringLiteral("left") || value == QStringLiteral("start")) {
+            if (value == Text("left") || value == Text("start")) {
                 properties.alignment = WordParagraphAlignment::left;
-            } else if (value == QStringLiteral("center")) {
+            } else if (value == Text("center")) {
                 properties.alignment = WordParagraphAlignment::center;
-            } else if (value == QStringLiteral("right") || value == QStringLiteral("end")) {
+            } else if (value == Text("right") || value == Text("end")) {
                 properties.alignment = WordParagraphAlignment::right;
-            } else if (value == QStringLiteral("both") || value == QStringLiteral("distribute")) {
+            } else if (value == Text("both") || value == Text("distribute")) {
                 properties.alignment = WordParagraphAlignment::justified;
             }
             xml.skipCurrentElement();
-        } else if (name == QStringLiteral("numPr")) {
+        } else if (name == Text("numPr")) {
             while (xml.readNextStartElement()) {
-                if (xml.name() == QStringLiteral("numId")) {
+                if (xml.name() == Text("numId")) {
                     bool valid = false;
                     const auto value = attribute(xml, "val").toInt(&valid);
                     if (valid) {
                         properties.numberingId = value;
                     }
                     xml.skipCurrentElement();
-                } else if (xml.name() == QStringLiteral("ilvl")) {
+                } else if (xml.name() == Text("ilvl")) {
                     bool valid = false;
                     const auto value = attribute(xml, "val").toInt(&valid);
                     if (valid) {
@@ -466,19 +462,19 @@ void parseParagraphProperties(QXmlStreamReader& xml, WordParagraphProperties& pr
 }
 
 void parseInlineContainer(
-    QXmlStreamReader& xml,
+    XmlReader& xml,
     WordParagraph& paragraph,
     const std::filesystem::path& source,
     std::vector<Diagnostic>& diagnostics)
 {
     while (xml.readNextStartElement()) {
         const auto name = xml.name();
-        if (name == QStringLiteral("r")) {
+        if (name == Text("r")) {
             paragraph.runs.push_back(parseRun(xml, source, diagnostics));
-        } else if (name == QStringLiteral("hyperlink") || name == QStringLiteral("ins")
-                   || name == QStringLiteral("smartTag") || name == QStringLiteral("sdt")
-                   || name == QStringLiteral("sdtContent") || name == QStringLiteral("fldSimple")) {
-            if (name == QStringLiteral("hyperlink")) {
+        } else if (name == Text("hyperlink") || name == Text("ins")
+                   || name == Text("smartTag") || name == Text("sdt")
+                   || name == Text("sdtContent") || name == Text("fldSimple")) {
+            if (name == Text("hyperlink")) {
                 warningOnce(
                     diagnostics,
                     "docx.hyperlink_flattened",
@@ -486,7 +482,7 @@ void parseInlineContainer(
                     source);
             }
             parseInlineContainer(xml, paragraph, source, diagnostics);
-        } else if (name == QStringLiteral("del") || name == QStringLiteral("moveFrom")) {
+        } else if (name == Text("del") || name == Text("moveFrom")) {
             warningOnce(
                 diagnostics,
                 "docx.tracked_deletion_omitted",
@@ -500,21 +496,21 @@ void parseInlineContainer(
 }
 
 WordParagraph parseParagraph(
-    QXmlStreamReader& xml,
+    XmlReader& xml,
     const std::filesystem::path& source,
     std::vector<Diagnostic>& diagnostics)
 {
     WordParagraph paragraph;
     while (xml.readNextStartElement()) {
-        if (xml.name() == QStringLiteral("pPr")) {
+        if (xml.name() == Text("pPr")) {
             parseParagraphProperties(xml, paragraph.properties);
-        } else if (xml.name() == QStringLiteral("r")) {
+        } else if (xml.name() == Text("r")) {
             paragraph.runs.push_back(parseRun(xml, source, diagnostics));
-        } else if (xml.name() == QStringLiteral("hyperlink") || xml.name() == QStringLiteral("ins")
-                   || xml.name() == QStringLiteral("smartTag") || xml.name() == QStringLiteral("sdt")
-                   || xml.name() == QStringLiteral("sdtContent")
-                   || xml.name() == QStringLiteral("fldSimple")) {
-            if (xml.name() == QStringLiteral("hyperlink")) {
+        } else if (xml.name() == Text("hyperlink") || xml.name() == Text("ins")
+                   || xml.name() == Text("smartTag") || xml.name() == Text("sdt")
+                   || xml.name() == Text("sdtContent")
+                   || xml.name() == Text("fldSimple")) {
+            if (xml.name() == Text("hyperlink")) {
                 warningOnce(
                     diagnostics,
                     "docx.hyperlink_flattened",
@@ -522,7 +518,7 @@ WordParagraph parseParagraph(
                     source);
             }
             parseInlineContainer(xml, paragraph, source, diagnostics);
-        } else if (xml.name() == QStringLiteral("del") || xml.name() == QStringLiteral("moveFrom")) {
+        } else if (xml.name() == Text("del") || xml.name() == Text("moveFrom")) {
             warningOnce(
                 diagnostics,
                 "docx.tracked_deletion_omitted",
@@ -537,15 +533,15 @@ WordParagraph parseParagraph(
 }
 
 WordTableCell parseTableCell(
-    QXmlStreamReader& xml,
+    XmlReader& xml,
     const std::filesystem::path& source,
     std::vector<Diagnostic>& diagnostics)
 {
     WordTableCell cell;
     while (xml.readNextStartElement()) {
-        if (xml.name() == QStringLiteral("p")) {
+        if (xml.name() == Text("p")) {
             cell.paragraphs.push_back(parseParagraph(xml, source, diagnostics));
-        } else if (xml.name() == QStringLiteral("tbl")) {
+        } else if (xml.name() == Text("tbl")) {
             warningOnce(
                 diagnostics,
                 "docx.nested_table_omitted",
@@ -563,13 +559,13 @@ WordTableCell parseTableCell(
 }
 
 WordTableRow parseTableRow(
-    QXmlStreamReader& xml,
+    XmlReader& xml,
     const std::filesystem::path& source,
     std::vector<Diagnostic>& diagnostics)
 {
     WordTableRow row;
     while (xml.readNextStartElement()) {
-        if (xml.name() == QStringLiteral("tc")) {
+        if (xml.name() == Text("tc")) {
             row.cells.push_back(parseTableCell(xml, source, diagnostics));
         } else {
             xml.skipCurrentElement();
@@ -579,13 +575,13 @@ WordTableRow parseTableRow(
 }
 
 WordTable parseTable(
-    QXmlStreamReader& xml,
+    XmlReader& xml,
     const std::filesystem::path& source,
     std::vector<Diagnostic>& diagnostics)
 {
     WordTable table;
     while (xml.readNextStartElement()) {
-        if (xml.name() == QStringLiteral("tr")) {
+        if (xml.name() == Text("tr")) {
             table.rows.push_back(parseTableRow(xml, source, diagnostics));
         } else {
             xml.skipCurrentElement();
@@ -594,10 +590,10 @@ WordTable parseTable(
     return table;
 }
 
-void parseSectionProperties(QXmlStreamReader& xml, WordSectionProperties& section)
+void parseSectionProperties(XmlReader& xml, WordSectionProperties& section)
 {
     while (xml.readNextStartElement()) {
-        if (xml.name() == QStringLiteral("pgSz")) {
+        if (xml.name() == Text("pgSz")) {
             bool widthValid = false;
             bool heightValid = false;
             const auto width = attribute(xml, "w").toInt(&widthValid);
@@ -609,7 +605,7 @@ void parseSectionProperties(QXmlStreamReader& xml, WordSectionProperties& sectio
                 section.pageHeightTwips = height;
             }
             xml.skipCurrentElement();
-        } else if (xml.name() == QStringLiteral("pgMar")) {
+        } else if (xml.name() == Text("pgMar")) {
             const auto assign = [&](const char* name, int& target) {
                 bool valid = false;
                 const auto value = attribute(xml, name).toInt(&valid);
@@ -629,25 +625,25 @@ void parseSectionProperties(QXmlStreamReader& xml, WordSectionProperties& sectio
 }
 
 void parseDocumentXml(
-    const QByteArray& bytes,
+    const ByteBuffer& bytes,
     WordDocument& document,
     const std::filesystem::path& source,
     std::vector<Diagnostic>& diagnostics)
 {
-    QXmlStreamReader xml(bytes);
+    XmlReader xml(bytes);
     bool foundBody = false;
     while (!xml.atEnd()) {
         xml.readNext();
-        if (!xml.isStartElement() || xml.name() != QStringLiteral("body")) {
+        if (!xml.isStartElement() || xml.name() != Text("body")) {
             continue;
         }
         foundBody = true;
         while (xml.readNextStartElement()) {
-            if (xml.name() == QStringLiteral("p")) {
+            if (xml.name() == Text("p")) {
                 document.blocks().emplace_back(parseParagraph(xml, source, diagnostics));
-            } else if (xml.name() == QStringLiteral("tbl")) {
+            } else if (xml.name() == Text("tbl")) {
                 document.blocks().emplace_back(parseTable(xml, source, diagnostics));
-            } else if (xml.name() == QStringLiteral("sectPr")) {
+            } else if (xml.name() == Text("sectPr")) {
                 parseSectionProperties(xml, document.section());
             } else {
                 warningOnce(
@@ -675,27 +671,25 @@ void parseDocumentXml(
     }
 }
 
-QByteArray xmlDocument(const std::function<void(QXmlStreamWriter&)>& body)
+ByteBuffer xmlDocument(const std::function<void(XmlWriter&)>& body)
 {
-    QByteArray bytes;
-    QBuffer buffer(&bytes);
-    buffer.open(QIODevice::WriteOnly);
-    QXmlStreamWriter xml(&buffer);
+    ByteBuffer bytes;
+    XmlWriter xml(bytes);
     xml.setAutoFormatting(false);
-    xml.writeStartDocument(QStringLiteral("1.0"));
+    xml.writeStartDocument(Text("1.0"));
     body(xml);
     xml.writeEndDocument();
     return bytes;
 }
 
-void writeValElement(QXmlStreamWriter& xml, const QString& name, const QString& value)
+void writeValElement(XmlWriter& xml, const Text& name, const Text& value)
 {
     xml.writeStartElement(wordNamespace(), name);
-    xml.writeAttribute(wordNamespace(), QStringLiteral("val"), value);
+    xml.writeAttribute(wordNamespace(), Text("val"), value);
     xml.writeEndElement();
 }
 
-void writeRunProperties(QXmlStreamWriter& xml, const WordRunProperties& properties)
+void writeRunProperties(XmlWriter& xml, const WordRunProperties& properties)
 {
     const bool hasProperties = properties.bold || properties.italic || properties.underline
         || !properties.fontFamily.empty() || !properties.eastAsiaFontFamily.empty()
@@ -704,70 +698,70 @@ void writeRunProperties(QXmlStreamWriter& xml, const WordRunProperties& properti
         return;
     }
 
-    xml.writeStartElement(wordNamespace(), QStringLiteral("rPr"));
+    xml.writeStartElement(wordNamespace(), Text("rPr"));
     if (properties.bold) {
-        xml.writeEmptyElement(wordNamespace(), QStringLiteral("b"));
+        xml.writeEmptyElement(wordNamespace(), Text("b"));
     }
     if (properties.italic) {
-        xml.writeEmptyElement(wordNamespace(), QStringLiteral("i"));
+        xml.writeEmptyElement(wordNamespace(), Text("i"));
     }
     if (properties.underline) {
-        writeValElement(xml, QStringLiteral("u"), QStringLiteral("single"));
+        writeValElement(xml, Text("u"), Text("single"));
     }
     if (!properties.fontFamily.empty()) {
-        xml.writeStartElement(wordNamespace(), QStringLiteral("rFonts"));
-        const auto font = QString::fromUtf8(properties.fontFamily);
-        xml.writeAttribute(wordNamespace(), QStringLiteral("ascii"), font);
-        xml.writeAttribute(wordNamespace(), QStringLiteral("hAnsi"), font);
+        xml.writeStartElement(wordNamespace(), Text("rFonts"));
+        const auto font = Text::fromUtf8(properties.fontFamily);
+        xml.writeAttribute(wordNamespace(), Text("ascii"), font);
+        xml.writeAttribute(wordNamespace(), Text("hAnsi"), font);
         if (!properties.eastAsiaFontFamily.empty()) {
-            xml.writeAttribute(wordNamespace(), QStringLiteral("eastAsia"),
-                               QString::fromUtf8(properties.eastAsiaFontFamily));
+            xml.writeAttribute(wordNamespace(), Text("eastAsia"),
+                               Text::fromUtf8(properties.eastAsiaFontFamily));
         }
         xml.writeEndElement();
     } else if (!properties.eastAsiaFontFamily.empty()) {
-        xml.writeStartElement(wordNamespace(), QStringLiteral("rFonts"));
-        xml.writeAttribute(wordNamespace(), QStringLiteral("eastAsia"),
-                           QString::fromUtf8(properties.eastAsiaFontFamily));
+        xml.writeStartElement(wordNamespace(), Text("rFonts"));
+        xml.writeAttribute(wordNamespace(), Text("eastAsia"),
+                           Text::fromUtf8(properties.eastAsiaFontFamily));
         xml.writeEndElement();
     }
     if (properties.fontSizePoints > 0.0) {
         const auto halfPoints = static_cast<int>(std::lround(properties.fontSizePoints * 2.0));
-        writeValElement(xml, QStringLiteral("sz"), QString::number(halfPoints));
-        writeValElement(xml, QStringLiteral("szCs"), QString::number(halfPoints));
+        writeValElement(xml, Text("sz"), Text::number(halfPoints));
+        writeValElement(xml, Text("szCs"), Text::number(halfPoints));
     }
     if (!properties.color.empty()) {
-        writeValElement(xml, QStringLiteral("color"), QString::fromUtf8(properties.color));
+        writeValElement(xml, Text("color"), Text::fromUtf8(properties.color));
     }
     xml.writeEndElement();
 }
 
-void writeRunText(QXmlStreamWriter& xml, const std::string& text)
+void writeRunText(XmlWriter& xml, const std::string& text)
 {
-    const auto value = QString::fromUtf8(text);
-    QString chunk;
+    const auto value = Text::fromUtf8(text);
+    Text chunk;
     auto flush = [&]() {
         if (chunk.isEmpty()) {
             return;
         }
-        xml.writeStartElement(wordNamespace(), QStringLiteral("t"));
+        xml.writeStartElement(wordNamespace(), Text("t"));
         xml.writeAttribute(
-            QStringLiteral("http://www.w3.org/XML/1998/namespace"),
-            QStringLiteral("space"), QStringLiteral("preserve"));
+            Text("http://www.w3.org/XML/1998/namespace"),
+            Text("space"), Text("preserve"));
         xml.writeCharacters(chunk);
         xml.writeEndElement();
         chunk.clear();
     };
 
-    for (qsizetype index = 0; index < value.size(); ++index) {
+    for (std::ptrdiff_t index = 0; index < value.size(); ++index) {
         const auto character = value[index];
-        if (character == QLatin1Char('\t')) {
+        if (character == '\t') {
             flush();
-            xml.writeEmptyElement(wordNamespace(), QStringLiteral("tab"));
-        } else if (character == QLatin1Char('\n') || character == QLatin1Char('\r')) {
+            xml.writeEmptyElement(wordNamespace(), Text("tab"));
+        } else if (character == '\n' || character == '\r') {
             flush();
-            xml.writeEmptyElement(wordNamespace(), QStringLiteral("br"));
-            if (character == QLatin1Char('\r') && index + 1 < value.size()
-                && value[index + 1] == QLatin1Char('\n')) {
+            xml.writeEmptyElement(wordNamespace(), Text("br"));
+            if (character == '\r' && index + 1 < value.size()
+                && value[index + 1] == '\n') {
                 ++index;
             }
         } else {
@@ -777,52 +771,52 @@ void writeRunText(QXmlStreamWriter& xml, const std::string& text)
     flush();
 }
 
-void writeParagraph(QXmlStreamWriter& xml, const WordParagraph& paragraph)
+void writeParagraph(XmlWriter& xml, const WordParagraph& paragraph)
 {
-    xml.writeStartElement(wordNamespace(), QStringLiteral("p"));
+    xml.writeStartElement(wordNamespace(), Text("p"));
     const auto& properties = paragraph.properties;
     if (!properties.styleId.empty()
         || properties.alignment != WordParagraphAlignment::automatic
         || (properties.numberingId.has_value()
             && !properties.numberingContinuation)) {
-        xml.writeStartElement(wordNamespace(), QStringLiteral("pPr"));
+        xml.writeStartElement(wordNamespace(), Text("pPr"));
         if (!properties.styleId.empty()) {
             writeValElement(
-                xml, QStringLiteral("pStyle"), QString::fromUtf8(properties.styleId));
+                xml, Text("pStyle"), Text::fromUtf8(properties.styleId));
         }
-        QString alignment;
+        Text alignment;
         switch (properties.alignment) {
         case WordParagraphAlignment::left:
-            alignment = QStringLiteral("left");
+            alignment = Text("left");
             break;
         case WordParagraphAlignment::center:
-            alignment = QStringLiteral("center");
+            alignment = Text("center");
             break;
         case WordParagraphAlignment::right:
-            alignment = QStringLiteral("right");
+            alignment = Text("right");
             break;
         case WordParagraphAlignment::justified:
-            alignment = QStringLiteral("both");
+            alignment = Text("both");
             break;
         case WordParagraphAlignment::automatic:
             break;
         }
         if (!alignment.isEmpty()) {
-            writeValElement(xml, QStringLiteral("jc"), alignment);
+            writeValElement(xml, Text("jc"), alignment);
         }
         if (properties.numberingId && !properties.numberingContinuation) {
-            xml.writeStartElement(wordNamespace(), QStringLiteral("numPr"));
+            xml.writeStartElement(wordNamespace(), Text("numPr"));
             writeValElement(
-                xml, QStringLiteral("ilvl"), QString::number(properties.numberingLevel));
+                xml, Text("ilvl"), Text::number(properties.numberingLevel));
             writeValElement(
-                xml, QStringLiteral("numId"), QString::number(*properties.numberingId));
+                xml, Text("numId"), Text::number(*properties.numberingId));
             xml.writeEndElement();
         }
         xml.writeEndElement();
     }
 
     for (const auto& run : paragraph.runs) {
-        xml.writeStartElement(wordNamespace(), QStringLiteral("r"));
+        xml.writeStartElement(wordNamespace(), Text("r"));
         writeRunProperties(xml, run.properties);
         writeRunText(xml, run.text);
         xml.writeEndElement();
@@ -830,7 +824,7 @@ void writeParagraph(QXmlStreamWriter& xml, const WordParagraph& paragraph)
     xml.writeEndElement();
 }
 
-void writeTable(QXmlStreamWriter& xml, const WordTable& table, int usableWidthTwips)
+void writeTable(XmlWriter& xml, const WordTable& table, int usableWidthTwips)
 {
     std::size_t columnCount = 1;
     for (const auto& row : table.rows) {
@@ -844,58 +838,58 @@ void writeTable(QXmlStreamWriter& xml, const WordTable& table, int usableWidthTw
         ++widths[static_cast<std::size_t>(index)];
     }
 
-    xml.writeStartElement(wordNamespace(), QStringLiteral("tbl"));
-    xml.writeStartElement(wordNamespace(), QStringLiteral("tblPr"));
-    xml.writeStartElement(wordNamespace(), QStringLiteral("tblW"));
-    xml.writeAttribute(wordNamespace(), QStringLiteral("w"), QString::number(safeWidth));
-    xml.writeAttribute(wordNamespace(), QStringLiteral("type"), QStringLiteral("dxa"));
+    xml.writeStartElement(wordNamespace(), Text("tbl"));
+    xml.writeStartElement(wordNamespace(), Text("tblPr"));
+    xml.writeStartElement(wordNamespace(), Text("tblW"));
+    xml.writeAttribute(wordNamespace(), Text("w"), Text::number(safeWidth));
+    xml.writeAttribute(wordNamespace(), Text("type"), Text("dxa"));
     xml.writeEndElement();
-    xml.writeStartElement(wordNamespace(), QStringLiteral("tblInd"));
-    xml.writeAttribute(wordNamespace(), QStringLiteral("w"), QStringLiteral("120"));
-    xml.writeAttribute(wordNamespace(), QStringLiteral("type"), QStringLiteral("dxa"));
+    xml.writeStartElement(wordNamespace(), Text("tblInd"));
+    xml.writeAttribute(wordNamespace(), Text("w"), Text("120"));
+    xml.writeAttribute(wordNamespace(), Text("type"), Text("dxa"));
     xml.writeEndElement();
-    xml.writeStartElement(wordNamespace(), QStringLiteral("tblLayout"));
-    xml.writeAttribute(wordNamespace(), QStringLiteral("type"), QStringLiteral("fixed"));
+    xml.writeStartElement(wordNamespace(), Text("tblLayout"));
+    xml.writeAttribute(wordNamespace(), Text("type"), Text("fixed"));
     xml.writeEndElement();
-    xml.writeStartElement(wordNamespace(), QStringLiteral("tblCellMar"));
+    xml.writeStartElement(wordNamespace(), Text("tblCellMar"));
     for (const auto* side : {"top", "left", "bottom", "right"}) {
-        xml.writeStartElement(wordNamespace(), QString::fromLatin1(side));
-        xml.writeAttribute(wordNamespace(), QStringLiteral("w"), QStringLiteral("120"));
-        xml.writeAttribute(wordNamespace(), QStringLiteral("type"), QStringLiteral("dxa"));
+        xml.writeStartElement(wordNamespace(), Text::fromLatin1(side));
+        xml.writeAttribute(wordNamespace(), Text("w"), Text("120"));
+        xml.writeAttribute(wordNamespace(), Text("type"), Text("dxa"));
         xml.writeEndElement();
     }
     xml.writeEndElement();
-    xml.writeStartElement(wordNamespace(), QStringLiteral("tblBorders"));
+    xml.writeStartElement(wordNamespace(), Text("tblBorders"));
     for (const auto* side : {"top", "left", "bottom", "right", "insideH", "insideV"}) {
-        xml.writeStartElement(wordNamespace(), QString::fromLatin1(side));
-        xml.writeAttribute(wordNamespace(), QStringLiteral("val"), QStringLiteral("single"));
-        xml.writeAttribute(wordNamespace(), QStringLiteral("sz"), QStringLiteral("4"));
-        xml.writeAttribute(wordNamespace(), QStringLiteral("color"), QStringLiteral("B7C9D6"));
+        xml.writeStartElement(wordNamespace(), Text::fromLatin1(side));
+        xml.writeAttribute(wordNamespace(), Text("val"), Text("single"));
+        xml.writeAttribute(wordNamespace(), Text("sz"), Text("4"));
+        xml.writeAttribute(wordNamespace(), Text("color"), Text("B7C9D6"));
         xml.writeEndElement();
     }
     xml.writeEndElement();
     xml.writeEndElement();
 
-    xml.writeStartElement(wordNamespace(), QStringLiteral("tblGrid"));
+    xml.writeStartElement(wordNamespace(), Text("tblGrid"));
     for (const auto width : widths) {
-        xml.writeStartElement(wordNamespace(), QStringLiteral("gridCol"));
-        xml.writeAttribute(wordNamespace(), QStringLiteral("w"), QString::number(width));
+        xml.writeStartElement(wordNamespace(), Text("gridCol"));
+        xml.writeAttribute(wordNamespace(), Text("w"), Text::number(width));
         xml.writeEndElement();
     }
     xml.writeEndElement();
 
     for (const auto& row : table.rows) {
-        xml.writeStartElement(wordNamespace(), QStringLiteral("tr"));
+        xml.writeStartElement(wordNamespace(), Text("tr"));
         for (std::size_t cellIndex = 0; cellIndex < row.cells.size(); ++cellIndex) {
             const auto& cell = row.cells[cellIndex];
-            xml.writeStartElement(wordNamespace(), QStringLiteral("tc"));
-            xml.writeStartElement(wordNamespace(), QStringLiteral("tcPr"));
-            xml.writeStartElement(wordNamespace(), QStringLiteral("tcW"));
+            xml.writeStartElement(wordNamespace(), Text("tc"));
+            xml.writeStartElement(wordNamespace(), Text("tcPr"));
+            xml.writeStartElement(wordNamespace(), Text("tcW"));
             xml.writeAttribute(
-                wordNamespace(), QStringLiteral("w"), QString::number(widths[cellIndex]));
-            xml.writeAttribute(wordNamespace(), QStringLiteral("type"), QStringLiteral("dxa"));
+                wordNamespace(), Text("w"), Text::number(widths[cellIndex]));
+            xml.writeAttribute(wordNamespace(), Text("type"), Text("dxa"));
             xml.writeEndElement();
-            writeValElement(xml, QStringLiteral("vAlign"), QStringLiteral("center"));
+            writeValElement(xml, Text("vAlign"), Text("center"));
             xml.writeEndElement();
             if (cell.paragraphs.empty()) {
                 writeParagraph(xml, {});
@@ -959,15 +953,15 @@ std::set<int> usedNumberingIds(const WordDocument& document)
     return identifiers;
 }
 
-QByteArray documentXml(const WordDocument& document)
+ByteBuffer documentXml(const WordDocument& document)
 {
-    return xmlDocument([&](QXmlStreamWriter& xml) {
-        xml.writeStartElement(QStringLiteral("w:document"));
-        xml.writeNamespace(wordNamespace(), QStringLiteral("w"));
+    return xmlDocument([&](XmlWriter& xml) {
+        xml.writeStartElement(Text("w:document"));
+        xml.writeNamespace(wordNamespace(), Text("w"));
         xml.writeNamespace(
-            QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/relationships"),
-            QStringLiteral("r"));
-        xml.writeStartElement(wordNamespace(), QStringLiteral("body"));
+            Text("http://schemas.openxmlformats.org/officeDocument/2006/relationships"),
+            Text("r"));
+        xml.writeStartElement(wordNamespace(), Text("body"));
 
         if (document.blocks().empty()) {
             writeParagraph(xml, {});
@@ -985,25 +979,25 @@ QByteArray documentXml(const WordDocument& document)
         }
 
         const auto& section = document.section();
-        xml.writeStartElement(wordNamespace(), QStringLiteral("sectPr"));
-        xml.writeStartElement(wordNamespace(), QStringLiteral("pgSz"));
+        xml.writeStartElement(wordNamespace(), Text("sectPr"));
+        xml.writeStartElement(wordNamespace(), Text("pgSz"));
         xml.writeAttribute(
-            wordNamespace(), QStringLiteral("w"), QString::number(section.pageWidthTwips));
+            wordNamespace(), Text("w"), Text::number(section.pageWidthTwips));
         xml.writeAttribute(
-            wordNamespace(), QStringLiteral("h"), QString::number(section.pageHeightTwips));
+            wordNamespace(), Text("h"), Text::number(section.pageHeightTwips));
         xml.writeEndElement();
-        xml.writeStartElement(wordNamespace(), QStringLiteral("pgMar"));
+        xml.writeStartElement(wordNamespace(), Text("pgMar"));
         xml.writeAttribute(
-            wordNamespace(), QStringLiteral("top"), QString::number(section.marginTopTwips));
+            wordNamespace(), Text("top"), Text::number(section.marginTopTwips));
         xml.writeAttribute(
-            wordNamespace(), QStringLiteral("right"), QString::number(section.marginRightTwips));
+            wordNamespace(), Text("right"), Text::number(section.marginRightTwips));
         xml.writeAttribute(
-            wordNamespace(), QStringLiteral("bottom"), QString::number(section.marginBottomTwips));
+            wordNamespace(), Text("bottom"), Text::number(section.marginBottomTwips));
         xml.writeAttribute(
-            wordNamespace(), QStringLiteral("left"), QString::number(section.marginLeftTwips));
-        xml.writeAttribute(wordNamespace(), QStringLiteral("header"), QStringLiteral("720"));
-        xml.writeAttribute(wordNamespace(), QStringLiteral("footer"), QStringLiteral("720"));
-        xml.writeAttribute(wordNamespace(), QStringLiteral("gutter"), QStringLiteral("0"));
+            wordNamespace(), Text("left"), Text::number(section.marginLeftTwips));
+        xml.writeAttribute(wordNamespace(), Text("header"), Text("720"));
+        xml.writeAttribute(wordNamespace(), Text("footer"), Text("720"));
+        xml.writeAttribute(wordNamespace(), Text("gutter"), Text("0"));
         xml.writeEndElement();
         xml.writeEndElement();
 
@@ -1013,318 +1007,318 @@ QByteArray documentXml(const WordDocument& document)
 }
 
 void writeStyle(
-    QXmlStreamWriter& xml,
-    const QString& id,
-    const QString& name,
+    XmlWriter& xml,
+    const Text& id,
+    const Text& name,
     int fontSizeHalfPoints,
     bool bold,
     int spaceBefore,
     int spaceAfter,
     bool isDefault = false)
 {
-    xml.writeStartElement(wordNamespace(), QStringLiteral("style"));
-    xml.writeAttribute(wordNamespace(), QStringLiteral("type"), QStringLiteral("paragraph"));
-    xml.writeAttribute(wordNamespace(), QStringLiteral("styleId"), id);
+    xml.writeStartElement(wordNamespace(), Text("style"));
+    xml.writeAttribute(wordNamespace(), Text("type"), Text("paragraph"));
+    xml.writeAttribute(wordNamespace(), Text("styleId"), id);
     if (isDefault) {
-        xml.writeAttribute(wordNamespace(), QStringLiteral("default"), QStringLiteral("1"));
+        xml.writeAttribute(wordNamespace(), Text("default"), Text("1"));
     }
-    writeValElement(xml, QStringLiteral("name"), name);
+    writeValElement(xml, Text("name"), name);
     if (!isDefault) {
-        writeValElement(xml, QStringLiteral("basedOn"), QStringLiteral("Normal"));
-        writeValElement(xml, QStringLiteral("next"), QStringLiteral("Normal"));
-        xml.writeEmptyElement(wordNamespace(), QStringLiteral("qFormat"));
+        writeValElement(xml, Text("basedOn"), Text("Normal"));
+        writeValElement(xml, Text("next"), Text("Normal"));
+        xml.writeEmptyElement(wordNamespace(), Text("qFormat"));
     }
-    xml.writeStartElement(wordNamespace(), QStringLiteral("pPr"));
-    xml.writeStartElement(wordNamespace(), QStringLiteral("spacing"));
-    xml.writeAttribute(wordNamespace(), QStringLiteral("before"), QString::number(spaceBefore));
-    xml.writeAttribute(wordNamespace(), QStringLiteral("after"), QString::number(spaceAfter));
-    xml.writeAttribute(wordNamespace(), QStringLiteral("line"), QStringLiteral("276"));
-    xml.writeAttribute(wordNamespace(), QStringLiteral("lineRule"), QStringLiteral("auto"));
+    xml.writeStartElement(wordNamespace(), Text("pPr"));
+    xml.writeStartElement(wordNamespace(), Text("spacing"));
+    xml.writeAttribute(wordNamespace(), Text("before"), Text::number(spaceBefore));
+    xml.writeAttribute(wordNamespace(), Text("after"), Text::number(spaceAfter));
+    xml.writeAttribute(wordNamespace(), Text("line"), Text("276"));
+    xml.writeAttribute(wordNamespace(), Text("lineRule"), Text("auto"));
     xml.writeEndElement();
     xml.writeEndElement();
-    xml.writeStartElement(wordNamespace(), QStringLiteral("rPr"));
+    xml.writeStartElement(wordNamespace(), Text("rPr"));
     if (bold) {
-        xml.writeEmptyElement(wordNamespace(), QStringLiteral("b"));
+        xml.writeEmptyElement(wordNamespace(), Text("b"));
     }
-    writeValElement(xml, QStringLiteral("sz"), QString::number(fontSizeHalfPoints));
-    writeValElement(xml, QStringLiteral("szCs"), QString::number(fontSizeHalfPoints));
+    writeValElement(xml, Text("sz"), Text::number(fontSizeHalfPoints));
+    writeValElement(xml, Text("szCs"), Text::number(fontSizeHalfPoints));
     xml.writeEndElement();
     xml.writeEndElement();
 }
 
-QByteArray stylesXml(const WordDocument& document)
+ByteBuffer stylesXml(const WordDocument& document)
 {
     const std::set<std::string> builtIn{
         "Normal", "Title", "Subtitle", "Heading1", "Heading2", "Heading3"};
-    return xmlDocument([&](QXmlStreamWriter& xml) {
-        xml.writeStartElement(QStringLiteral("w:styles"));
-        xml.writeNamespace(wordNamespace(), QStringLiteral("w"));
-        xml.writeStartElement(wordNamespace(), QStringLiteral("docDefaults"));
-        xml.writeStartElement(wordNamespace(), QStringLiteral("rPrDefault"));
-        xml.writeStartElement(wordNamespace(), QStringLiteral("rPr"));
-        xml.writeStartElement(wordNamespace(), QStringLiteral("rFonts"));
+    return xmlDocument([&](XmlWriter& xml) {
+        xml.writeStartElement(Text("w:styles"));
+        xml.writeNamespace(wordNamespace(), Text("w"));
+        xml.writeStartElement(wordNamespace(), Text("docDefaults"));
+        xml.writeStartElement(wordNamespace(), Text("rPrDefault"));
+        xml.writeStartElement(wordNamespace(), Text("rPr"));
+        xml.writeStartElement(wordNamespace(), Text("rFonts"));
         for (const auto* attributeName : {"ascii", "hAnsi", "cs"}) {
             xml.writeAttribute(
-                wordNamespace(), QString::fromLatin1(attributeName), QStringLiteral("Arial"));
+                wordNamespace(), Text::fromLatin1(attributeName), Text("Arial"));
         }
         xml.writeEndElement();
-        writeValElement(xml, QStringLiteral("sz"), QStringLiteral("22"));
-        writeValElement(xml, QStringLiteral("szCs"), QStringLiteral("22"));
+        writeValElement(xml, Text("sz"), Text("22"));
+        writeValElement(xml, Text("szCs"), Text("22"));
         xml.writeEndElement();
         xml.writeEndElement();
-        xml.writeStartElement(wordNamespace(), QStringLiteral("pPrDefault"));
-        xml.writeStartElement(wordNamespace(), QStringLiteral("pPr"));
-        xml.writeStartElement(wordNamespace(), QStringLiteral("spacing"));
-        xml.writeAttribute(wordNamespace(), QStringLiteral("after"), QStringLiteral("160"));
-        xml.writeAttribute(wordNamespace(), QStringLiteral("line"), QStringLiteral("276"));
-        xml.writeAttribute(wordNamespace(), QStringLiteral("lineRule"), QStringLiteral("auto"));
+        xml.writeStartElement(wordNamespace(), Text("pPrDefault"));
+        xml.writeStartElement(wordNamespace(), Text("pPr"));
+        xml.writeStartElement(wordNamespace(), Text("spacing"));
+        xml.writeAttribute(wordNamespace(), Text("after"), Text("160"));
+        xml.writeAttribute(wordNamespace(), Text("line"), Text("276"));
+        xml.writeAttribute(wordNamespace(), Text("lineRule"), Text("auto"));
         xml.writeEndElement();
         xml.writeEndElement();
         xml.writeEndElement();
         xml.writeEndElement();
 
-        writeStyle(xml, QStringLiteral("Normal"), QStringLiteral("Normal"), 22, false, 0, 160, true);
-        writeStyle(xml, QStringLiteral("Title"), QStringLiteral("Title"), 52, false, 0, 60);
-        writeStyle(xml, QStringLiteral("Subtitle"), QStringLiteral("Subtitle"), 30, false, 0, 160);
-        writeStyle(xml, QStringLiteral("Heading1"), QStringLiteral("heading 1"), 32, true, 240, 120);
-        writeStyle(xml, QStringLiteral("Heading2"), QStringLiteral("heading 2"), 26, true, 200, 80);
-        writeStyle(xml, QStringLiteral("Heading3"), QStringLiteral("heading 3"), 22, true, 160, 60);
+        writeStyle(xml, Text("Normal"), Text("Normal"), 22, false, 0, 160, true);
+        writeStyle(xml, Text("Title"), Text("Title"), 52, false, 0, 60);
+        writeStyle(xml, Text("Subtitle"), Text("Subtitle"), 30, false, 0, 160);
+        writeStyle(xml, Text("Heading1"), Text("heading 1"), 32, true, 240, 120);
+        writeStyle(xml, Text("Heading2"), Text("heading 2"), 26, true, 200, 80);
+        writeStyle(xml, Text("Heading3"), Text("heading 3"), 22, true, 160, 60);
 
         for (const auto& style : usedStyles(document)) {
             if (!builtIn.contains(style)) {
                 writeStyle(
-                    xml, QString::fromUtf8(style), QString::fromUtf8(style), 22, false, 0, 160);
+                    xml, Text::fromUtf8(style), Text::fromUtf8(style), 22, false, 0, 160);
             }
         }
         xml.writeEndElement();
     });
 }
 
-QByteArray numberingXml(const std::set<int>& identifiers)
+ByteBuffer numberingXml(const std::set<int>& identifiers)
 {
-    return xmlDocument([&](QXmlStreamWriter& xml) {
-        xml.writeStartElement(QStringLiteral("w:numbering"));
-        xml.writeNamespace(wordNamespace(), QStringLiteral("w"));
+    return xmlDocument([&](XmlWriter& xml) {
+        xml.writeStartElement(Text("w:numbering"));
+        xml.writeNamespace(wordNamespace(), Text("w"));
         for (const auto identifier : identifiers) {
-            xml.writeStartElement(wordNamespace(), QStringLiteral("abstractNum"));
+            xml.writeStartElement(wordNamespace(), Text("abstractNum"));
             xml.writeAttribute(
-                wordNamespace(), QStringLiteral("abstractNumId"), QString::number(identifier));
-            writeValElement(xml, QStringLiteral("multiLevelType"), QStringLiteral("multilevel"));
+                wordNamespace(), Text("abstractNumId"), Text::number(identifier));
+            writeValElement(xml, Text("multiLevelType"), Text("multilevel"));
             for (int level = 0; level < 9; ++level) {
-                xml.writeStartElement(wordNamespace(), QStringLiteral("lvl"));
-                xml.writeAttribute(wordNamespace(), QStringLiteral("ilvl"), QString::number(level));
-                writeValElement(xml, QStringLiteral("start"), QStringLiteral("1"));
-                writeValElement(xml, QStringLiteral("numFmt"), QStringLiteral("decimal"));
+                xml.writeStartElement(wordNamespace(), Text("lvl"));
+                xml.writeAttribute(wordNamespace(), Text("ilvl"), Text::number(level));
+                writeValElement(xml, Text("start"), Text("1"));
+                writeValElement(xml, Text("numFmt"), Text("decimal"));
                 writeValElement(
-                    xml, QStringLiteral("lvlText"), QStringLiteral("%") + QString::number(level + 1)
-                        + QStringLiteral("."));
-                writeValElement(xml, QStringLiteral("suff"), QStringLiteral("tab"));
-                xml.writeStartElement(wordNamespace(), QStringLiteral("pPr"));
-                xml.writeStartElement(wordNamespace(), QStringLiteral("tabs"));
-                xml.writeStartElement(wordNamespace(), QStringLiteral("tab"));
-                xml.writeAttribute(wordNamespace(), QStringLiteral("val"), QStringLiteral("num"));
+                    xml, Text("lvlText"), Text("%") + Text::number(level + 1)
+                        + Text("."));
+                writeValElement(xml, Text("suff"), Text("tab"));
+                xml.writeStartElement(wordNamespace(), Text("pPr"));
+                xml.writeStartElement(wordNamespace(), Text("tabs"));
+                xml.writeStartElement(wordNamespace(), Text("tab"));
+                xml.writeAttribute(wordNamespace(), Text("val"), Text("num"));
                 xml.writeAttribute(
-                    wordNamespace(), QStringLiteral("pos"), QString::number(720 + level * 360));
+                    wordNamespace(), Text("pos"), Text::number(720 + level * 360));
                 xml.writeEndElement();
                 xml.writeEndElement();
-                xml.writeStartElement(wordNamespace(), QStringLiteral("ind"));
+                xml.writeStartElement(wordNamespace(), Text("ind"));
                 xml.writeAttribute(
-                    wordNamespace(), QStringLiteral("left"), QString::number(720 + level * 360));
-                xml.writeAttribute(wordNamespace(), QStringLiteral("hanging"), QStringLiteral("360"));
+                    wordNamespace(), Text("left"), Text::number(720 + level * 360));
+                xml.writeAttribute(wordNamespace(), Text("hanging"), Text("360"));
                 xml.writeEndElement();
                 xml.writeEndElement();
                 xml.writeEndElement();
             }
             xml.writeEndElement();
-            xml.writeStartElement(wordNamespace(), QStringLiteral("num"));
-            xml.writeAttribute(wordNamespace(), QStringLiteral("numId"), QString::number(identifier));
+            xml.writeStartElement(wordNamespace(), Text("num"));
+            xml.writeAttribute(wordNamespace(), Text("numId"), Text::number(identifier));
             writeValElement(
-                xml, QStringLiteral("abstractNumId"), QString::number(identifier));
+                xml, Text("abstractNumId"), Text::number(identifier));
             xml.writeEndElement();
         }
         xml.writeEndElement();
     });
 }
 
-QByteArray packageRelationshipsXml()
+ByteBuffer packageRelationshipsXml()
 {
-    return xmlDocument([](QXmlStreamWriter& xml) {
-        xml.writeStartElement(QStringLiteral("Relationships"));
+    return xmlDocument([](XmlWriter& xml) {
+        xml.writeStartElement(Text("Relationships"));
         xml.writeDefaultNamespace(relationshipNamespace());
-        const auto relationship = [&](const QString& id, const QString& type, const QString& target) {
-            xml.writeStartElement(relationshipNamespace(), QStringLiteral("Relationship"));
-            xml.writeAttribute(QStringLiteral("Id"), id);
-            xml.writeAttribute(QStringLiteral("Type"), type);
-            xml.writeAttribute(QStringLiteral("Target"), target);
+        const auto relationship = [&](const Text& id, const Text& type, const Text& target) {
+            xml.writeStartElement(relationshipNamespace(), Text("Relationship"));
+            xml.writeAttribute(Text("Id"), id);
+            xml.writeAttribute(Text("Type"), type);
+            xml.writeAttribute(Text("Target"), target);
             xml.writeEndElement();
         };
         relationship(
-            QStringLiteral("rId1"),
-            QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"),
-            QStringLiteral("word/document.xml"));
+            Text("rId1"),
+            Text("http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument"),
+            Text("word/document.xml"));
         relationship(
-            QStringLiteral("rId2"),
-            QStringLiteral("http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties"),
-            QStringLiteral("docProps/core.xml"));
+            Text("rId2"),
+            Text("http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties"),
+            Text("docProps/core.xml"));
         relationship(
-            QStringLiteral("rId3"),
-            QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties"),
-            QStringLiteral("docProps/app.xml"));
-        relationship(QStringLiteral("rId4"),
-            QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/relationships/custom-properties"),
-            QStringLiteral("docProps/custom.xml"));
+            Text("rId3"),
+            Text("http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties"),
+            Text("docProps/app.xml"));
+        relationship(Text("rId4"),
+            Text("http://schemas.openxmlformats.org/officeDocument/2006/relationships/custom-properties"),
+            Text("docProps/custom.xml"));
         xml.writeEndElement();
     });
 }
 
-QByteArray documentRelationshipsXml(bool hasNumbering)
+ByteBuffer documentRelationshipsXml(bool hasNumbering)
 {
-    return xmlDocument([&](QXmlStreamWriter& xml) {
-        xml.writeStartElement(QStringLiteral("Relationships"));
+    return xmlDocument([&](XmlWriter& xml) {
+        xml.writeStartElement(Text("Relationships"));
         xml.writeDefaultNamespace(relationshipNamespace());
-        xml.writeStartElement(relationshipNamespace(), QStringLiteral("Relationship"));
-        xml.writeAttribute(QStringLiteral("Id"), QStringLiteral("rId1"));
+        xml.writeStartElement(relationshipNamespace(), Text("Relationship"));
+        xml.writeAttribute(Text("Id"), Text("rId1"));
         xml.writeAttribute(
-            QStringLiteral("Type"),
-            QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles"));
-        xml.writeAttribute(QStringLiteral("Target"), QStringLiteral("styles.xml"));
+            Text("Type"),
+            Text("http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles"));
+        xml.writeAttribute(Text("Target"), Text("styles.xml"));
         xml.writeEndElement();
         if (hasNumbering) {
-            xml.writeStartElement(relationshipNamespace(), QStringLiteral("Relationship"));
-            xml.writeAttribute(QStringLiteral("Id"), QStringLiteral("rId2"));
+            xml.writeStartElement(relationshipNamespace(), Text("Relationship"));
+            xml.writeAttribute(Text("Id"), Text("rId2"));
             xml.writeAttribute(
-                QStringLiteral("Type"),
-                QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"));
-            xml.writeAttribute(QStringLiteral("Target"), QStringLiteral("numbering.xml"));
+                Text("Type"),
+                Text("http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering"));
+            xml.writeAttribute(Text("Target"), Text("numbering.xml"));
             xml.writeEndElement();
         }
         xml.writeEndElement();
     });
 }
 
-QByteArray contentTypesXml(bool hasNumbering)
+ByteBuffer contentTypesXml(bool hasNumbering)
 {
-    static const QString contentTypesNamespace =
-        QStringLiteral("http://schemas.openxmlformats.org/package/2006/content-types");
-    return xmlDocument([&](QXmlStreamWriter& xml) {
-        xml.writeStartElement(QStringLiteral("Types"));
+    static const Text contentTypesNamespace =
+        Text("http://schemas.openxmlformats.org/package/2006/content-types");
+    return xmlDocument([&](XmlWriter& xml) {
+        xml.writeStartElement(Text("Types"));
         xml.writeDefaultNamespace(contentTypesNamespace);
-        const auto defaultType = [&](const QString& extension, const QString& contentType) {
-            xml.writeStartElement(contentTypesNamespace, QStringLiteral("Default"));
-            xml.writeAttribute(QStringLiteral("Extension"), extension);
-            xml.writeAttribute(QStringLiteral("ContentType"), contentType);
+        const auto defaultType = [&](const Text& extension, const Text& contentType) {
+            xml.writeStartElement(contentTypesNamespace, Text("Default"));
+            xml.writeAttribute(Text("Extension"), extension);
+            xml.writeAttribute(Text("ContentType"), contentType);
             xml.writeEndElement();
         };
-        const auto overrideType = [&](const QString& partName, const QString& contentType) {
-            xml.writeStartElement(contentTypesNamespace, QStringLiteral("Override"));
-            xml.writeAttribute(QStringLiteral("PartName"), partName);
-            xml.writeAttribute(QStringLiteral("ContentType"), contentType);
+        const auto overrideType = [&](const Text& partName, const Text& contentType) {
+            xml.writeStartElement(contentTypesNamespace, Text("Override"));
+            xml.writeAttribute(Text("PartName"), partName);
+            xml.writeAttribute(Text("ContentType"), contentType);
             xml.writeEndElement();
         };
         defaultType(
-            QStringLiteral("rels"),
-            QStringLiteral("application/vnd.openxmlformats-package.relationships+xml"));
-        defaultType(QStringLiteral("xml"), QStringLiteral("application/xml"));
+            Text("rels"),
+            Text("application/vnd.openxmlformats-package.relationships+xml"));
+        defaultType(Text("xml"), Text("application/xml"));
         overrideType(
-            QStringLiteral("/word/document.xml"),
-            QStringLiteral("application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"));
+            Text("/word/document.xml"),
+            Text("application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"));
         overrideType(
-            QStringLiteral("/word/styles.xml"),
-            QStringLiteral("application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"));
+            Text("/word/styles.xml"),
+            Text("application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"));
         if (hasNumbering) {
             overrideType(
-                QStringLiteral("/word/numbering.xml"),
-                QStringLiteral("application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"));
+                Text("/word/numbering.xml"),
+                Text("application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"));
         }
         overrideType(
-            QStringLiteral("/docProps/core.xml"),
-            QStringLiteral("application/vnd.openxmlformats-package.core-properties+xml"));
+            Text("/docProps/core.xml"),
+            Text("application/vnd.openxmlformats-package.core-properties+xml"));
         overrideType(
-            QStringLiteral("/docProps/app.xml"),
-            QStringLiteral("application/vnd.openxmlformats-officedocument.extended-properties+xml"));
-        overrideType(QStringLiteral("/docProps/custom.xml"),
-            QStringLiteral("application/vnd.openxmlformats-officedocument.custom-properties+xml"));
+            Text("/docProps/app.xml"),
+            Text("application/vnd.openxmlformats-officedocument.extended-properties+xml"));
+        overrideType(Text("/docProps/custom.xml"),
+            Text("application/vnd.openxmlformats-officedocument.custom-properties+xml"));
         xml.writeEndElement();
     });
 }
 
-QByteArray customPropertiesXml(const WordDocument &document) {
-    return xmlDocument([&](QXmlStreamWriter &xml) {
-        xml.writeStartElement(QStringLiteral("Properties"));
+ByteBuffer customPropertiesXml(const WordDocument &document) {
+    return xmlDocument([&](XmlWriter &xml) {
+        xml.writeStartElement(Text("Properties"));
         xml.writeDefaultNamespace(customNamespace);
-        xml.writeNamespace(variantNamespace, QStringLiteral("vt"));
+        xml.writeNamespace(variantNamespace, Text("vt"));
         if (!document.authorship().isEmpty()) {
-            xml.writeStartElement(customNamespace, QStringLiteral("property"));
-            xml.writeAttribute(QStringLiteral("fmtid"), QStringLiteral("{D5CDD505-2E9C-101B-9397-08002B2CF9AE}"));
-            xml.writeAttribute(QStringLiteral("pid"), QStringLiteral("2"));
-            xml.writeAttribute(QStringLiteral("name"), QString::fromLatin1(iiFileProvider::Authorship::MetadataKey));
-            xml.writeTextElement(variantNamespace, QStringLiteral("lpwstr"), QString::fromUtf8(document.authorship().dump()));
+            xml.writeStartElement(customNamespace, Text("property"));
+            xml.writeAttribute(Text("fmtid"), Text("{D5CDD505-2E9C-101B-9397-08002B2CF9AE}"));
+            xml.writeAttribute(Text("pid"), Text("2"));
+            xml.writeAttribute(Text("name"), Text::fromLatin1(iiFileProvider::native::Authorship::MetadataKey));
+            xml.writeTextElement(variantNamespace, Text("lpwstr"), Text::fromUtf8(document.authorship().dump()));
             xml.writeEndElement();
         }
         xml.writeEndElement();
     });
 }
 
-QByteArray corePropertiesXml(const WordDocument& document)
+ByteBuffer corePropertiesXml(const WordDocument& document)
 {
-    static const QString cpNamespace =
-        QStringLiteral("http://schemas.openxmlformats.org/package/2006/metadata/core-properties");
-    static const QString dcNamespace = QStringLiteral("http://purl.org/dc/elements/1.1/");
-    static const QString dctermsNamespace = QStringLiteral("http://purl.org/dc/terms/");
-    static const QString xsiNamespace = QStringLiteral("http://www.w3.org/2001/XMLSchema-instance");
+    static const Text cpNamespace =
+        Text("http://schemas.openxmlformats.org/package/2006/metadata/core-properties");
+    static const Text dcNamespace = Text("http://purl.org/dc/elements/1.1/");
+    static const Text dctermsNamespace = Text("http://purl.org/dc/terms/");
+    static const Text xsiNamespace = Text("http://www.w3.org/2001/XMLSchema-instance");
 
-    return xmlDocument([&](QXmlStreamWriter& xml) {
-        xml.writeStartElement(QStringLiteral("cp:coreProperties"));
-        xml.writeNamespace(cpNamespace, QStringLiteral("cp"));
-        xml.writeNamespace(dcNamespace, QStringLiteral("dc"));
-        xml.writeNamespace(dctermsNamespace, QStringLiteral("dcterms"));
-        xml.writeNamespace(xsiNamespace, QStringLiteral("xsi"));
-        const auto writeMetadata = [&](const char* key, const QString& ns, const QString& name) {
+    return xmlDocument([&](XmlWriter& xml) {
+        xml.writeStartElement(Text("cp:coreProperties"));
+        xml.writeNamespace(cpNamespace, Text("cp"));
+        xml.writeNamespace(dcNamespace, Text("dc"));
+        xml.writeNamespace(dctermsNamespace, Text("dcterms"));
+        xml.writeNamespace(xsiNamespace, Text("xsi"));
+        const auto writeMetadata = [&](const char* key, const Text& ns, const Text& name) {
             const auto found = document.metadata().find(key);
             if (found != document.metadata().end() && !found->second.empty()) {
-                xml.writeTextElement(ns, name, QString::fromUtf8(found->second));
+                xml.writeTextElement(ns, name, Text::fromUtf8(found->second));
             }
         };
-        writeMetadata("Title", dcNamespace, QStringLiteral("title"));
-        writeMetadata("Author", dcNamespace, QStringLiteral("creator"));
-        writeMetadata("Subject", dcNamespace, QStringLiteral("subject"));
-        writeMetadata("Description", dcNamespace, QStringLiteral("description"));
-        writeMetadata("Keywords", cpNamespace, QStringLiteral("keywords"));
-        writeMetadata("LastModifiedBy", cpNamespace, QStringLiteral("lastModifiedBy"));
-        const auto writeDate = [&](const char* key, const QString& name) {
+        writeMetadata("Title", dcNamespace, Text("title"));
+        writeMetadata("Author", dcNamespace, Text("creator"));
+        writeMetadata("Subject", dcNamespace, Text("subject"));
+        writeMetadata("Description", dcNamespace, Text("description"));
+        writeMetadata("Keywords", cpNamespace, Text("keywords"));
+        writeMetadata("LastModifiedBy", cpNamespace, Text("lastModifiedBy"));
+        const auto writeDate = [&](const char* key, const Text& name) {
             const auto found = document.metadata().find(key);
             if (found != document.metadata().end() && !found->second.empty()) {
                 xml.writeStartElement(dctermsNamespace, name);
-                xml.writeAttribute(xsiNamespace, QStringLiteral("type"), QStringLiteral("dcterms:W3CDTF"));
-                xml.writeCharacters(QString::fromUtf8(found->second));
+                xml.writeAttribute(xsiNamespace, Text("type"), Text("dcterms:W3CDTF"));
+                xml.writeCharacters(Text::fromUtf8(found->second));
                 xml.writeEndElement();
             }
         };
-        writeDate("Created", QStringLiteral("created"));
-        writeDate("Modified", QStringLiteral("modified"));
+        writeDate("Created", Text("created"));
+        writeDate("Modified", Text("modified"));
         xml.writeEndElement();
     });
 }
 
-QByteArray appPropertiesXml()
+ByteBuffer appPropertiesXml()
 {
-    static const QString appNamespace =
-        QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/extended-properties");
-    return xmlDocument([](QXmlStreamWriter& xml) {
-        xml.writeStartElement(QStringLiteral("Properties"));
+    static const Text appNamespace =
+        Text("http://schemas.openxmlformats.org/officeDocument/2006/extended-properties");
+    return xmlDocument([](XmlWriter& xml) {
+        xml.writeStartElement(Text("Properties"));
         xml.writeDefaultNamespace(appNamespace);
         xml.writeNamespace(
-            QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"),
-            QStringLiteral("vt"));
-        xml.writeTextElement(appNamespace, QStringLiteral("Application"), QStringLiteral("iiGeneralDocument"));
-        xml.writeTextElement(appNamespace, QStringLiteral("AppVersion"), QStringLiteral("0.1"));
+            Text("http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"),
+            Text("vt"));
+        xml.writeTextElement(appNamespace, Text("Application"), Text("iiGeneralDocument"));
+        xml.writeTextElement(appNamespace, Text("AppVersion"), Text("0.1"));
         xml.writeEndElement();
     });
 }
 
 struct PackagePart {
     std::string name;
-    QByteArray bytes;
+    ByteBuffer bytes;
 };
 
 bool isXmlPackagePart(const PackagePart& part)
@@ -1590,8 +1584,8 @@ WordWriteResult writeDocxPackage(
 
     std::error_code directoryError;
     if (!destination.parent_path().empty()) {
-        try { iiFileProvider::File::createDirectories(iiFileProvider::File::pathString(destination.parent_path())); }
-        catch (const iiFileProvider::FileError &) { directoryError = std::make_error_code(std::errc::io_error); }
+        try { iiFileProvider::native::File::createDirectories(iiFileProvider::native::File::pathString(destination.parent_path())); }
+        catch (const iiFileProvider::native::FileError &) { directoryError = std::make_error_code(std::errc::io_error); }
     }
     if (directoryError) {
         result.diagnostics.push_back(diagnostic(
@@ -1634,15 +1628,15 @@ WordWriteResult writeDocxPackage(
         return result;
     }
 
-    std::unique_ptr<iiFileProvider::StagedFile> temporary;
+    std::unique_ptr<iiFileProvider::native::StagedFile> temporary;
     try {
-        temporary = std::make_unique<iiFileProvider::StagedFile>(iiFileProvider::File::pathString(destination));
-    } catch (const iiFileProvider::FileError &error) {
+        temporary = std::make_unique<iiFileProvider::native::StagedFile>(iiFileProvider::native::File::pathString(destination));
+    } catch (const iiFileProvider::native::FileError &error) {
         result.diagnostics.push_back(diagnostic(DiagnosticSeverity::error,
             "docx.temporary_file_failed", error.what(), destination));
         return result;
     }
-    const auto temporaryPath = std::filesystem::path(temporary->path().toStdU16String());
+    const auto temporaryPath = std::filesystem::path(temporary->path().u16string());
 
     int openError = 0;
     ZipArchive archive(zip_open(

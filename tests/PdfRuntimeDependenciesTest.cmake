@@ -1,0 +1,16 @@
+execute_process(COMMAND /usr/bin/otool -L "${IIGENERALDOCUMENT_PDF_LIBRARY}"
+    RESULT_VARIABLE _result OUTPUT_VARIABLE _runtime ERROR_VARIABLE _error)
+if(NOT _result EQUAL 0)
+    message(FATAL_ERROR "Native PDF runtime inspection failed: ${_error}")
+endif()
+if(_runtime MATCHES "Qt|Adobe|Acrobat|iiFileProvider|iiXml|iiHtmlBlock|libqpdf|libjpeg|libz\\.")
+    message(FATAL_ERROR "Native PDF codec has an unexpected runtime dependency: ${_runtime}")
+endif()
+execute_process(COMMAND "${IIGENERALDOCUMENT_NM}" -gU "${IIGENERALDOCUMENT_PDF_LIBRARY}"
+    RESULT_VARIABLE _result OUTPUT_VARIABLE _symbols ERROR_VARIABLE _error)
+if(NOT _result EQUAL 0)
+    message(FATAL_ERROR "Native PDF symbol inspection failed: ${_error}")
+endif()
+if(_symbols MATCHES "QPDF|QUtil|_jpeg_[A-Za-z]|_(inflate|deflate|adler32|crc32)")
+    message(FATAL_ERROR "A private compression/PDF/JPEG backend symbol is public: ${_symbols}")
+endif()

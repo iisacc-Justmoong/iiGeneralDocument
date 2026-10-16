@@ -98,8 +98,8 @@ std::string WordDocument::plainText() const
 }
 
 
-const iiFileProvider::Authorship& WordDocument::authorship() const noexcept { return authorship_; }
-bool WordDocument::setFileAuthor(const iiFileProvider::FileAuthor& author) {
+const iiFileProvider::native::Authorship& WordDocument::authorship() const noexcept { return authorship_; }
+bool WordDocument::setFileAuthor(const iiFileProvider::native::FileAuthor& author) {
     auto next = authorship_; const bool changed = next.setAuthor(author);
     detail::storeAuthorship(next, metadata_); authorship_ = std::move(next); return changed;
 }
@@ -109,7 +109,7 @@ void WordDocument::recordChange() {
 }
 void WordDocument::restoreAuthorship() { authorship_ = detail::readAuthorship(metadata_); }
 bool WordDocument::setMetadata(std::string key, std::string value) {
-    if (key == iiFileProvider::Authorship::MetadataKey) throw DocumentError("Authorship is managed by iiFileProvider");
+    if (key == iiFileProvider::native::Authorship::MetadataKey) throw DocumentError("Authorship is managed by iiFileProvider");
     const auto found = metadata_.find(key);
     if (found != metadata_.end() && found->second == value) return false;
     auto next = metadata_; next[std::move(key)] = std::move(value);

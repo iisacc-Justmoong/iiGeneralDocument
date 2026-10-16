@@ -71,3 +71,14 @@ SHA-256 프레임링과 부모/트리 의미론은 Git 스타일이지만 이 �
 - 분기, 병합, 저작자, 서명 및 원격 동기화.
 
 `iiGeneralDocument.ThinkingSpaceDocumentModel`는 집계 표면, `.tsdoc` 확장, 독립적인 메타데이터/본문 구성, 결정적 콘텐츠 ID, 상위 체인, 가역적 델타, 무결성 검사, 얕은 경계, 가장 오래된 것부터 잘라내기 및 정확한 100버전 보존 제한을 확인합니다.
+
+
+## Native dependency migration (0.4)
+
+The complete module now uses C++23 standard types and open-source backends.
+Qt and the installed iiXml/iiHtmlBlock packages are not runtime or public-package
+dependencies. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml
+and persistence uses nlohmann/json. The markup algorithms retain the first-party
+range/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)
+for byte-string API changes, ABI compatibility, prior-file verification and the
+Thinking Space schema-2 byte-diff encoding.

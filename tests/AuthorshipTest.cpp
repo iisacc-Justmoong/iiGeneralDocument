@@ -1,18 +1,12 @@
 #include <iiGeneralDocument.h>
-#include <iiFileProvider.h>
+#include <iiFileProviderNative.h>
 #include "TestSupport.h"
-#include <QCoreApplication>
-#include <QDir>
-#include <QFile>
-#include <QJsonDocument>
-#include <QTemporaryDir>
 #include <filesystem>
 using namespace ii::document;
-int main(int argc, char **argv) {
-    QCoreApplication app(argc, argv);
-    const auto author = iiFileProvider::FileAuthor::fromIisaccAccount(
+int main() {
+    const auto author = iiFileProvider::native::FileAuthor::fromIisaccAccount(
         {{"sub", "document-author"}, {"email", "author@example.com"}, {"displayName", "Document Author"}},
-        QUrl("https://iisacc.com"), QDateTime::currentDateTimeUtc());
+        "https://iisacc.com", iiFileProvider::native::utcNow());
     expect(author.has_value(), "valid author");
     Document pdf; pdf.addPage(Page(Rect{0,0,320,480}));
     expect(pdf.setFileAuthor(*author), "attach PDF author");
@@ -20,11 +14,11 @@ int main(int argc, char **argv) {
     DocumentEditor editor(pdf);
     auto text = editor.addText(0, "Before", Point{10,20}, 12);
     expect(pdf.authorship().revision() == revision + 1, "PDF changes dump synchronously");
-    const auto dump = pdf.metadata().at(iiFileProvider::Authorship::MetadataKey);
+    const auto dump = pdf.metadata().at(iiFileProvider::native::Authorship::MetadataKey);
     editor.replaceText(text,0,"Before"); expect(!editor.remove(ElementId{999}), "missing removal is no-op");
-    expect(pdf.metadata().at(iiFileProvider::Authorship::MetadataKey) == dump, "no-op preserves PDF author metadata");
-    QTemporaryDir dir(QDir::currentPath()+"/authorship-XXXXXX"); expect(dir.isValid(), "temporary directory");
-    const auto root = std::filesystem::path(dir.path().toStdString());
+    expect(pdf.metadata().at(iiFileProvider::native::Authorship::MetadataKey) == dump, "no-op preserves PDF author metadata");
+    iiFileProvider::native::TemporaryDirectory dir; expect(dir.isValid(), "temporary directory");
+    const auto root = std::filesystem::path(dir.path().string());
     expect(!PdfDocumentWriter{}.write(pdf,root/"author.pdf").hasErrors(), "write authored PDF");
     auto read = PdfDocumentReader{}.read(root/"author.pdf");
     expect(!read.hasErrors() && read.document.authorship().dump() == pdf.authorship().dump(), "PDF author round trip");
@@ -54,14 +48,16 @@ int main(int argc, char **argv) {
     auto xmlRead = XmlTreeDocument::fromFileBytes(xml.toFileBytes());
     expect(xmlRead.xml()==xml.xml() && xmlRead.authorship().dump()==xml.authorship().dump(), "XML file metadata round trip");
     // OpenDocument defines the omitted value-type as string; LibreOffice uses it.
-    QFile fodt(QString::fromStdString((root/"author.fodt").string()));
-    expect(fodt.open(QIODevice::ReadOnly), "open authored FODT");
-    auto fodtBytes = fodt.readAll(); fodt.close(); fodtBytes.replace(" meta:value-type=\"string\"", "");
-    expect(fodt.open(QIODevice::WriteOnly|QIODevice::Truncate), "write default-type FODT"); fodt.write(fodtBytes); fodt.close();
+    auto fodtBytes = iiFileProvider::native::File::read(root/"author.fodt");
+    constexpr std::string_view typeAttribute=" meta:value-type=\"string\"";
+    const auto typePosition=fodtBytes.find(typeAttribute);
+    expect(typePosition!=std::string::npos,"explicit string metadata type is present");
+    fodtBytes.erase(typePosition,typeAttribute.size());
+    iiFileProvider::native::File::write(root/"author.fodt",fodtBytes);
     auto defaultType = WordDocumentReader{}.read(root/"author.fodt");
     expect(!defaultType.hasErrors() && defaultType.document.authorship().dump()==stable, "ODF default string metadata");
     bool rejected = false;
-    auto badXml = xml.toFileBytes(); badXml.replace("iisacc:authorship:v1:","iisacc:authorship:v9:");
+    auto badXml = xml.toFileBytes(); badXml.replace(badXml.find("iisacc:authorship:v1:"),std::string("iisacc:authorship:v1:").size(),"iisacc:authorship:v9:");
     try { (void)XmlTreeDocument::fromFileBytes(badXml); } catch (const DocumentError &) { rejected = true; }
     expect(rejected, "future markup authorship schema fails closed");
     ThinkingSpaceDocument thinking; thinking.body.htmlBlocks = HtmlBlockDocument::fromHtml("<p>Body</p>");
@@ -69,7 +65,7 @@ int main(int argc, char **argv) {
     (void)thinking.recordVersion("Initial", "2026-09-07T12:00:00Z");
     const auto initialRevision = thinking.authorship().revision();
     expect(thinking.edit([](ThinkingSpaceDocument &draft) { draft.header.metadata["Title"]="Authored note"; return true; }), "header edit");
-    expect(thinking.authorship().revision()==initialRevision+1 && thinking.header.metadata.at(iiFileProvider::Authorship::MetadataKey)==thinking.authorship().dump().toStdString(), "header edits dump immediately");
+    expect(thinking.authorship().revision()==initialRevision+1 && thinking.header.metadata.at(iiFileProvider::native::Authorship::MetadataKey)==thinking.authorship().dump(), "header edits dump immediately");
     (void)thinking.recordVersion("Header", "2026-09-07T12:01:00Z");
     for (int index=0; index<101; ++index) {
         thinking.edit([&](ThinkingSpaceDocument &draft) { draft.header.metadata["Step"]=std::to_string(index); return true; });
@@ -79,22 +75,22 @@ int main(int argc, char **argv) {
     const auto loaded = ThinkingSpaceDocument::fromFileBytes(tsdoc);
     expect(loaded.authorship().dump()==thinking.authorship().dump() && loaded.versionHistory.verifyIntegrity(), "Thinking Space author and complete history round trip");
     expect(loaded.versionHistory.versions().size()==100 && loaded.versionHistory.prunedVersionCount()==3, "pruned history persists");
-    auto damaged = QJsonDocument::fromJson(tsdoc).object(); damaged["schemaVersion"] = 2;
+    auto damaged = tsdoc; const auto schema=damaged.find("\"schemaVersion\":2"); expect(schema!=std::string::npos,"current tsdoc schema"); damaged.replace(schema,std::string("\"schemaVersion\":2").size(),"\"schemaVersion\":99");
     rejected = false;
-    try { (void)ThinkingSpaceDocument::fromFileBytes(QJsonDocument(damaged).toJson()); } catch (const DocumentError &) { rejected = true; }
+    try { (void)ThinkingSpaceDocument::fromFileBytes(damaged); } catch (const DocumentError &) { rejected = true; }
     expect(rejected, "future tsdoc schema fails closed");
     ThinkingSpaceDocument invalidUtf8;
     invalidUtf8.header.metadata["invalid"] = std::string(1,static_cast<char>(0xff));
     rejected = false;
     try { (void)invalidUtf8.toFileBytes(); } catch (const DocumentError &) { rejected = true; }
     expect(rejected, "invalid UTF-8 cannot be silently rewritten by tsdoc serialization");
-    const auto stored = dir.filePath("provider.thinking-space");
-    iiFileProvider::File::create(stored, tsdoc);
-    auto storedDocument = ThinkingSpaceDocument::fromFileBytes(iiFileProvider::File::read(stored));
+    const auto stored = root/"provider.thinking-space";
+    iiFileProvider::native::File::write(stored, tsdoc);
+    auto storedDocument = ThinkingSpaceDocument::fromFileBytes(iiFileProvider::native::File::read(stored));
     expect(storedDocument.authorship().dump() == thinking.authorship().dump(), "provider preserves native authorship");
     storedDocument.edit([](ThinkingSpaceDocument &draft) { draft.header.metadata["Title"] = "Provider update"; return true; });
-    iiFileProvider::File::update(stored, tsdoc, storedDocument.toFileBytes());
-    expect(ThinkingSpaceDocument::fromFileBytes(iiFileProvider::File::read(stored)).header.metadata.at("Title") == "Provider update", "provider updates native document");
-    expect(iiFileProvider::File::remove(stored), "provider deletes native document");
+    iiFileProvider::native::File::write(stored, storedDocument.toFileBytes());
+    expect(ThinkingSpaceDocument::fromFileBytes(iiFileProvider::native::File::read(stored)).header.metadata.at("Title") == "Provider update", "provider updates native document");
+    expect(std::filesystem::remove(stored), "provider deletes native document");
     return 0;
 }

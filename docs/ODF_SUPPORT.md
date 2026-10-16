@@ -13,7 +13,7 @@
 리더는 ODF 1.0부터 1.4 텍스트 문서의 공통 의미 부분을 읽고, 그보다 새롭거나 알 수
 없는 버전은 명시적 warning과 함께 best-effort로 처리한다. 네임스페이스와 문서 종류를
 확인한 뒤 지원하는 요소만 `WordDocument`로 변환한다. 라이터는 널리
-호환되는 ODF 1.3 문서를 생성한다. ODT와 FODT는 모두 Qt XML 기반의 네이티브
+호환되는 ODF 1.3 문서를 생성한다. ODT와 FODT는 모두 pugixml XML 기반의 네이티브
 코덱을 사용하므로 읽기와 쓰기에 LibreOffice 설치가 필요하지 않다.
 
 구현 기준은 OASIS의 최신 공식 명세인 [OpenDocument 1.4 Part 2:
@@ -229,3 +229,14 @@ iiGeneralDocument가 생성한 ODT/FODT를 LibreOffice로 열고 다시 저장�
 네이티브 리더로 확인하며, LibreOffice가 생성한 ODT/FODT도 읽고 수정한 뒤 재개방한다.
 이 검증은 실제 제품 호환성을 위한 선택적 테스트 backend이며 런타임 읽기·쓰기
 의존성은 아니다. `soffice`가 없는 환경에서도 네이티브 ODF 테스트는 항상 실행한다.
+
+
+## Native dependency migration (0.4)
+
+The complete module now uses C++23 standard types and open-source backends.
+Qt and the installed iiXml/iiHtmlBlock packages are not runtime or public-package
+dependencies. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml
+and persistence uses nlohmann/json. The markup algorithms retain the first-party
+range/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)
+for byte-string API changes, ABI compatibility, prior-file verification and the
+Thinking Space schema-2 byte-diff encoding.

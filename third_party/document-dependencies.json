@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "pugixml": "1.16",
+  "nlohmann-json": "3.12.0",
+  "license": "MIT",
+  "files": [
+    {
+      "file": "pugixml/pugixml.cpp",
+      "source": "https://raw.githubusercontent.com/zeux/pugixml/v1.16/src/pugixml.cpp",
+      "sha256": "bd94cd9ec6ac67c0723422640bb243eab4a7c2d9fd5584dab77305a50fa31ef4",
+      "bytes": 363120
+    },
+    {
+      "file": "pugixml/pugixml.hpp",
+      "source": "https://raw.githubusercontent.com/zeux/pugixml/v1.16/src/pugixml.hpp",
+      "sha256": "0b7c94701df3d50981ffafe57f177c77b940e347c6e5d01073e4161f61299212",
+      "bytes": 57223
+    },
+    {
+      "file": "pugixml/pugiconfig.hpp",
+      "source": "https://raw.githubusercontent.com/zeux/pugixml/v1.16/src/pugiconfig.hpp",
+      "sha256": "e6c51fbc9a765608bd214ea47d229d3bbd6b650036cdffc94b96b498c202495c",
+      "bytes": 3060
+    },
+    {
+      "file": "licenses/pugixml/LICENSE.md",
+      "source": "https://raw.githubusercontent.com/zeux/pugixml/v1.16/LICENSE.md",
+      "sha256": "90974fbb120e966b452654eaae3ba6ee55f3647db3b28918a7649733ee99da97",
+      "bytes": 1079
+    },
+    {
+      "file": "nlohmann/json.hpp",
+      "source": "https://raw.githubusercontent.com/nlohmann/json/v3.12.0/single_include/nlohmann/json.hpp",
+      "sha256": "aaf127c04cb31c406e5b04a63f1ae89369fccde6d8fa7cdda1ed4f32dfc5de63",
+      "bytes": 953436
+    },
+    {
+      "file": "licenses/nlohmann-json/LICENSE.MIT",
+      "source": "https://raw.githubusercontent.com/nlohmann/json/v3.12.0/LICENSE.MIT",
+      "sha256": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603",
+      "bytes": 1076
+    },
+    {
+      "file": "licenses/first-party-markup/LICENSE",
+      "source": "first-party iiXml and iiHtmlBlock AGPL-3.0-only",
+      "sha256": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef",
+      "bytes": 34523
+    }
+  ]
+}

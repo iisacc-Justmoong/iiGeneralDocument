@@ -1,211 +1,109 @@
 # iiGeneralDocument
 
-`iiGeneralDocument` is a C++20 general document library. It provides separate,
-editable models for PDF page content, hierarchical XML, HTML blocks, and
-flow-oriented text documents, plus a versioned Thinking Space `.tsdoc`
-object boundary, while keeping format backends behind focused boundaries.
+`iiGeneralDocument` is a native C++23 document library with standard public types
+and open-source format backends. Version 0.4 removes Qt from the entire library,
+including file access, author metadata, Word XML, JSON persistence, conversion
+processes, tests and installed consumers.
 
-Version 0.2 provides:
+It provides:
 
-- iiFileProvider authorship with immediate metadata dumps and embedded file round trips;
-- ordered `Document`, `Page`, and stable `ElementId` objects;
-- `TextElement`, `PathElement`, `ImageElement`, `FormXObjectElement`, `InlineImageElement`, `ShadingElement`, `MarkedContentElement`, `GraphicsStateElement`, and `UnknownElement`;
-- recursive Form XObject contents, shared when the PDF resource is shared;
-- separately editable annotations and existing AcroForm fields;
-- lossless PDF value and content-instruction objects for low-level edits;
-- reader and writer interfaces that do not depend on QPDF types;
-- validation before writes, source-PDF preservation, and post-write reopening;
-- fail-closed handling for digital signatures and encryption;
-- source-preserving, iiXml-backed hierarchical XML CRUD with stable node IDs,
-  parent/child navigation, depth and opening/closing-tag inspection, typed
-  attributes, subtree replacement, and strict single-root validation;
-- source-preserving HTML/iiXml block CRUD with ordered roots, stable IDs,
-  parent/child navigation, depth and opening/closing-tag inspection, nested
-  creation, atomic updates, recursive deletion, and overlap-safe range handling;
-- a `.tsdoc` aggregate with separate header metadata, an `HtmlBlockDocument`
-  body, Git-style SHA-256 snapshot/parent objects, reversible diff objects,
-  integrity verification, and newest-100 version retention;
-- a flow-oriented Word model plus native DOCX read/write for paragraphs,
-  formatted runs, tables, numbering, metadata, and section geometry;
-- native ODT and flat-XML FODT read/write through the same editable flow model,
-  with standard package validation and atomic output;
-- legacy Word 97-2003 `.doc` read/write through an isolated, timeout-bounded
-  LibreOffice conversion backend with post-write reopening;
+- editable PDF documents, pages, stable element IDs, content instructions,
+  annotations, existing AcroForm fields and attachment summaries;
+- ordered/repeated page extraction, selected-document merging, batch rotation,
+  Unicode notes, metadata editing and existing text-field value editing;
+- a standalone `iiGeneralDocument::Pdf` byte/object component with transactional
+  edits, copied input bytes and C++23 standard types;
+- source-preserving XML tree CRUD with typed attributes, parent/child navigation,
+  subtree replacement and stable IDs;
+- source-preserving HTML block CRUD with ordered roots, nested creation, display
+  overrides, atomic updates and overlap-safe ranges;
+- native DOCX, ODT and FODT read/write through one editable `WordDocument` flow
+  model, including paragraphs, run styles, tables, numbering, metadata and geometry;
+- optional legacy `.doc` read/write through an isolated, timeout-bounded
+  LibreOffice process, with validation before atomic publication;
+- standard author snapshots/ledgers with synchronous revision updates and embedded
+  metadata in PDF, Word, HTML, XML and Thinking Space files;
+- a `.tsdoc` aggregate with SHA-256 snapshots, parent links, byte diffs, integrity
+  checks and newest-100 version retention; existing schema-1 files remain readable.
 
-## Build
+## Build and install
 
-The source checkout is `Workspace/SDK/iiGeneralDocument`. Run `./install.sh`
-to configure a fresh `build/`, build and test the native library, install it to
-`~/.local/SDK/iiGeneralDocument`, and compile/run the actual installed consumer.
-Direct CMake configuration uses the same default install prefix; an explicit
-`CMAKE_INSTALL_PREFIX` is respected. The default applies only to a top-level
-build; an `add_subdirectory()` consumer retains its parent install prefix. If
-`HOME` is empty, `USERPROFILE` supplies the default user directory. The script accepts
-`IIGENERALDOCUMENT_INSTALL_PREFIX`, `IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT`,
-and `IIGENERALDOCUMENT_QT_PREFIX` overrides. All generated consumer and dependency
-build directories remain under `build/`. A moved checkout invalidates and removes
-the old build tree before configuration.
+From `Workspace/SDK/iiGeneralDocument`, run `./install.sh`. It builds the
+standard-only `iiFileProvider::Native` component, configures and tests the full
+library in `build/`, installs to `~/.local/SDK/iiGeneralDocument`, and compiles/runs
+an actual installed consumer with Qt and the legacy provider packages disabled.
+No Qt kit is required. All generated files stay inside each repository's `build/`.
 
-On macOS, imported SDK targets restore the runtime search path when a shell's
-`LIBRARY_PATH` makes CMake classify the installed libraries as implicit linker
-directories. The installed-consumer test reproduces this environment for all
-three SDK libraries and runs with `DYLD_LIBRARY_PATH` and
-`DYLD_FALLBACK_LIBRARY_PATH` unset. Its staged consumer also clears ambient
-compiler include variables so another installed copy cannot shadow the package
-being tested.
-
-The build requires Qt Core 6.5 or newer plus the `iiXml` and `iiHtmlBlock`
-0.1.0 CMake packages. The installer defaults to `/Volumes/Storage/Qt/6.8.3/macos`;
-set `IIGENERALDOCUMENT_QT_PREFIX` to use a different Qt kit.
-Qt Core and both iisacc libraries are public package
-dependencies, so an installed consumer receives the same include and link
-contract. The standard installs at `~/.local/SDK/iiXml` and
-`~/.local/SDK/iiHtmlBlock` are discovered automatically; set
-`IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT` or `CMAKE_PREFIX_PATH` for another
-installation root.
-
-The default build fetches and statically links pinned QPDF 12.3.2 and libzip
-1.11.4 sources in `build/`. Their tools, examples, tests, and unnecessary
-compression or crypto backends are not added to the product build. Set
-`IIGENERALDOCUMENT_USE_SYSTEM_QPDF=ON` or
-`IIGENERALDOCUMENT_USE_SYSTEM_LIBZIP=ON` to require installed packages.
-On Unix-like GNU or Clang builds, the pinned QPDF archive is compiled with an
-explicit `-fPIC` because QPDF 12.3.2 disables PIC on its static object target;
-this keeps the archive safe to link into the shared `iiGeneralDocument`
-library. ELF shared builds link the system `JPEG::JPEG` shared target instead
-of a non-PIC static JPEG archive.
-Legacy `.doc` support also needs a local LibreOffice executable at runtime;
-native `.docx`, `.odt`, and `.fodt` support does not.
+Direct configuration requires the Native provider package. The installer supplies
+it from `Workspace/SDK/iiFileProvider/Native`; manual builds can install it first:
 
 ```sh
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --parallel
+cmake -S ../iiFileProvider/Native -B ../iiFileProvider/build/native -G Ninja \
+  -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$HOME/.local/SDK/iiFileProvider"
+cmake --build ../iiFileProvider/build/native --parallel 4
+ctest --test-dir ../iiFileProvider/build/native --output-on-failure
+cmake --install ../iiFileProvider/build/native
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_DISABLE_FIND_PACKAGE_Qt6=TRUE
+cmake --build build --parallel 4
 ctest --test-dir build --output-on-failure
 ```
 
-Use `-DIIGENERALDOCUMENT_USE_SYSTEM_QPDF=ON` to require an installed QPDF 12.3 package instead. Local builds use only `build/`; other build-directory names are unsupported.
+The default top-level install prefix is `~/.local/SDK/iiGeneralDocument`; an
+explicit `CMAKE_INSTALL_PREFIX` is respected. The installer accepts
+`IIGENERALDOCUMENT_INSTALL_PREFIX` and `IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT`.
+Installed packages discover the Native provider alongside the SDK or under that
+SDK root. Imported targets also handle macOS runtime lookup when `LIBRARY_PATH`
+makes package directories implicit to the linker.
 
-## Example
+## Consume the SDK
 
-```cpp
-#include <iiGeneralDocument/iiGeneralDocument.h>
-
-using namespace ii::document;
-
-auto loaded = PdfDocumentReader{}.read("input.pdf");
-if (loaded.hasErrors()) {
-    return 1;
-}
-
-DocumentEditor editor(loaded.document);
-for (const auto& page : loaded.document.pages()) {
-    for (const auto& element : page.elements()) {
-        if (const auto* text = dynamic_cast<const TextElement*>(element.get());
-            text && !text->textSegments().empty()) {
-            editor.replaceText(text->id(), 0, "Edited text");
-            break;
-        }
-    }
-}
-
-const auto written = PdfDocumentWriter{}.write(loaded.document, "output.pdf");
-return written.hasErrors() ? 1 : 0;
+```cmake
+find_package(iiGeneralDocument 0.4 CONFIG REQUIRED)
+target_link_libraries(application PRIVATE iiGeneralDocument::iiGeneralDocument)
 ```
 
-Text strings in a PDF content stream are encoded bytes, not universally Unicode text. `textSegments()` deliberately returns those bytes. A caller that changes text in a custom embedded font must encode the replacement for that font or replace the font resource as part of its document workflow. New documents receive a Helvetica/WinAnsi fallback for referenced font names.
+Include `<iiGeneralDocument/iiGeneralDocument.h>`. The full target publicly links
+only `iiFileProvider::Native` and `iiGeneralDocument::Pdf`. Public author APIs use
+`iiFileProvider::native`; HTML/XML/Thinking Space file bytes are `std::string` and
+`std::string_view`. Version 0.4 is a new full-module ABI; existing clients rebuild.
+See [migration and dependency boundaries](docs/QT_REMOVAL.md).
 
-HTML block documents use the `iiHtmlBlock` range and serialization contract:
+For the independent PDF byte/object component:
 
-```cpp
-auto htmlDocument = HtmlBlockDocument::fromHtml(
-    "<main><p>Existing</p></main>");
-HtmlBlockEditor htmlEditor(htmlDocument);
-const HtmlBlockId mainId = htmlDocument.blocks().front().id();
-const HtmlBlockId created = htmlEditor.create("<p>Created</p>", mainId);
-const HtmlBlock* createdBlock = htmlEditor.read(created);
-const auto parentId = createdBlock->parentId();
-const auto openingTag = createdBlock->openingTag();
-htmlEditor.update(created, "<article>Updated</article>");
-htmlEditor.remove(created);
+```cmake
+find_package(iiGeneralDocument 0.4 CONFIG REQUIRED COMPONENTS Pdf)
+target_link_libraries(application PRIVATE iiGeneralDocument::Pdf)
 ```
 
-Hierarchical XML documents use `iiXml` ranges behind a dependency-free public
-model:
+Include `<iiGeneralDocument/Pdf/Objects.h>`. A PDF-only build uses
+`-DIIGENERALDOCUMENT_PDF_ONLY=ON` with a build directory such as
+`build/pdf-native`. This component has no provider dependency.
 
-```cpp
-auto xmlDocument = XmlTreeDocument::fromXml(
-    "<catalog><item>Existing</item></catalog>");
-XmlTreeEditor xmlEditor(xmlDocument);
-const XmlNodeId catalogId = *xmlDocument.rootId();
-const XmlNodeId createdNode = xmlEditor.create(
-    "<item enabled=true>Created</item>", catalogId);
-const XmlNode* item = xmlEditor.read(createdNode);
-const auto childDepth = item->depth();
-const auto closingTag = item->closingTag();
-xmlEditor.update(createdNode, "<entry>Updated</entry>");
-xmlEditor.remove(createdNode);
-```
+## Backends and tests
 
-Thinking Space documents capture explicit, content-addressed versions:
+Private backends are QPDF 12.3.2, zlib 1.3.1, libjpeg-turbo 3.2.0, libzip 1.11.4,
+pugixml 1.16 and nlohmann/json 3.12.0. Native author normalization uses utf8proc
+2.11.3. Release sources/licenses are pinned; local vendored files and archives are
+SHA-256 checked during configuration. Upstream C libraries keep their own language;
+authored library and test code is C++23 without compiler extensions. Optional
+`IIGENERALDOCUMENT_USE_SYSTEM_LIBZIP=ON` uses an installed libzip package.
+LibreOffice is needed only for legacy `.doc` conversion and interoperability tests.
 
-```cpp
-ThinkingSpaceDocument thinkingSpace;
-thinkingSpace.header.metadata["title"] = "Draft";
-thinkingSpace.body.htmlBlocks = HtmlBlockDocument::fromHtml(
-    "<main>Versioned body</main>");
+The tests cover document mutation, format round trips, authorship, malformed input,
+atomic writes/permissions, symbol isolation, installed package use, actual
+LibreOffice interoperability, prior-file migration and absence of Qt dependencies.
+Use `-DIIGENERALDOCUMENT_SANITIZERS=ON` for full AddressSanitizer/UndefinedBehaviorSanitizer
+validation, or `IIGENERALDOCUMENT_PDF_SANITIZERS=ON` for the PDF component alone.
+Build output and platform execution establish different guarantees: each target
+platform still needs native execution before it is considered verified.
 
-const ThinkingSpaceDocumentVersion version =
-    thinkingSpace.recordVersion("Initial draft");
-const ThinkingSpaceDocumentDiff* diff =
-    thinkingSpace.versionHistory.findDiff(version.diffObjectId);
-```
+See [API](docs/API.md), [architecture](docs/ARCHITECTURE.md),
+[PDF](docs/PDF_SUPPORT.md), [Word](docs/WORD_SUPPORT.md), [ODF](docs/ODF_SUPPORT.md),
+[HTML](docs/HTML_BLOCK_CRUD.md), [XML](docs/XML_TREE_CRUD.md),
+[Thinking Space](docs/THINKING_SPACE_DOCUMENT.md) and
+[Acrobat feature absorption](docs/ACROBAT_ABSORPTION.md).
 
-`recordVersion()` is the commit boundary; ordinary header or HTML edits do not
-implicitly add history. At most the newest 100 versions are retained.
-
-Word and OpenDocument text files use the same flow model:
-
-```cpp
-WordDocument word;
-WordParagraph heading;
-heading.properties.styleId = "Heading1";
-heading.runs.push_back({"Editable Word heading", {.bold = true}});
-word.appendParagraph(std::move(heading));
-
-const auto wordWritten = WordDocumentWriter{}.write(word, "output.docx");
-auto wordRead = WordDocumentReader{}.read("output.docx");
-const auto odtWritten = WordDocumentWriter{}.write(wordRead.document, "output.odt");
-const auto fodtWritten = WordDocumentWriter{}.write(wordRead.document, "output.fodt");
-auto flatOdfRead = WordDocumentReader{}.read("output.fodt");
-```
-
-See [API](docs/API.md), [architecture](docs/ARCHITECTURE.md), the [PDF support contract](docs/PDF_SUPPORT.md), the [XML tree CRUD contract](docs/XML_TREE_CRUD.md), the [HTML block CRUD contract](docs/HTML_BLOCK_CRUD.md), the [Thinking Space Document contract](docs/THINKING_SPACE_DOCUMENT.md), the [Word support contract](docs/WORD_SUPPORT.md), and the [OpenDocument support contract](docs/ODF_SUPPORT.md) before integrating editing into a product.
-
-## License
-
-SPDX-License-Identifier: AGPL-3.0-only
-
-The original code and documentation in iiGeneralDocument are distributed under
-the GNU Affero General Public License version 3.0 only. See [LICENSE](LICENSE)
-for the full license text.
-
-Third-party code, libraries, tools, and model weights retain their respective
-licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for dependency
-notices.
-
-## File authorship (0.2.0)
-
-All document models use required `iiFileProvider 0.2` author metadata. Select the
-editor with `setFileAuthor`, then use the model's editing APIs. Accepted changes
-immediately regenerate the cached contribution record. PDF, DOCX, DOC, ODT and
-FODT writers embed it in the document; HTML/XML and Thinking Space provide
-`toFileBytes` / `fromFileBytes` for authored file bytes. `.tsdoc` now preserves
-the complete retained history as well as current content and attribution. See
-[the mutation and file contract](docs/FILE_AUTHORSHIP.md) for raw-reference
-boundaries, native fields and token exclusion. Rebuild consumers for SOVERSION 0.2.
-
-<a id="파일-저장-소유권"></a>
-
-## File storage ownership
-
-File CRUD is iiFileProvider 0.5 owns it. PDF is created and verified in memory, then atomically published by the provider. DOCX /ODT uses the provider's read device and the temporary file it owns, and FODT / DOC conversion results are also recorded and published via the provider. Thinking Space / HTML / XML byte codecs combine with File::create /read/update/remove. iiFileProvider forbids reverse references to this SDK.
+The enclosing SDK keeps its existing AGPL-3.0-only license. Full dependency
+licenses are shipped with the installation; see [notices](THIRD_PARTY_NOTICES.md).
+No Adobe proprietary source, extracted resources or runtime is included.

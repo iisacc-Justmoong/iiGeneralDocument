@@ -29,6 +29,8 @@ public:
     void setRect(Rect rect) noexcept;
     [[nodiscard]] const std::string& contents() const noexcept;
     void setContents(std::string utf8Contents);
+    [[nodiscard]] const std::string& author() const noexcept;
+    void setAuthor(std::string utf8Author);
     [[nodiscard]] int flags() const noexcept;
     void setFlags(int flags) noexcept;
     [[nodiscard]] const PdfValue& dictionary() const noexcept;
@@ -42,6 +44,7 @@ private:
     std::string subtype_;
     Rect rect_;
     std::string contents_;
+    std::string author_;
     int flags_{0};
     PdfValue dictionary_{PdfValue::dictionary({})};
     std::optional<SourceReference> source_;
@@ -58,6 +61,11 @@ public:
 
     [[nodiscard]] const Rect& mediaBox() const noexcept;
     void setMediaBox(Rect mediaBox) noexcept;
+    // Effective CropBox falls back to MediaBox when no explicit crop is set.
+    [[nodiscard]] const Rect& cropBox() const noexcept;
+    void setCropBox(std::optional<Rect> cropBox) noexcept;
+    [[nodiscard]] double userUnit() const noexcept;
+    void setUserUnit(double unit) noexcept;
     [[nodiscard]] int rotation() const noexcept;
     void setRotation(int degrees) noexcept;
 
@@ -80,6 +88,8 @@ public:
 
 private:
     Rect mediaBox_;
+    std::optional<Rect> cropBox_;
+    double userUnit_{1.0};
     int rotation_{0};
     std::vector<std::unique_ptr<Element>> elements_;
     std::vector<Annotation> annotations_;

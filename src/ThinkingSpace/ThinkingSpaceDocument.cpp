@@ -1,11 +1,9 @@
+#include <iiFileProviderNative.h>
 #include "ThinkingSpace/ThinkingSpaceDocument.h"
 #include "Metadata/Authorship_p.hpp"
 
 #include "Core/Diagnostic.h"
 
-#include <QByteArray>
-#include <QCryptographicHash>
-#include <QDateTime>
 
 #include <algorithm>
 #include <charconv>
@@ -31,11 +29,7 @@ std::string hashObject(std::string_view type, std::string_view payload)
     framed.push_back('\0');
     framed.append(payload);
 
-    return QCryptographicHash::hash(
-               QByteArray::fromStdString(framed),
-               QCryptographicHash::Sha256)
-        .toHex()
-        .toStdString();
+    return iiFileProvider::native::sha256(framed);
 }
 
 std::string canonicalHeader(const std::map<std::string, std::string>& metadata)
@@ -235,9 +229,7 @@ std::string canonicalVersion(const ThinkingSpaceDocumentVersion& version)
 
 std::string currentUtcTimestamp()
 {
-    return QDateTime::currentDateTimeUtc()
-        .toString(Qt::ISODateWithMs)
-        .toStdString();
+    return iiFileProvider::native::utcNow();
 }
 
 bool snapshotMatchesId(const ThinkingSpaceDocumentSnapshot& snapshot)

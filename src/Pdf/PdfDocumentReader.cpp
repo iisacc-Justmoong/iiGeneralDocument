@@ -8,6 +8,9 @@
 #include <qpdf/QPDFAcroFormDocumentHelper.hh>
 #include <qpdf/QPDFAnnotationObjectHelper.hh>
 #include <qpdf/QPDFFormFieldObjectHelper.hh>
+#include <qpdf/QPDFEmbeddedFileDocumentHelper.hh>
+#include <qpdf/QPDFEFStreamObjectHelper.hh>
+#include <qpdf/QPDFFileSpecObjectHelper.hh>
 #include <qpdf/QPDFObjectHandle.hh>
 #include <qpdf/QPDFPageDocumentHelper.hh>
 #include <qpdf/QPDFPageObjectHelper.hh>
@@ -15,7 +18,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
-#include <iiFileProvider.h>
+#include <iiFileProviderNative.h>
 #include <iterator>
 #include <map>
 #include <memory>
@@ -408,7 +411,8 @@ Rect pageMediaBox(QPDFPageObjectHelper& page)
 int pageRotation(QPDFPageObjectHelper& page)
 {
     const auto value = page.getAttribute("/Rotate", false);
-    return value.isInteger() ? value.getIntValueAsInt() : 0;
+    const auto degrees = value.isInteger() ? value.getIntValueAsInt() : 0;
+    return (degrees % 360 + 360) % 360;
 }
 
 FormFieldType formFieldType(const std::string& pdfType)
@@ -430,7 +434,7 @@ FormFieldType formFieldType(const std::string& pdfType)
 
 std::vector<char> readFile(const std::filesystem::path& source)
 {
-    const auto bytes = iiFileProvider::File::read(iiFileProvider::File::pathString(source));
+    const auto bytes = iiFileProvider::native::File::read(iiFileProvider::native::File::pathString(source));
     return {bytes.begin(), bytes.end()};
 }
 
@@ -439,22 +443,45 @@ std::vector<char> readFile(const std::filesystem::path& source)
 ReadResult PdfDocumentReader::read(
     const std::filesystem::path& source, const ReadOptions& options) const
 {
+    try {
+        const auto bytes = readFile(source);
+        return readBytes(std::as_bytes(std::span(bytes)), source.string(), options);
+    } catch (const std::exception& error) {
+        ReadResult result;
+        result.diagnostics.push_back({DiagnosticSeverity::error, "pdf.read_failed", error.what(), source.string()});
+        return result;
+    }
+}
+
+ReadResult PdfDocumentReader::readBytes(
+    std::span<const std::byte> input, std::string description, const ReadOptions& options) const
+{
     ReadResult result;
     try {
-        auto bytes = readFile(source);
+        std::vector<char> bytes(input.size());
+        if (!input.empty()) std::copy_n(reinterpret_cast<const char*>(input.data()), input.size(), bytes.begin());
         if (bytes.empty()) {
-            throw DocumentError("PDF source is empty: " + source.string());
+            throw DocumentError("PDF source is empty: " + description);
         }
 
         QPDF pdf;
         pdf.setAttemptRecovery(options.attemptRecovery);
         pdf.setSuppressWarnings(true);
         const char* password = options.password.empty() ? nullptr : options.password.c_str();
-        pdf.processMemoryFile(source.string().c_str(), bytes.data(), bytes.size(), password);
+        pdf.processMemoryFile(description.c_str(), bytes.data(), bytes.size(), password);
 
         result.document.pdfVersion_ = pdf.getPDFVersion();
         const bool encrypted = pdf.isEncrypted();
         bool digitallySigned = false;
+        for (auto object : pdf.getAllObjects()) {
+            if (object.isDictionary() && (object.hasKey("/ByteRange")
+                || (object.getKey("/Type").isNameAndEquals("/Sig")
+                    && !object.getKey("/Contents").isNull()))) digitallySigned = true;
+        }
+        const auto perms = pdf.getRoot().getKey("/Perms");
+        digitallySigned = digitallySigned || (perms.isDictionary() && !perms.getKey("/DocMDP").isNull());
+        const auto acroForm = pdf.getRoot().getKey("/AcroForm");
+        const bool xfa = acroForm.isDictionary() && !acroForm.getKey("/XFA").isNull();
         std::uint64_t nextElementId = 1;
         std::uint64_t nextAnnotationId = 1;
         std::uint64_t nextFieldId = 1;
@@ -476,6 +503,10 @@ ReadResult PdfDocumentReader::read(
         for (std::size_t pageIndex = 0; pageIndex < pages.size(); ++pageIndex) {
             auto& sourcePage = pages[pageIndex];
             Page page(pageMediaBox(sourcePage));
+            const auto crop = sourcePage.getCropBox().getArrayAsRectangle();
+            page.setCropBox(Rect{crop.llx, crop.lly, crop.urx - crop.llx, crop.ury - crop.lly});
+            const auto unit = sourcePage.getObjectHandle().getKey("/UserUnit");
+            if (!unit.isNull()) page.setUserUnit(unit.getNumericValue());
             page.setRotation(pageRotation(sourcePage));
             page.setSourcePageIndex(pageIndex);
 
@@ -510,6 +541,8 @@ ReadResult PdfDocumentReader::read(
                 if (contents.isString()) {
                     annotation.setContents(contents.getUTF8Value());
                 }
+                const auto author = handle.getKey("/T");
+                if (author.isString()) annotation.setAuthor(author.getUTF8Value());
                 annotation.setDictionary(toPdfValue(handle));
                 annotation.setSource(sourceReference(handle));
                 page.addAnnotation(std::move(annotation));
@@ -533,24 +566,37 @@ ReadResult PdfDocumentReader::read(
                     field.setUtf8Value(fieldValue.getUTF8Value());
                 }
                 field.setFlags(sourceField.getFlags());
+                const auto maximum = sourceField.getInheritableFieldValue("/MaxLen");
+                if (!maximum.isNull()) field.setMaximumLength(maximum.getIntValueAsInt());
                 field.setChoices(sourceField.getChoices());
                 field.setSource(sourceReference(sourceField.getObjectHandle()));
-                digitallySigned = digitallySigned || field.type() == FormFieldType::signature;
+                digitallySigned = digitallySigned || (field.type() == FormFieldType::signature && !fieldValue.isNull());
                 result.document.formFields().push_back(std::move(field));
             }
         }
 
+        for (const auto& [key, spec] : QPDFEmbeddedFileDocumentHelper(pdf).getEmbeddedFiles()) {
+            ii::document::pdf::Attachment attachment{key, spec->getFilename(), spec->getDescription(), {}, std::nullopt};
+            const auto embedded = spec->getEmbeddedFileStream();
+            if (embedded.isStream()) {
+                attachment.mimeType = QPDFEFStreamObjectHelper(embedded).getSubtype();
+                const auto params = embedded.getDict().getKey("/Params");
+                unsigned long long size{};
+                if (params.isDictionary() && params.getKey("/Size").getValueAsUInt(size)) attachment.declaredSize = size;
+            }
+            result.document.attachments_.push_back(std::move(attachment));
+        }
         for (const auto& warning : pdf.getWarnings()) {
             result.diagnostics.push_back({DiagnosticSeverity::warning, "pdf.recovered",
-                                          warning.what(), source.string()});
+                                          warning.what(), description});
         }
 
         result.document.restoreAuthorship();
         result.document.origin_ = Document::Origin{
-            std::move(bytes), source.string(), options.password, encrypted, digitallySigned};
+            std::move(bytes), description, options.password, encrypted, digitallySigned, xfa};
     } catch (const std::exception& error) {
         result.diagnostics.push_back(
-            {DiagnosticSeverity::error, "pdf.read_failed", error.what(), source.string()});
+            {DiagnosticSeverity::error, "pdf.read_failed", error.what(), description});
     }
     return result;
 }

@@ -1,0 +1,695 @@
+{
+  "schema": 1,
+  "verifiedAtUtc": "2026-10-14T12:18:31.228476+00:00",
+  "sdk": "iiGeneralDocument",
+  "version": "0.3.0",
+  "platform": "Darwin arm64",
+  "featureCount": 7,
+  "engineeringRuntimeDependency": false,
+  "authoredLanguage": "C++23",
+  "nativePdfQtDependency": false,
+  "legacyFullDocumentQtDependency": true,
+  "tests": {
+    "fullDocument": {
+      "passed": 29,
+      "failed": 0,
+      "log": "/Volumes/Storage/Workspace/SDK/iiGeneralDocument/build/acrobat-absorption/full-tests.log",
+      "logSha256": "6b815eb8323c585c3622ac7bf3f14e9b51238f88e1ad41467b273858d66e0fbb"
+    },
+    "nativePdf": {
+      "passed": 10,
+      "failed": 0,
+      "log": "/Volumes/Storage/Workspace/SDK/iiGeneralDocument/build/acrobat-absorption/native-tests.log",
+      "logSha256": "1490124e71f628a37124b4096ea2c99388e28aaeb6f772b53cb86a0ce311e29d"
+    },
+    "nativePdfSanitized": {
+      "passed": 9,
+      "failed": 0,
+      "log": "/Volumes/Storage/Workspace/SDK/iiGeneralDocument/build/acrobat-absorption/sanitized-tests.log",
+      "logSha256": "ffc89e261ebba3ab97f42f773eaed27166aa475e3d2b5b9c61661d4e7a0d0a55"
+    }
+  },
+  "independentPdfVerification": {
+    "parser": "pypdf",
+    "version": "6.10.0",
+    "scope": "SDK Document/DocumentEditor/PdfDocumentWriter outputs; independent of QPDF",
+    "files": [
+      {
+        "file": "/Volumes/Storage/Workspace/SDK/iiGeneralDocument/build/test-output/acrobat-absorption/edited.pdf",
+        "sha256": "f3aaecf0ea20f470e80df2d6a40f50c4d822be183b9c23585b58f26ea9ac85c5",
+        "pages": 2,
+        "formFields": 2,
+        "rotations": [
+          0,
+          180
+        ],
+        "texts": [
+          "Page One fixture",
+          "Page Two fixture"
+        ],
+        "strictReaderAccepted": true
+      },
+      {
+        "file": "/Volumes/Storage/Workspace/SDK/iiGeneralDocument/build/test-output/acrobat-absorption/extracted.pdf",
+        "sha256": "09d37f0b8ec7d597cdf594f133972a843c0dc2f0a07a3ff6d2feb80039a7e16b",
+        "pages": 3,
+        "formFields": 3,
+        "rotations": [
+          180,
+          0,
+          0
+        ],
+        "texts": [
+          "Page Two fixture",
+          "Page One fixture",
+          "Page One fixture"
+        ],
+        "strictReaderAccepted": true
+      },
+      {
+        "file": "/Volumes/Storage/Workspace/SDK/iiGeneralDocument/build/test-output/acrobat-absorption/merged.pdf",
+        "sha256": "418ee7bf6893a0723292da2512bfafcd2fa39acf9a4900d05be0abb9fde9e14b",
+        "pages": 4,
+        "formFields": 4,
+        "rotations": [
+          180,
+          0,
+          270,
+          0
+        ],
+        "texts": [
+          "Page Two fixture",
+          "Page One fixture",
+          "Page Two fixture",
+          "Page One fixture"
+        ],
+        "strictReaderAccepted": true
+      }
+    ]
+  },
+  "installedPrefix": "/Users/ymy/.local/SDK/iiGeneralDocument",
+  "actualInstalledConsumers": {
+    "installed-pdf-consumer": {
+      "compileExitCode": 0,
+      "runExitCode": 0,
+      "backendWarnings": 0,
+      "loadedInstalledLibraries": [
+        "dyld[59489]: <2EAF298B-35CC-3776-A005-D78C7C8152BB> /Users/ymy/.local/SDK/iiGeneralDocument/lib/libiiGeneralDocumentPdf.0.3.0.dylib"
+      ],
+      "runtimeLog": "/Volumes/Storage/Workspace/SDK/iiGeneralDocument/build/acrobat-absorption/installed-pdf-consumer-runtime.log"
+    },
+    "installed-object-consumer": {
+      "compileExitCode": 0,
+      "runExitCode": 0,
+      "backendWarnings": 0,
+      "loadedInstalledLibraries": [
+        "dyld[59539]: <AA28C29A-A20C-36DC-BDB4-321EC53463EC> /Users/ymy/.local/SDK/iiGeneralDocument/lib/libiiGeneralDocument.0.3.0.dylib",
+        "dyld[59539]: <2EAF298B-35CC-3776-A005-D78C7C8152BB> /Users/ymy/.local/SDK/iiGeneralDocument/lib/libiiGeneralDocumentPdf.0.3.0.dylib"
+      ],
+      "runtimeLog": "/Volumes/Storage/Workspace/SDK/iiGeneralDocument/build/acrobat-absorption/installed-object-consumer-runtime.log"
+    }
+  },
+  "preservedOldAbiLibrary": {
+    "file": "lib/libiiGeneralDocument.0.2.0.dylib",
+    "sha256": "541d7cce6d73643e805c7a10c3047287ae6c502c9e8f0cf75385cd0a4f23f581",
+    "bytes": 2718288
+  },
+  "installedBackup": "/Volumes/Storage/Workspace/SDK/iiGeneralDocument/build/acrobat-absorption/installed-before",
+  "initialGitStatus": "",
+  "modifiedOriginalFiles": [
+    "src/iiGeneralDocument.h",
+    "src/Pdf/PdfDocumentWriter.cpp",
+    "src/Pdf/PdfDocumentReader.h",
+    "src/Pdf/PdfDocumentReader.cpp",
+    "src/Pdf/PdfDocumentWriter.h",
+    "src/Editing/DocumentEditor.cpp",
+    "src/Editing/DocumentEditor.h",
+    "src/Model/Page.cpp",
+    "src/Model/Page.h",
+    "src/Model/Document.h",
+    "src/Model/Document.cpp",
+    "src/Validation/DocumentValidator.cpp",
+    "cmake/iiGeneralDocumentConfig.cmake.in",
+    "docs/ARCHITECTURE.md",
+    "docs/API.md",
+    "docs/PDF_SUPPORT.md",
+    "CMakeLists.txt",
+    "README.md",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "deletedOriginalFiles": [],
+  "nativeCompileCommandsVerified": 1,
+  "pinnedOssDependencies": [
+    {
+      "name": "qpdf",
+      "version": "12.3.2",
+      "archive": "archives/qpdf-12.3.2.tar.gz",
+      "sha256": "6cba2f9f2cd887d905faeb99e0e51a307b217920d1bbf3e9cfbb2e8178a2deda",
+      "bytes": 19640678,
+      "officialSourceUrl": "https://github.com/qpdf/qpdf/releases/download/v12.3.2/qpdf-12.3.2.tar.gz",
+      "upstreamSourcesModified": false,
+      "productDependency": true,
+      "licenses": [
+        "LICENSE.txt",
+        "NOTICE.md",
+        "Artistic-2.0"
+      ],
+      "compiledLanguage": "93 upstream C++23 units and 2 original sphlib C units",
+      "analysisClass": "independent open-source backend; not recovered Adobe implementation",
+      "gitCommit": "a898bb3a7289d1d05789d6d3f0d5dd534943a8da",
+      "license": "Apache-2.0; original optional Artistic-2.0 notice preserved",
+      "compiledUnits": {
+        "C++23": 93,
+        "C": 2,
+        "assembly": 0
+      },
+      "originalCUnits": [
+        "libqpdf/sha2.c",
+        "libqpdf/sha2big.c"
+      ],
+      "licenseSha256": {
+        "LICENSE.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+        "NOTICE.md": "b207f65a9e5491195ded63b2941199b19a4d30148871f2742c88eae7bfc513a6",
+        "Artistic-2.0": "fb929ac30decb4dc3a2eea2bec6c43296a797c5d2d602deb3784ee39430583d5"
+      }
+    },
+    {
+      "name": "zlib",
+      "version": "1.3.1",
+      "archive": "archives/zlib-1.3.1.tar.gz",
+      "sha256": "9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23",
+      "bytes": 1512791,
+      "officialSourceUrl": "https://zlib.net/fossils/zlib-1.3.1.tar.gz",
+      "upstreamSourcesModified": false,
+      "productDependency": true,
+      "licenses": [
+        "LICENSE"
+      ],
+      "compiledLanguage": "upstream C",
+      "analysisClass": "independent open-source backend; not recovered Adobe implementation",
+      "license": "Zlib",
+      "compiledUnits": {
+        "C": 15,
+        "assembly": 0
+      },
+      "licenseSha256": {
+        "LICENSE": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243"
+      }
+    },
+    {
+      "name": "libjpeg-turbo",
+      "version": "3.2.0",
+      "archive": "archives/libjpeg-turbo-3.2.0.tar.gz",
+      "sha256": "6f30092cef9fb839779646608f4ee14ae3cbac989c47fa05e841b0841f09878e",
+      "bytes": 2537858,
+      "officialSourceUrl": "https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/3.2.0/libjpeg-turbo-3.2.0.tar.gz",
+      "upstreamSourcesModified": false,
+      "productDependency": true,
+      "licenses": [
+        "LICENSE.md",
+        "README.ijg"
+      ],
+      "compiledLanguage": "upstream C",
+      "analysisClass": "independent open-source backend; not recovered Adobe implementation",
+      "license": "IJG, BSD-3-Clause, Zlib; full upstream texts preserved",
+      "compiledUnits": {
+        "C": 101,
+        "assembly": 0
+      },
+      "buildOptions": {
+        "static": true,
+        "SIMD": false,
+        "TurboJPEG": false,
+        "JNA": false,
+        "tools": false,
+        "upstreamTests": false
+      },
+      "licenseSha256": {
+        "LICENSE.md": "ba6bceebcba0fdd35488477c2cca8c4632ce82c74dbfbc87d886ce6fc4433579",
+        "README.ijg": "75815e3bf6484201a3c3d17a1bbf10f2e8e3237f84df10a2357ea896db2a81d6"
+      }
+    }
+  ],
+  "nativeRuntimeDependencies": "/Users/ymy/.local/SDK/iiGeneralDocument/lib/libiiGeneralDocumentPdf.0.3.0.dylib:\n\t@rpath/libiiGeneralDocumentPdf.0.3.dylib (compatibility version 0.3.0, current version 0.3.0)\n\t/usr/lib/libc++.1.dylib (compatibility version 1.0.0, current version 2200.27.0)\n\t/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1359.0.0)\n",
+  "sourceManifest": [
+    {
+      "file": "src/Core/Diagnostic.cpp",
+      "sha256": "6d0e4ebc49fc63416fa734d236517208d542b617a093682384bd7a18ed89fcd2"
+    },
+    {
+      "file": "src/Core/Diagnostic.h",
+      "sha256": "605871dc1cc92641e4b6207380c8d3268c7833babca6291d7f92e745755682fd"
+    },
+    {
+      "file": "src/Core/PdfValue.cpp",
+      "sha256": "6ff2e30836377fcb9586d878e53836eb00901190a10ce2db9bd3dea6c858b1b2"
+    },
+    {
+      "file": "src/Core/PdfValue.h",
+      "sha256": "60ab7990b8bc78937aa57403b2fef231c3836974b8c1e8da5f12530a5a03984a"
+    },
+    {
+      "file": "src/Editing/DocumentEditor.cpp",
+      "sha256": "7dabe9fb8876ab3d4deeae086d6bd825005d1416a9458e080e951285f4a1eedc"
+    },
+    {
+      "file": "src/Editing/DocumentEditor.h",
+      "sha256": "fda2a9f4921dc24246a7a04a3687dfb4dfc015f37659d60a28376b098f4a75e7"
+    },
+    {
+      "file": "src/Html/HtmlBlockDocument.cpp",
+      "sha256": "5ba338cd622f6cd6689a345c7a9f296154fa8b1f3d160ce21ee95889411c68a0"
+    },
+    {
+      "file": "src/Html/HtmlBlockDocument.h",
+      "sha256": "935b16444742c5606b1ccc366cdb169c0b7a4f2dd09661e4e4adff5474830873"
+    },
+    {
+      "file": "src/Html/HtmlBlockEditor.cpp",
+      "sha256": "a49e07ead62398ded9e259677ad0dc180601a4f2b830484a2fe1b718567d3693"
+    },
+    {
+      "file": "src/Html/HtmlBlockEditor.h",
+      "sha256": "b95193b49a17d33c984c458ebc01767b4912021c75cfca2d8385ce8e55bd2eca"
+    },
+    {
+      "file": "src/IO/DocumentReader.h",
+      "sha256": "124db7a1f376abfdab8e13eeb6462ef3ffbc61b33d1fc6a1a848cbf2c302999b"
+    },
+    {
+      "file": "src/IO/DocumentWriter.h",
+      "sha256": "652ffc9ef55fc1704d2f2b4e020518ce47177b8120d3c6cf18aab032cf2bf8c1"
+    },
+    {
+      "file": "src/Metadata/Authorship_p.hpp",
+      "sha256": "8a1f34a4884269c6164452d465a63fa03c0783a041e703eebda76ca3d38bd6ed"
+    },
+    {
+      "file": "src/Model/Document.cpp",
+      "sha256": "3c24b452abd32ece8c578c01b7285a2d35b20a54f82850e70809283823b1494e"
+    },
+    {
+      "file": "src/Model/Document.h",
+      "sha256": "77bf15d3957141842a78259a3c95e5f92a739c54d3118ea8d36f5b5ea805fd29"
+    },
+    {
+      "file": "src/Model/Element.cpp",
+      "sha256": "4d2d1d7df263f02c7d5eeaf09ef56f34ec3a98ef1014286139cb72b48cfa2e5b"
+    },
+    {
+      "file": "src/Model/Element.h",
+      "sha256": "d4dcb90b295c7e47e524163b31be6da6feaa64c718e058bcd29b4ac95e0749e6"
+    },
+    {
+      "file": "src/Model/Geometry.h",
+      "sha256": "5096a73daf14253e63757555cf675c04217b78832388326e2db4bafadac2d6d2"
+    },
+    {
+      "file": "src/Model/Page.cpp",
+      "sha256": "c5c8f82c0ec876171f02d1ac61e4ffc28baf7c736559c63103169b0f92d14a90"
+    },
+    {
+      "file": "src/Model/Page.h",
+      "sha256": "d096b4311d677be16eef34354a4fdad7f6b2049efc903247113294f6acfda2d8"
+    },
+    {
+      "file": "src/Pdf/Objects.cpp",
+      "sha256": "ac120b947c4b16623f044756da258bd6fa300f7bd47e5350f11c1f6041bb5456"
+    },
+    {
+      "file": "src/Pdf/Objects.h",
+      "sha256": "26b93942394660620e53723520f02f44c17ec50e599538acbfd079033e2d84c2"
+    },
+    {
+      "file": "src/Pdf/PdfDocumentReader.cpp",
+      "sha256": "237ddeb7a716d769e3411c2b1cd8d94ff93f4332c2eb9cbeaf0ee84b08a6547f"
+    },
+    {
+      "file": "src/Pdf/PdfDocumentReader.h",
+      "sha256": "e819bcf535ea43450aec0469e83492611231cae75a2c15c642a56a7bc6c79aa9"
+    },
+    {
+      "file": "src/Pdf/PdfDocumentWriter.cpp",
+      "sha256": "b28bd3bdf7a1f8db1e351740a157db74bcf41db53ea0c2ab9d3e0a288fdadcdc"
+    },
+    {
+      "file": "src/Pdf/PdfDocumentWriter.h",
+      "sha256": "16f40538f35854e206c39e4bbba78fcacd1aaeb265f53760be3c3bd6b7055775"
+    },
+    {
+      "file": "src/Pdf/Private/TextValidation.h",
+      "sha256": "9995107c4b9f5ccb090b5f8d90a91e617a8d3f4554040c1a5c568d2ff5b682a5"
+    },
+    {
+      "file": "src/ThinkingSpace/ThinkingSpaceDocument.cpp",
+      "sha256": "52667f7a8fc2edfc4476f698fc1e7cfc06066c1476156c86a2a290ffbcf43eb2"
+    },
+    {
+      "file": "src/ThinkingSpace/ThinkingSpaceDocument.h",
+      "sha256": "a3db4f74b178170272e36fb1e691bdade629754700f997c59f57447a3fd7e100"
+    },
+    {
+      "file": "src/ThinkingSpace/ThinkingSpaceFile.cpp",
+      "sha256": "fa5e11124cbd3ff0cf2a83c5c0e5e3363fc2e14bfc728e8811850948e606ff22"
+    },
+    {
+      "file": "src/Validation/DocumentValidator.cpp",
+      "sha256": "84df020b5947ec5acdf91062464720232b2532075cc4b4fa62a6351252da74b5"
+    },
+    {
+      "file": "src/Validation/DocumentValidator.h",
+      "sha256": "877dd26599fbca392755e5d79c3bd122d9ad32a5e4d166878f15dd926f8fc902"
+    },
+    {
+      "file": "src/Word/Private/AtomicFileCommit.cpp",
+      "sha256": "d90ee1b1a4bd6e8f11c64d3484b61860e6c98fcd9e80b1cbcc3dcbf49839e925"
+    },
+    {
+      "file": "src/Word/Private/AtomicFileCommit.h",
+      "sha256": "8d91ddc8236314f6db132e37b627b72f545efd57f55b0418b89728d4f275fb49"
+    },
+    {
+      "file": "src/Word/Private/DocxPackage.cpp",
+      "sha256": "46679b4277ca1ecc990a2c8e0a5da045e05cfd2d198e801779abd410b7123773"
+    },
+    {
+      "file": "src/Word/Private/DocxPackage.h",
+      "sha256": "dc4ec52df6773f3b7597a1a11a73acb6ffb20e974045d0a9517be95022ec8af4"
+    },
+    {
+      "file": "src/Word/Private/LegacyDocConverter.cpp",
+      "sha256": "5c08a4d9b1b1cdde5f881260256f026ed61b0adf903f9a61432a1156b2f5680e"
+    },
+    {
+      "file": "src/Word/Private/LegacyDocConverter.h",
+      "sha256": "549c532dca3f846f069e8ca273d741bc30dbfbeb3f67facd1cf35616ecce64b3"
+    },
+    {
+      "file": "src/Word/Private/OdfTextCodec.cpp",
+      "sha256": "9200c26fea1662399509ccd8dcf7c951a10c7013d8f7a3658ddc8023a25f8913"
+    },
+    {
+      "file": "src/Word/Private/OdfTextCodec.h",
+      "sha256": "7e3f341abad8077adc0dd9900d8a0b09c938dc176a19bfec379c258efb9cd904"
+    },
+    {
+      "file": "src/Word/Private/ProviderZipSource.h",
+      "sha256": "49f4c8a3bf67735b7345ec1ff411b5ce85df1930540bd76e3f070fd21812cebe"
+    },
+    {
+      "file": "src/Word/WordDocument.cpp",
+      "sha256": "873f3eb1f8fe1894d2516802acbdb95e2590e3e33ed3fe78404e4c61044ba62a"
+    },
+    {
+      "file": "src/Word/WordDocument.h",
+      "sha256": "88301ae357d81ae02a611517a6850577909598d88bc6ae33619074e27c10decf"
+    },
+    {
+      "file": "src/Word/WordDocumentReader.cpp",
+      "sha256": "83942ead5c87411c9c0e89c3febaa0bd541628581b82d8f180e6bec89ba70059"
+    },
+    {
+      "file": "src/Word/WordDocumentReader.h",
+      "sha256": "bc51a566338514bcb70e13fa8eeaf6782889a9a84c38ac37a0fc10901ea04ba9"
+    },
+    {
+      "file": "src/Word/WordDocumentWriter.cpp",
+      "sha256": "4d6e66ef2755968ce1999db2fe0263846c5005b1f0eead2675b043d01465d02b"
+    },
+    {
+      "file": "src/Word/WordDocumentWriter.h",
+      "sha256": "a5ae1460bed7caa03db3b998d4b694bccdd85148f162c433b3f12bab668563e4"
+    },
+    {
+      "file": "src/Xml/XmlTreeDocument.cpp",
+      "sha256": "6dd5091f3ced0db9c432642b086a6a3de464b15f9361b99a287f68caac563d2a"
+    },
+    {
+      "file": "src/Xml/XmlTreeDocument.h",
+      "sha256": "cd13f3c4ce0c17d91bfb420c384df7f298113ce651e37bb98e0589a8eef8e0b1"
+    },
+    {
+      "file": "src/Xml/XmlTreeEditor.cpp",
+      "sha256": "ac0dbcf9842a3ea17185a4d3ac25dfd4e2889d8c2e52b8ed75f7724645d3516b"
+    },
+    {
+      "file": "src/Xml/XmlTreeEditor.h",
+      "sha256": "78f40b97d2dd85c67abc90979fd97a982c0e586db3bb73132caf826a888ddaab"
+    },
+    {
+      "file": "src/iiGeneralDocument.h",
+      "sha256": "5bde39c0a15b95ef9f579e3f7fc25109ff36c9aeb87cd727accbad12d9a7c100"
+    },
+    {
+      "file": "cmake/InstallPdfZlib.cmake",
+      "sha256": "c9b1c5b436244419450872609b6fb74c8479e5723e036b3450be487a0c39dcda"
+    },
+    {
+      "file": "cmake/PdfObjectDependencies.cmake",
+      "sha256": "dd72a93257259fc0e8a63085cf1c12969dc8bda3814af3c780080f87da5263be"
+    },
+    {
+      "file": "cmake/PdfObjects.cmake",
+      "sha256": "cfdc7216d96c51a44e4da74c152636dbf3d30466b253b594b136b32f88cd627c"
+    },
+    {
+      "file": "cmake/iiGeneralDocumentConfig.cmake.in",
+      "sha256": "df62100bb09c12bbed309bd62c13d203b7ea40f82608f15310fa8c1bbb985f73"
+    },
+    {
+      "file": "docs/ACROBAT_ABSORPTION.md",
+      "sha256": "b6e6785120dc197d0f24f5c4ccde5c7fb98156e08743399e58e81669dce36eb2"
+    },
+    {
+      "file": "docs/API.md",
+      "sha256": "1700cd36dcb90414406678829c934598aca1a7c3a40978cbbf86e67fce604e46"
+    },
+    {
+      "file": "docs/ARCHITECTURE.md",
+      "sha256": "36add043356387814c6820dd422e711947a9fa9e3324f4af2a88f5834be31c27"
+    },
+    {
+      "file": "docs/FILE_AUTHORSHIP.md",
+      "sha256": "d596a4c08adc6c5fba1801dd9f3748637c0bf3e89217ae03e5e231a5bfb0e27e"
+    },
+    {
+      "file": "docs/HTML_BLOCK_CRUD.md",
+      "sha256": "4e0d880120c7752f7ec280715f49bba41dc1448919046aed74c59967bc78a3d6"
+    },
+    {
+      "file": "docs/ODF_SUPPORT.md",
+      "sha256": "6782598ced4c9918f582aa6b9a80bccac9a0234dce143939d2c161e30e01c3f7"
+    },
+    {
+      "file": "docs/PDF_SUPPORT.md",
+      "sha256": "c709dbea68efcc063a18f49d022d92c24485312d7d2131b8a0e9df11e225e657"
+    },
+    {
+      "file": "docs/THINKING_SPACE_DOCUMENT.md",
+      "sha256": "096e01798d0a834f1451426cf196244e37556f1771779bb7e38c05bbd70b2f89"
+    },
+    {
+      "file": "docs/WORD_SUPPORT.md",
+      "sha256": "26051e98eae3897552f47d5270e9b1eb26dda263de9686a900f2180f56a4c2d7"
+    },
+    {
+      "file": "docs/Windows.md",
+      "sha256": "673683ad04245040f4a232e8e51828499e7334dcb53275e9210d2d2db880f8b7"
+    },
+    {
+      "file": "docs/XML_TREE_CRUD.md",
+      "sha256": "54df3416455706eea6b448b32777c6c75ac3667e26b44a29efcb7bba16ceab34"
+    },
+    {
+      "file": "tests/AuthorshipTest.cpp",
+      "sha256": "8ab4554e347490aa3f5a91eac5511c9ba9653a3d3f0706c9b31cb30314524331"
+    },
+    {
+      "file": "tests/DocumentEditorTest.cpp",
+      "sha256": "2de775d7173533e5b8aa0aebee7e92aa4c364c9b5dff63393b682b32cb3162ce"
+    },
+    {
+      "file": "tests/HtmlBlockCrudTest.cpp",
+      "sha256": "471490fa7042846e747c102dd4fa16787f9279c4032edd65605a0e9b3b668504"
+    },
+    {
+      "file": "tests/InstallConsumerTest.cmake",
+      "sha256": "77cd6f819bede034a392ba7159bff1da0f28347f350c36bfb7a1738b834788d7"
+    },
+    {
+      "file": "tests/LegacyDocRoundTripTest.cpp",
+      "sha256": "ba8151b8f57bc23307f1d2b9577a0a33af3172f2cb1faa701e24dce074540da3"
+    },
+    {
+      "file": "tests/ModelTest.cpp",
+      "sha256": "a66e21e8bc66ae9ee898c38351ddbe40351b73260a5bf1e7948fc6e105be360b"
+    },
+    {
+      "file": "tests/OdfLibreOfficeInteropTest.cpp",
+      "sha256": "791d9034002065fe98182750e9cd03170bf84786e71bb23f5c99808e742ec07e"
+    },
+    {
+      "file": "tests/OdfRobustnessTest.cpp",
+      "sha256": "ea2581049aa1e7d446d89217f6fd43dc1a61ada7dec45cd00db1225d5f16d135"
+    },
+    {
+      "file": "tests/OdfRoundTripTest.cpp",
+      "sha256": "789fc7ee94ce49d1d221267167693ae976cfbaa7c85964ee5f03cc5687571ee4"
+    },
+    {
+      "file": "tests/OdfStyleCompatibilityTest.cpp",
+      "sha256": "79d8054c8e17698ed8379340551c28984365e16e16a4c2a9cd93f9b2e2448d25"
+    },
+    {
+      "file": "tests/PdfAbsorptionTest.cpp",
+      "sha256": "e3f1ce3f2769329c61c876ac0940aa19caa705470a3ae14ca85db8b7c452824d"
+    },
+    {
+      "file": "tests/PdfFixture.h",
+      "sha256": "3d93dbdb22da17433486b0e9bef3249768031f6695da4df839947af2366f98e6"
+    },
+    {
+      "file": "tests/PdfInstallConsumerTest.cmake",
+      "sha256": "eb8776248646526df362c48458e95d706bebb624aba14f86b95a880a2a09d644"
+    },
+    {
+      "file": "tests/PdfObjectBoundariesTest.cpp",
+      "sha256": "565db1f1e1bc3efae6d6ad2db94d89cd930c33add698efad5defba572d4fd869"
+    },
+    {
+      "file": "tests/PdfObjectsTest.cpp",
+      "sha256": "04424ccb3236d1e5bcd313d7fae1dd871ed9c2df0b8a7a8d787c499c1ed28ac0"
+    },
+    {
+      "file": "tests/PdfRoundTripTest.cpp",
+      "sha256": "d627096c39a71e347053e8d575339d51d732234a7d93482092421011ddab0c25"
+    },
+    {
+      "file": "tests/PdfRuntimeDependenciesTest.cmake",
+      "sha256": "930c63a4ec9312572c9960641ff28237b440931be180d24319ef73880b16d6b8"
+    },
+    {
+      "file": "tests/ProjectContractTest.cmake",
+      "sha256": "534fc16961018481472e742e5c97f2f375987c339aef054c4c732d241bdbdb8f"
+    },
+    {
+      "file": "tests/SymbolIsolationTest.cmake",
+      "sha256": "c0979c8b5a14857903fff03de1aaaf97e2c8afc2689398c8f63d93aa8ff6496c"
+    },
+    {
+      "file": "tests/TestSupport.h",
+      "sha256": "4eeb38c809a971be113b6a9769d133859288aa41942696a256cae24c890cbe6e"
+    },
+    {
+      "file": "tests/ThinkingSpaceDocumentModelTest.cpp",
+      "sha256": "5a4fc1a8eb680079adf775ba2c07164455427024ea177b0d0371421b2254873d"
+    },
+    {
+      "file": "tests/ValidationTest.cpp",
+      "sha256": "22cecb4818bdd0cf9153ce9b585b20e6d02fd24a835dc9c3c3c216f46347e572"
+    },
+    {
+      "file": "tests/WordModelTest.cpp",
+      "sha256": "6adc9c21ec96696c002212c8bf37f95df5288676c6a06891842b6ba798ddb0fd"
+    },
+    {
+      "file": "tests/WordRoundTripTest.cpp",
+      "sha256": "8b47eeb8cdc3bb6b2b8aba477c8ea11c8634e2c4ca0b8e6dba9a467b5e674799"
+    },
+    {
+      "file": "tests/XmlTreeCrudTest.cpp",
+      "sha256": "89a7edfe143868fda67ae916f5448549016d4b5a488a4b2bb1ae70bb6b3a79c4"
+    },
+    {
+      "file": "tests/consumer/CMakeLists.txt",
+      "sha256": "b8834639623951a3e2892539ffa7d8dd72c53db27f04684a1af9108f1cf459a9"
+    },
+    {
+      "file": "tests/consumer/main.cpp",
+      "sha256": "a93d004d5e5ebf86cc1216d1b01d494cb58a452c762855626d27bb8775421eb9"
+    },
+    {
+      "file": "tests/foreign-headers/iiGeneralDocument/Pdf/Objects.h",
+      "sha256": "4a947514a8a3ae8651c514a33c2142cb39eaa2781e594b92e9a05b25ed46f858"
+    },
+    {
+      "file": "tests/foreign-headers/iiGeneralDocument/iiGeneralDocument.h",
+      "sha256": "c4b3379abafe3bf2bcf4a201e0b99a7ef34c52d0b033961878d48f25a7296b5a"
+    },
+    {
+      "file": "tests/pdf-consumer/CMakeLists.txt",
+      "sha256": "b9d4fc2637908d39d1564e10e847a4f3c2bf9e84b09d5964bda3e3767cf3d1e4"
+    },
+    {
+      "file": "tests/pdf-consumer/main.cpp",
+      "sha256": "f5febce1655639a0c6179c45af67d5cc8756c898927a50a16644f28e39f044e5"
+    },
+    {
+      "file": "third_party/archives/libjpeg-turbo-3.2.0.tar.gz",
+      "sha256": "6f30092cef9fb839779646608f4ee14ae3cbac989c47fa05e841b0841f09878e"
+    },
+    {
+      "file": "third_party/archives/qpdf-12.3.2.tar.gz",
+      "sha256": "6cba2f9f2cd887d905faeb99e0e51a307b217920d1bbf3e9cfbb2e8178a2deda"
+    },
+    {
+      "file": "third_party/archives/zlib-1.3.1.tar.gz",
+      "sha256": "9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23"
+    },
+    {
+      "file": "third_party/dependencies.json",
+      "sha256": "3f87dd77cbf77e2ee4e2c441bdd1accd00006acb08b0c08a2023be4eb0ed4b77"
+    },
+    {
+      "file": "third_party/licenses/acrobat-counterpart/LICENSE",
+      "sha256": "0aa8c630d68fced53f8d6547b4dffa5e954bbffd948c6694e1fdf034c6ce77ec"
+    },
+    {
+      "file": "third_party/licenses/libjpeg-turbo/LICENSE.md",
+      "sha256": "ba6bceebcba0fdd35488477c2cca8c4632ce82c74dbfbc87d886ce6fc4433579"
+    },
+    {
+      "file": "third_party/licenses/libjpeg-turbo/README.ijg",
+      "sha256": "75815e3bf6484201a3c3d17a1bbf10f2e8e3237f84df10a2357ea896db2a81d6"
+    },
+    {
+      "file": "third_party/licenses/qpdf/Artistic-2.0",
+      "sha256": "fb929ac30decb4dc3a2eea2bec6c43296a797c5d2d602deb3784ee39430583d5"
+    },
+    {
+      "file": "third_party/licenses/qpdf/LICENSE.txt",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "file": "third_party/licenses/qpdf/NOTICE.md",
+      "sha256": "b207f65a9e5491195ded63b2941199b19a4d30148871f2742c88eae7bfc513a6"
+    },
+    {
+      "file": "third_party/licenses/zlib/LICENSE",
+      "sha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243"
+    },
+    {
+      "file": "CMakeLists.txt",
+      "sha256": "24ea66ac92f10739fa9dfe5e49f5020e5b453426df99b56984017a24fae3c7e9"
+    },
+    {
+      "file": "README.md",
+      "sha256": "5adaf2f2e7082c36931be015d44019399d0113800c43eb7d56a3596d4cac974e"
+    },
+    {
+      "file": "THIRD_PARTY_NOTICES.md",
+      "sha256": "8b066b2e3a5552034c5a5d7356e4b2c7957b5ed33ff2e3562f5d47dd5c884cb6"
+    },
+    {
+      "file": "LICENSE",
+      "sha256": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef"
+    }
+  ],
+  "scopeLimits": [
+    "No cryptographic signature validation; signed/encrypted/XFA native manipulation refused",
+    "Text-field Unicode values verified; font embedding/visual appearance generation not implemented",
+    "Page extraction/merge omit document-level attachments/XMP/Info and combine only primary aggregate authorship",
+    "Legacy full Word/XML/HTML/provider-backed package still uses Qt",
+    "Full 0.3 aggregate ABI consumers require recompilation; product applications not deployed"
+  ]
+}

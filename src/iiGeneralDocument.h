@@ -12,6 +12,7 @@
 #include "Model/Geometry.h"
 #include "Model/Page.h"
 #include "Pdf/PdfDocumentReader.h"
+#include "Pdf/Objects.h"
 #include "Pdf/PdfDocumentWriter.h"
 #include "ThinkingSpace/ThinkingSpaceDocument.h"
 #include "Validation/DocumentValidator.h"

@@ -1,203 +1,95 @@
 #include "Word/Private/LegacyDocConverter.h"
-
-#include <QDir>
-#include <iiFileProvider.h>
-#include <QFileInfo>
-#include <QProcess>
-#include <QProcessEnvironment>
-#include <QStandardPaths>
-#include <QTemporaryDir>
-#include <QUrl>
-
-#include <algorithm>
+#include "Word/Private/ConversionProcess.h"
 #include <array>
-#include <chrono>
-#include <filesystem>
-#include <limits>
-#include <string>
-#include <utility>
-#include <vector>
-
+#include <cstdlib>
+#include <iiFileProviderNative.h>
+#include <system_error>
 namespace ii::document::detail {
 namespace {
-
-QString toQString(const std::filesystem::path& path)
-{
+std::filesystem::path resolveExecutable(const std::filesystem::path &requested) {
+    if (!requested.empty())
+        return std::filesystem::absolute(requested);
+    if (auto *search = std::getenv("PATH")) {
+        std::string_view paths(search);
 #ifdef _WIN32
-    return QString::fromStdWString(path.wstring());
+        constexpr char delimiter = ';';
+        constexpr std::array names{"soffice.exe", "libreoffice.exe"};
 #else
-    return QString::fromUtf8(path.string());
+        constexpr char delimiter = ':';
+        constexpr std::array names{"soffice", "libreoffice"};
 #endif
-}
-
-std::string toUtf8(const QString& value)
-{
-    const auto bytes = value.toUtf8();
-    return {bytes.constData(), static_cast<std::size_t>(bytes.size())};
-}
-
-std::filesystem::path resolveExecutable(const std::filesystem::path& requested)
-{
-    if (!requested.empty()) {
-        return requested;
-    }
-
-    for (const auto* name : {"soffice", "libreoffice"}) {
-        const auto found = QStandardPaths::findExecutable(QString::fromLatin1(name));
-        if (!found.isEmpty()) {
-            return std::filesystem::path(toUtf8(found));
+        while (!paths.empty()) {
+            auto end = paths.find(delimiter);
+            auto directory = std::filesystem::path(std::string(paths.substr(0, end)));
+            for (auto name : names) {
+                auto path = directory / name;
+                if (std::filesystem::is_regular_file(path))
+                    return std::filesystem::absolute(path);
+            }
+            if (end == paths.npos)
+                break;
+            paths.remove_prefix(end + 1);
         }
     }
-
-    const std::array<std::filesystem::path, 2> commonPaths{
-        std::filesystem::path{"/Applications/LibreOffice.app/Contents/MacOS/soffice"},
-        std::filesystem::path{"C:/Program Files/LibreOffice/program/soffice.exe"},
-    };
-    for (const auto& candidate : commonPaths) {
-        if (std::filesystem::is_regular_file(candidate)) {
-            return candidate;
-        }
-    }
+    for (auto path : {"/Applications/LibreOffice.app/Contents/MacOS/soffice",
+                      "C:/Program Files/LibreOffice/program/soffice.exe"})
+        if (std::filesystem::is_regular_file(path))
+            return path;
     return {};
 }
-
-Diagnostic error(std::string code, std::string message, const std::filesystem::path& context)
-{
-    return {DiagnosticSeverity::error, std::move(code), std::move(message),
-            context.string()};
+Diagnostic error(std::string code, std::string message, const std::filesystem::path &context) {
+    return {DiagnosticSeverity::error, std::move(code), std::move(message), context.string()};
 }
-
-bool copyAtomically(const QString& source, const QString& destination, QString& message)
-{
-    try { iiFileProvider::File::copy(source, destination, true); return true; }
-    catch (const iiFileProvider::FileError &error) { message = QString::fromUtf8(error.what()); return false; }
-}
-
 } // namespace
-
-std::vector<Diagnostic> convertWordFile(
-    const std::filesystem::path& source,
-    const std::filesystem::path& destination,
-    const std::filesystem::path& requestedExecutable,
-    std::chrono::milliseconds timeout,
-    std::string outputFilter)
-{
-    std::vector<Diagnostic> diagnostics;
-    const auto executable = resolveExecutable(requestedExecutable);
-    if (executable.empty() || !std::filesystem::is_regular_file(executable)) {
-        diagnostics.push_back(error(
-            "doc.converter_missing",
-            "LibreOffice soffice is required for the legacy .doc format.",
-            requestedExecutable.empty() ? source : requestedExecutable));
-        return diagnostics;
+std::vector<Diagnostic> convertWordFile(const std::filesystem::path &source,
+                                        const std::filesystem::path &destination,
+                                        const std::filesystem::path &requestedExecutable,
+                                        std::chrono::milliseconds timeout,
+                                        std::string outputFilter) {
+    auto executable = resolveExecutable(requestedExecutable);
+    if (executable.empty() || !std::filesystem::is_regular_file(executable))
+        return {error("doc.converter_missing",
+                      "LibreOffice soffice is required for the legacy .doc format.",
+                      requestedExecutable.empty() ? source : requestedExecutable)};
+    if (!std::filesystem::is_regular_file(source))
+        return {error("doc.source_missing", "The Word conversion source does not exist.", source)};
+    if (timeout <= std::chrono::milliseconds::zero())
+        return {
+            error("doc.invalid_timeout", "The Word conversion timeout must be positive.", source)};
+    try {
+        iiFileProvider::native::TemporaryDirectory work, profile;
+        auto run = runConversionProcess(
+            executable,
+            {"--headless", "--nologo", "--nodefault", "--nolockcheck", "--norestore",
+             "-env:UserInstallation=" + localFileUri(profile.path()), "--convert-to", outputFilter,
+             "--outdir", pathUtf8(work.path()), pathUtf8(std::filesystem::absolute(source))},
+            work.path(), timeout);
+        if (!run.started)
+            return {error("doc.conversion_start_failed",
+                          "LibreOffice could not start: " + run.error, executable)};
+        if (run.timedOut)
+            return {
+                error("doc.conversion_timeout", "LibreOffice Word conversion timed out.", source)};
+        if (run.exitCode != 0)
+            return {error("doc.conversion_failed",
+                          "LibreOffice failed to convert the Word file: " + run.error, source)};
+        auto extension = outputFilter.substr(0, outputFilter.find(':'));
+        auto converted = work.path() / (source.stem().string() + "." + extension);
+        if (!std::filesystem::is_regular_file(converted) ||
+            std::filesystem::file_size(converted) == 0)
+            return {error("doc.conversion_output_missing",
+                          "LibreOffice reported success but did not produce the "
+                          "expected Word file.",
+                          source)};
+        // Native provider performs the atomic publication and owns all file access.
+        iiFileProvider::native::File::write(destination,
+                                            iiFileProvider::native::File::read(converted));
+        return {{DiagnosticSeverity::information, "doc.converted_with_libreoffice",
+                 "The legacy Word document was converted through an isolated "
+                 "LibreOffice process.",
+                 destination.string()}};
+    } catch (const std::exception &e) {
+        return {error("doc.destination_write_failed", e.what(), destination)};
     }
-    if (!std::filesystem::is_regular_file(source)) {
-        diagnostics.push_back(error(
-            "doc.source_missing", "The Word conversion source does not exist.", source));
-        return diagnostics;
-    }
-    if (timeout <= std::chrono::milliseconds::zero()) {
-        diagnostics.push_back(error(
-            "doc.invalid_timeout", "The Word conversion timeout must be positive.", source));
-        return diagnostics;
-    }
-
-    QTemporaryDir workDirectory;
-    QTemporaryDir profileDirectory;
-    if (!workDirectory.isValid() || !profileDirectory.isValid()) {
-        diagnostics.push_back(error(
-            "doc.temporary_directory_failed",
-            "Unable to create an isolated directory for Word conversion.", destination));
-        return diagnostics;
-    }
-
-    QProcess process;
-    process.setProgram(toQString(executable));
-    process.setWorkingDirectory(workDirectory.path());
-    process.setProcessChannelMode(QProcess::SeparateChannels);
-    auto environment = QProcessEnvironment::systemEnvironment();
-    environment.insert(QStringLiteral("HOME"), profileDirectory.path());
-    process.setProcessEnvironment(environment);
-
-    const auto profileUrl = QUrl::fromLocalFile(profileDirectory.path())
-                                .toString(QUrl::FullyEncoded);
-    const auto filter = QString::fromUtf8(outputFilter);
-    const auto outputExtension = filter.section(QLatin1Char(':'), 0, 0);
-    process.setArguments({
-        QStringLiteral("--headless"),
-        QStringLiteral("--nologo"),
-        QStringLiteral("--nodefault"),
-        QStringLiteral("--nolockcheck"),
-        QStringLiteral("--norestore"),
-        QStringLiteral("-env:UserInstallation=") + profileUrl,
-        QStringLiteral("--convert-to"),
-        filter,
-        QStringLiteral("--outdir"),
-        workDirectory.path(),
-        toQString(std::filesystem::absolute(source)),
-    });
-
-    process.start();
-    const auto timeoutCount = std::min<std::chrono::milliseconds::rep>(
-        timeout.count(), std::numeric_limits<int>::max());
-    const auto timeoutMilliseconds = static_cast<int>(timeoutCount);
-    if (!process.waitForStarted(timeoutMilliseconds)) {
-        diagnostics.push_back(error(
-            "doc.conversion_start_failed",
-            "LibreOffice could not start: " + toUtf8(process.errorString()), executable));
-        return diagnostics;
-    }
-    if (!process.waitForFinished(timeoutMilliseconds)) {
-        process.kill();
-        process.waitForFinished(5000);
-        diagnostics.push_back(error(
-            "doc.conversion_timeout", "LibreOffice Word conversion timed out.", source));
-        return diagnostics;
-    }
-
-    const auto standardError = toUtf8(QString::fromUtf8(process.readAllStandardError()).trimmed());
-    if (process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0) {
-        diagnostics.push_back(error(
-            "doc.conversion_failed",
-            "LibreOffice failed to convert the Word file"
-                + (standardError.empty() ? std::string{"."} : ": " + standardError),
-            source));
-        return diagnostics;
-    }
-
-    const auto convertedName = QFileInfo(toQString(source)).completeBaseName()
-        + QLatin1Char('.') + outputExtension;
-    const auto convertedPath = QDir(workDirectory.path()).filePath(convertedName);
-    if (!QFileInfo::exists(convertedPath) || QFileInfo(convertedPath).size() <= 0) {
-        diagnostics.push_back(error(
-            "doc.conversion_output_missing",
-            "LibreOffice reported success but did not produce the expected Word file.", source));
-        return diagnostics;
-    }
-
-    const auto parent = toQString(destination.parent_path());
-    if (!parent.isEmpty() && !QDir().mkpath(parent)) {
-        diagnostics.push_back(error(
-            "doc.destination_directory_failed",
-            "Unable to create the Word destination directory.", destination.parent_path()));
-        return diagnostics;
-    }
-
-    QString copyError;
-    if (!copyAtomically(convertedPath, toQString(destination), copyError)) {
-        diagnostics.push_back(error(
-            "doc.destination_write_failed",
-            "Unable to commit the converted Word file: " + toUtf8(copyError), destination));
-        return diagnostics;
-    }
-
-    diagnostics.push_back({
-        DiagnosticSeverity::information,
-        "doc.converted_with_libreoffice",
-        "The legacy Word document was converted through an isolated LibreOffice process.",
-        destination.string(),
-    });
-    return diagnostics;
 }
-
 } // namespace ii::document::detail

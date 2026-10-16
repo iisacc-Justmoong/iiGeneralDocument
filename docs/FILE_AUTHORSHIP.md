@@ -2,13 +2,13 @@
 
 # 파일 저작자
 
-iiGeneralDocument 0.2 는 iiFileProvider 0.2를 요구합니다. 그것은 공유 `Authorship` 장부를 저장합니다: 검증된 iisacc 계정/프로필/장치/기여 정보, 기여자 식별자, 첫/최신 변경 시간, 최신 작성자 참조, 및 정확한 서명되지 않은 십진법 버전입니다. 활성 편집 정체성은 런타임 컨텍스트이며 파일에서 결코 복원되지 않습니다. 토큰, 로그인 자격 증명 및 토큰 갱신은 결코 이 장부에 입력되지 않습니다. 메타데이터는 귀속 데이터이며 검증된 소유권이나 로그인이 아닙니다.
+iiGeneralDocument 0.4는 표준 C++23 `iiFileProviderNative 0.5` 구성요소를 사용한다. 그것은 공유 `Authorship` 장부를 저장합니다: 검증된 iisacc 계정/프로필/장치/기여 정보, 기여자 식별자, 첫/최신 변경 시간, 최신 작성자 참조, 및 정확한 서명되지 않은 십진법 버전입니다. 활성 편집 정체성은 런타임 컨텍스트이며 파일에서 결코 복원되지 않습니다. 토큰, 로그인 자격 증명 및 토큰 갱신은 결코 이 장부에 입력되지 않습니다. 메타데이터는 귀속 데이터이며 검증된 소유권이나 로그인이 아닙니다.
 
 <a id="mutation-boundaries"></a>
 
 ## 돌연변이 경계
 
-위 `setFileAuthor(iiFileProvider::FileAuthor)` 를 `Document`, `WordDocument`, `HtmlBlockDocument`, `XmlTreeDocument` 또는 `ThinkingSpaceDocument` 에 호출합니다. 선택된 프로필은 즉시 기록됩니다. 동일한 프로필을 선택하는 것은 런타임 편집 컨텍스트만 변경합니다. 성공적인 변경은 변형이 반환되기 전에 JSON 덤프를 재생성하며 타이머나 게터 없이 수행됩니다. 저자가 선택되기 전의 변경사항은 명시적으로 귀속되지 않은 상태로 유지됩니다.
+위 `setFileAuthor(iiFileProvider::native::FileAuthor)` 를 `Document`, `WordDocument`, `HtmlBlockDocument`, `XmlTreeDocument` 또는 `ThinkingSpaceDocument` 에 호출합니다. 선택된 프로필은 즉시 기록됩니다. 동일한 프로필을 선택하는 것은 런타임 편집 컨텍스트만 변경합니다. 성공적인 변경은 변형이 반환되기 전에 JSON 덤프를 재생성하며 타이머나 게터 없이 수행됩니다. 저자가 선택되기 전의 변경사항은 명시적으로 귀속되지 않은 상태로 유지됩니다.
 
 - PDF : `DocumentEditor` 작업 및 `Document` 페이지/필드/버전/메타데이터 세터 스탬프 편집. 동일한 텍스트/이미지 교체 및 누락된 제거는 전혀 할 수 없습니다. 캐시된 JSON는 `metadata()["iisacc:authorship"]`에도 존재합니다.
 - Word: 단락/표 삽입 및 `setMetadata` 스탬프 직접 중첩 실행/스타일/테이블/섹션 변경을 위해 `WordDocument::edit(callback)`를 사용하십시오. 복사된 초안을 커밋하고 실제 값 변경을 감지하며 false/throw 콜백을 폐기합니다. 이미 스탬프가 찍힌 초안은 두 번 스탬프가 찍혀 있지 않습니다.
@@ -38,7 +38,7 @@ auto result = ii::document::WordDocumentWriter{}.write(word, "revised.docx");
 | ODT/FODT |문서 메타데이터의 `meta:user-defined` 문자열 속성|
 | DOC |기존 LibreOffice 브릿지는 변환을 통해 사용자 정의 속성을 유지합니다|
 | HTML/XML |`toFileBytes()` 는 기본64   UTF-8   JSON 주석을 추가하며;  `fromFileBytes()` 는 소스 파싱 전에 해당 엔벨로프를 검증하고 제거합니다|
-| `.tsdoc` |스키마 1   JSON 컨테이너는 헤더 메타데이터, 정확한 본문 HTML 및 완전한 유지 버전/스냅샷/차이점 저장소를 포함합니다|
+| `.tsdoc` |스키마 2 JSON 컨테이너(스키마 1 읽기 지원)는 헤더 메타데이터, 정확한 본문 HTML 및 완전한 유지 버전/스냅샷/차이점 저장소를 포함합니다|
 
 [OpenDocument   1.3, 섹션 19.338](https://docs.oasis-open.org/office/OpenDocument/v1.3/os/part3-schema/OpenDocument-v1.3-os-part3-schema.html) 은 `meta:value-type` 가 생략될 때 string 을 기본값으로 정의합니다. 리더는 LibreOffice 형식과 명시적인 string 타입을 허용합니다. 다른 작성된 값 타입, 중복 속성 및 잘못된 형식 장부는 읽기 오류를 발생시킵니다. PDF /Word 작성자는 정제된 장부를 사용하므로 예약된 원시 맵 값을 변경하면 작성된 출력에 임의의 인증 필드를 주입하지 않습니다
 
@@ -50,8 +50,19 @@ auto result = ii::document::WordDocumentWriter{}.write(word, "revised.docx");
 
 ## 종속성 및 유효성 검사
 
-요청한 iiFileProvider 의존성은 이 SDK와 동일한 AGPL-3.0-only에 따라 활발히 유지보수되는 형제 프로젝트이다. Qt Core의 JSON 및 값 타입을 재사용하며 네트워크 호출, 인증 SDK 또는 저장 엔진을 추가하지 않는다. QPDF, libzip, Qt XML과 기존 LibreOffice 브리지는 각자의 기존 파일 형식을 처리한다. 공개 모델 배치 변경은 재빌드가 필요하며 SOVERSION 0.2을 사용한다.
+작성자와 파일 처리는 동일한 AGPL-3.0-only의 형제 프로젝트 `iiFileProvider::Native`가 소유한다. JSON은 nlohmann/json, Unicode 정규화는 utf8proc, 시간·문자열·파일 인터페이스는 C++23 표준 타입을 사용한다. 공개 모델의 ABI 버전은 0.4이므로 기존 전체 모듈 소비자는 재빌드한다. 이전 프로필 및 장부의 형식과 내용은 유지되며 Qt 의존성은 없다.
 
 테스트는 즉시 덤프, 무작위/거부된 편집, PDF / DOCX / DOC / ODT / FODT 및 마크업 라운드 트립, LibreOffice 의 기본 문자열 타입, 잘못된 형식/미래 메타데이터 및 완전/가려진 `.tsdoc` 이력을 다룹니다. 독립적으로 설치된 패키지 테스트는 내보낸 CMake 타겟과 헤더를 통해 동일한 계약을 연습합니다.
 
 설치된 타깃은 비시스템 include 디렉터리를 내보내므로 선택한 SDK 접두사가 오래된 전역 `CPATH` 헤더보다 우선한다. 설치된 소비자 회귀 테스트는 충돌하는 레거시 umbrella 헤더를 의도적으로 제공한다. Thinking Space의 직렬화는 JSON을 작성하기 전에 UTF-8이 아닌 문자열을 거부한다.
+
+
+## Native dependency migration (0.4)
+
+The complete module now uses C++23 standard types and open-source backends.
+Qt and the installed iiXml/iiHtmlBlock packages are not runtime or public-package
+dependencies. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml
+and persistence uses nlohmann/json. The markup algorithms retain the first-party
+range/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)
+for byte-string API changes, ABI compatibility, prior-file verification and the
+Thinking Space schema-2 byte-diff encoding.

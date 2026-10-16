@@ -2,18 +2,6 @@ set(install_prefix "${IIGENERALDOCUMENT_BINARY_DIR}/install-consumer-prefix")
 set(consumer_build "${IIGENERALDOCUMENT_BINARY_DIR}/install-consumer-build")
 file(REMOVE_RECURSE "${install_prefix}" "${consumer_build}")
 
-foreach(required_variable IN ITEMS
-        IIGENERALDOCUMENT_IIFILEPROVIDER_DIR
-        IIGENERALDOCUMENT_IIXML_DIR
-        IIGENERALDOCUMENT_IIHTMLBLOCK_DIR
-        IIGENERALDOCUMENT_IIXML_LIBRARY_DIR
-        IIGENERALDOCUMENT_IIHTMLBLOCK_LIBRARY_DIR
-        IIGENERALDOCUMENT_QT6_DIR)
-    if(NOT DEFINED ${required_variable} OR "${${required_variable}}" STREQUAL "")
-        message(FATAL_ERROR "Required dependency package directory is missing: ${required_variable}")
-    endif()
-endforeach()
-
 execute_process(
     COMMAND "${IIGENERALDOCUMENT_CMAKE_COMMAND}" --install "${IIGENERALDOCUMENT_BINARY_DIR}"
             --prefix "${install_prefix}"
@@ -34,7 +22,7 @@ if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
     # All three SDK directories are implicit to the linker, but each imported
     # package must still supply its runtime lookup path to the consumer.
     set(consumer_configure_command ${consumer_environment_command}
-        "LIBRARY_PATH=${install_prefix}/lib:${IIGENERALDOCUMENT_IIXML_LIBRARY_DIR}:${IIGENERALDOCUMENT_IIHTMLBLOCK_LIBRARY_DIR}"
+        "LIBRARY_PATH=${install_prefix}/lib:${IIGENERALDOCUMENT_NATIVE_PROVIDER_LIBRARY_DIR}"
         "${IIGENERALDOCUMENT_CMAKE_COMMAND}")
 endif()
 
@@ -44,10 +32,7 @@ execute_process(
             -B "${consumer_build}"
             -G Ninja
             "-DCMAKE_PREFIX_PATH=${install_prefix}"
-            "-DiiFileProvider_DIR=${IIGENERALDOCUMENT_IIFILEPROVIDER_DIR}"
-            "-DiiXml_DIR=${IIGENERALDOCUMENT_IIXML_DIR}"
-            "-DiiHtmlBlock_DIR=${IIGENERALDOCUMENT_IIHTMLBLOCK_DIR}"
-            "-DQt6_DIR=${IIGENERALDOCUMENT_QT6_DIR}"
+            "-DiiFileProviderNative_DIR=${IIGENERALDOCUMENT_NATIVE_PROVIDER_DIR}"
     RESULT_VARIABLE configure_result
     OUTPUT_VARIABLE configure_output
     ERROR_VARIABLE configure_error)
@@ -69,6 +54,7 @@ execute_process(
     COMMAND "${IIGENERALDOCUMENT_CMAKE_COMMAND}" -E env
             --unset=DYLD_LIBRARY_PATH --unset=DYLD_FALLBACK_LIBRARY_PATH
             "${consumer_build}/iiGeneralDocumentConsumer"
+    WORKING_DIRECTORY "${consumer_build}"
     RESULT_VARIABLE run_result
     OUTPUT_VARIABLE run_output
     ERROR_VARIABLE run_error)

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "iiGeneralDocument/Export.h"
-#include <iiFileProvider.h>
+#include <iiFileProviderNative.h>
 
 #include <compare>
 #include <cstddef>
@@ -107,10 +107,10 @@ private:
 class IIGENERALDOCUMENT_EXPORT XmlTreeDocument {
 public:
     XmlTreeDocument() = default;
-    [[nodiscard]] const iiFileProvider::Authorship& authorship() const noexcept;
-    bool setFileAuthor(const iiFileProvider::FileAuthor& author);
-    [[nodiscard]] QByteArray toFileBytes() const;
-    [[nodiscard]] static XmlTreeDocument fromFileBytes(const QByteArray& bytes);
+    [[nodiscard]] const iiFileProvider::native::Authorship& authorship() const noexcept;
+    bool setFileAuthor(const iiFileProvider::native::FileAuthor& author);
+    [[nodiscard]] std::string toFileBytes() const;
+    [[nodiscard]] static XmlTreeDocument fromFileBytes(std::string_view bytes);
 
     [[nodiscard]] static XmlTreeDocument fromXml(std::string xml);
 
@@ -127,7 +127,7 @@ private:
         std::string_view xml,
         bool allowEmpty);
 
-    iiFileProvider::Authorship authorship_;
+    iiFileProvider::native::Authorship authorship_;
     std::string xml_;
     std::vector<XmlNode> nodes_;
     std::optional<XmlNodeId> rootId_;

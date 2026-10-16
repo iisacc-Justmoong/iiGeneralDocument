@@ -3,7 +3,8 @@
 
 #include "Core/Diagnostic.h"
 
-#include <iiXml>
+#include "Codec/Private/Markup/TagParser.h"
+#include "Codec/Private/Markup/Doctype.h"
 
 #include <algorithm>
 #include <limits>
@@ -58,7 +59,7 @@ std::size_t requireTokenEnd(
 
 std::size_t declarationLength(
     std::string_view declaration,
-    iiXml::Elements::DoctypeKind expectedKind,
+    detail::markup::Elements::DoctypeKind expectedKind,
     bool standardDoctype)
 {
     std::string normalized;
@@ -69,9 +70,9 @@ std::size_t declarationLength(
         parsedDeclaration = normalized;
     }
 
-    const iiXml::Elements::Doctype matcher;
-    const iiXml::Elements::DoctypeResult result = matcher.MatchTopResult(parsedDeclaration);
-    if (result.Status != iiXml::Elements::DoctypeStatus::Matched
+    const detail::markup::Elements::Doctype matcher;
+    const detail::markup::Elements::DoctypeResult result = matcher.MatchTopResult(parsedDeclaration);
+    if (result.Status != detail::markup::Elements::DoctypeStatus::Matched
         || !result.Match.has_value()
         || result.Match->Kind != expectedKind) {
         std::string reason = result.Reason;
@@ -102,21 +103,21 @@ std::size_t documentBodyBegin(std::string_view source)
                 throw DocumentError("XML declaration must occur once before the doctype");
             }
             offset += declarationLength(
-                source.substr(offset), iiXml::Elements::DoctypeKind::XmlDeclaration, false);
+                source.substr(offset), detail::markup::Elements::DoctypeKind::XmlDeclaration, false);
             hasXmlDeclaration = true;
         } else if (startsWithAt(source, offset, "<!Doctype")) {
             if (hasDoctype) {
                 throw DocumentError("XML document contains more than one doctype");
             }
             offset += declarationLength(
-                source.substr(offset), iiXml::Elements::DoctypeKind::DoctypeDeclaration, false);
+                source.substr(offset), detail::markup::Elements::DoctypeKind::DoctypeDeclaration, false);
             hasDoctype = true;
         } else if (startsWithAt(source, offset, "<!DOCTYPE")) {
             if (hasDoctype) {
                 throw DocumentError("XML document contains more than one doctype");
             }
             offset += declarationLength(
-                source.substr(offset), iiXml::Elements::DoctypeKind::DoctypeDeclaration, true);
+                source.substr(offset), detail::markup::Elements::DoctypeKind::DoctypeDeclaration, true);
             hasDoctype = true;
         } else if (startsWithAt(source, offset, "<!--")) {
             offset = requireTokenEnd(source, offset + 4, "-->", "comment");
@@ -164,7 +165,7 @@ bool containsOnlyXmlMisc(std::string_view source) noexcept
 }
 
 void validateNodeHierarchy(
-    const iiXml::Parser::TagNode& node,
+    const detail::markup::Parser::TagNode& node,
     std::size_t sourceSize)
 {
     const auto& range = node.Range;
@@ -190,16 +191,16 @@ void validateNodeHierarchy(
     }
 }
 
-XmlAttributeValueType publicValueType(iiXml::Elements::InlinePropertyType valueType) noexcept
+XmlAttributeValueType publicValueType(detail::markup::Elements::InlinePropertyType valueType) noexcept
 {
     switch (valueType) {
-    case iiXml::Elements::InlinePropertyType::IntType:
+    case detail::markup::Elements::InlinePropertyType::IntType:
         return XmlAttributeValueType::integer;
-    case iiXml::Elements::InlinePropertyType::FloatType:
+    case detail::markup::Elements::InlinePropertyType::FloatType:
         return XmlAttributeValueType::real;
-    case iiXml::Elements::InlinePropertyType::BoolType:
+    case detail::markup::Elements::InlinePropertyType::BoolType:
         return XmlAttributeValueType::boolean;
-    case iiXml::Elements::InlinePropertyType::StringType:
+    case detail::markup::Elements::InlinePropertyType::StringType:
         return XmlAttributeValueType::string;
     }
     return XmlAttributeValueType::string;
@@ -412,9 +413,9 @@ std::vector<XmlNode> XmlTreeDocument::parseNodes(
         throw DocumentError("XML document must contain exactly one root element");
     }
 
-    const iiXml::Parser::TagParser parser;
-    const iiXml::Parser::TagDocumentResult result = parser.ParseAllDocumentResult(body);
-    if (result.Status != iiXml::Parser::TagTreeParseStatus::Parsed
+    const detail::markup::Parser::TagParser parser;
+    const detail::markup::Parser::TagDocumentResult result = parser.ParseAllDocumentResult(body);
+    if (result.Status != detail::markup::Parser::TagTreeParseStatus::Parsed
         || !result.Document.has_value()) {
         std::string reason = result.Diagnostic.Reason;
         if (reason.empty()) {
@@ -423,12 +424,12 @@ std::vector<XmlNode> XmlTreeDocument::parseNodes(
         throw DocumentError("XML tree parse failed: " + reason);
     }
 
-    const iiXml::Parser::TagDocument& parsed = *result.Document;
+    const detail::markup::Parser::TagDocument& parsed = *result.Document;
     if (parsed.Nodes.size() != 1) {
         throw DocumentError("XML document must contain exactly one root element");
     }
 
-    const iiXml::Parser::TagNode& root = parsed.Nodes.front();
+    const detail::markup::Parser::TagNode& root = parsed.Nodes.front();
     if (root.Range.RawBegin != 0
         || !containsOnlyXmlMisc(body.substr(root.Range.RawEnd))) {
         throw DocumentError("XML document contains content outside its root element");
@@ -437,7 +438,7 @@ std::vector<XmlNode> XmlTreeDocument::parseNodes(
 
     std::vector<XmlNode> nodes;
     const auto appendNode = [&](const auto& self,
-                                const iiXml::Parser::TagNode& parsedNode,
+                                const detail::markup::Parser::TagNode& parsedNode,
                                 std::optional<XmlNodeId> parentId,
                                 std::size_t depth) -> XmlNodeId {
         if (nodes.size() >= std::numeric_limits<std::uint64_t>::max()) {
@@ -494,10 +495,10 @@ std::vector<XmlNode> XmlTreeDocument::parseNodes(
 }
 
 
-const iiFileProvider::Authorship& XmlTreeDocument::authorship() const noexcept { return authorship_; }
-bool XmlTreeDocument::setFileAuthor(const iiFileProvider::FileAuthor& author) { return authorship_.setAuthor(author); }
-QByteArray XmlTreeDocument::toFileBytes() const { return detail::markupBytes(xml_, authorship_); }
-XmlTreeDocument XmlTreeDocument::fromFileBytes(const QByteArray& bytes) {
+const iiFileProvider::native::Authorship& XmlTreeDocument::authorship() const noexcept { return authorship_; }
+bool XmlTreeDocument::setFileAuthor(const iiFileProvider::native::FileAuthor& author) { return authorship_.setAuthor(author); }
+std::string XmlTreeDocument::toFileBytes() const { return detail::markupBytes(xml_, authorship_); }
+XmlTreeDocument XmlTreeDocument::fromFileBytes(std::string_view bytes) {
     auto parsed = detail::readMarkup(bytes);
     auto document = fromXml(std::move(parsed.body));
     document.authorship_ = std::move(parsed.author); return document;

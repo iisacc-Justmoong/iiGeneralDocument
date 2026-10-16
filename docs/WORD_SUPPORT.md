@@ -10,10 +10,10 @@
 
 |형식|읽기|쓰기|백엔드|
 | --- | --- | --- | --- |
-| `.docx` |예|예|네이티브 OOXML/OPC 구현(Qt XML 및 비공개 사용) 링크된 libzip|
+| `.docx` |예|예|네이티브 OOXML/OPC 구현(pugixml XML 및 비공개 사용) 링크된 libzip|
 | `.doc` |예|예|고립된 LibreOffice 를 네이티브 DOCX 코덱으로 변환하거나 그로부터 변환하는 것|
-| `.odt` |예|예|네이티브 OpenDocument ZIP Qt XML 및 비공개를 사용하여 구현 libzip|
-| `.fodt` |예|예|Qt XML를 사용한 네이티브 플랫 OpenDocument XML 구현|
+| `.odt` |예|예|네이티브 OpenDocument ZIP pugixml XML 및 비공개를 사용하여 구현 libzip|
+| `.fodt` |예|예|pugixml XML를 사용한 네이티브 플랫 OpenDocument XML 구현|
 
 DOCX 는 ZIP 패키지로, 고정된 경로로 가정되는 대신 OPC 패키지 관계를 통해 주요 문서 부분이 발견됩니다. 레거시 DOC 는 Word 97-2003 바이너리 컴파운드 파일 형식입니다. 라이브러리는 해당 바이너리 사양을 재구현한다고 주장하지 않으며, `.doc` 를 위해 로컬에 설치된 `soffice` / `libreoffice` 실행 가능 파일을 요구합니다. `PATH` 에 있지 않을 때 `libreOfficeExecutable` 를 `WordReadOptions` 또는 `WordWriteOptions` 에 설정합니다.
 
@@ -78,3 +78,14 @@ return WordDocumentWriter{}.write(read.document, "revised.docx").hasErrors();
 ## 검증
 
 `iiGeneralDocument.WordModel` 는 편집 가능한 객체 계약을 수정합니다. `iiGeneralDocument.WordRoundTrip` 는 DOCX 에 포함된 Unicode 텍스트, 서식화된 런, 탭, 줄바꿈, 메타데이터, 및 테이블을 작성, 다시 엽니다, 편집하며, 다시 씁니다. `iiGeneralDocument.OdfRoundTrip`, `.OdfStyleCompatibility`, 및 `.OdfRobustness` 는 네이티브 ODT / FODT CRUD, 외부 스타일/레이아웃 매핑, 패키지 무결성, 리소스 제한, 및 원자적 덮어쓰기 행동을 포함합니다. `iiGeneralDocument.LegacyDocRoundTrip` 는 OLE 컴파운드 파일 서명을 확인하고 `soffice` 가 존재할 때 실제 LibreOffice DOC 쓰기/읽기 주기를 수행합니다. 릴리스 확인은 추가로 생성된 DOCX 를 페이지 PNG 로 렌더링하고 모든 페이지를 시각적으로 검사합니다.
+
+
+## Native dependency migration (0.4)
+
+The complete module now uses C++23 standard types and open-source backends.
+Qt and the installed iiXml/iiHtmlBlock packages are not runtime or public-package
+dependencies. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml
+and persistence uses nlohmann/json. The markup algorithms retain the first-party
+range/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)
+for byte-string API changes, ABI compatibility, prior-file verification and the
+Thinking Space schema-2 byte-diff encoding.

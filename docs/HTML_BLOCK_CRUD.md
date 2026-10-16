@@ -6,7 +6,7 @@
 
 ## 범위
 
-`HtmlBlockDocument` 는 `iiHtmlBlock 0.1.0` 위에 구축된 편집 가능한 HTML / iiXml 소스 모델입니다. 원래 소스 바이트 문자열은 문서의 기준 원본 입니다. `iiHtmlBlock::BlockRangeTracker` 은 블록 요소와 그 소스 범위를 인식하며, 공개 iiGeneralDocument API 는 이러한 의존성 타입을 안정된 `HtmlBlockId` 객체로 변환합니다.
+`HtmlBlockDocument` 는 `iiHtmlBlock 0.1.0` 위에 구축된 편집 가능한 HTML / iiXml 소스 모델입니다. 원래 소스 바이트 문자열은 문서의 기준 원본 입니다. `the private standard C++ block tracker` 은 블록 요소와 그 소스 범위를 인식하며, 공개 iiGeneralDocument API 는 이러한 의존성 타입을 안정된 `HtmlBlockId` 객체로 변환합니다.
 
 이 모듈은 의도적으로 PDF 페이지 모델, Word 흐름 모델 및 애플리케이션 지속성 레이어와 분리되어 있습니다. 메모리 내 블록 CRUD를 수행합니다. 파일이나 데이터베이스가 관련되어 있는 경우 호출자는 `HtmlBlockDocument::html()`를 로드하고 유지하는 책임을 집니다.
 
@@ -49,7 +49,7 @@ editor.remove(created);
 const std::string& result = document.html();
 ```
 
-`create(fragment)` 는 문서에 최상위 블록 하나를 추가합니다. `create(fragment, parentId)` 는 이를 부모의 마지막 자식으로 추가합니다. 프래그먼트 주변의 앞뒤 ASCII 공백은 버려집니다. 프래그먼트 자체는 `iiHtmlBlock::BlockHTMLSerializer` 를 통해 정확히 하나의 최상위 블록으로 직렬화되어야 하며, 인라인 전용, 잘못된 형식, 또는 여러 루트 프래그먼트는 거부됩니다.
+`create(fragment)` 는 문서에 최상위 블록 하나를 추가합니다. `create(fragment, parentId)` 는 이를 부모의 마지막 자식으로 추가합니다. 프래그먼트 주변의 앞뒤 ASCII 공백은 버려집니다. 프래그먼트 자체는 `source-range validation and exact original fragment serialization` 를 통해 정확히 하나의 최상위 블록으로 직렬화되어야 하며, 인라인 전용, 잘못된 형식, 또는 여러 루트 프래그먼트는 거부됩니다.
 
 `read(id)`는 현재 불변 블록 뷰에 대한 포인터를 반환하거나 알 수 없는 ID에 대해 `nullptr`를 반환합니다. 성공적인 변형은 뷰 컬렉션을 다시 작성하므로 이전에 반환된 포인터가 `create`, `update` 또는 `remove`에서 유지되어서는 안 됩니다.
 
@@ -76,3 +76,14 @@ iiXml는 엄격한 트리를 형성하는 대신 서로 겹칠 수 있는 독립
 ## 검증
 
 `iiGeneralDocument.HtmlBlockCrud` 는 순차적인 루트, 부모/자식 탐색, 깊이, 열기/닫기 태그 경계, 자기 닫힘 블록, 중첩 읽기, Unicode 범위, 사용자 지정 표시 블록, 최상위 및 자식 생성, 이동된 범위 전반에 걸친 안정적인 ID, 업데이트 후 계층 구조 재구성, 재귀적 삭제, 최종 루트 삭제, 접두어 보존, 유효하지 않은 조각 롤백, 알 수 없는 ID, 빈 문서, 그리고 중첩된 iiXml 범위를 포함합니다. `iiGeneralDocument.InstallConsumer` 는 설치된 CMake 패키지에서 동일한 API 를 컴파일하고 실행합니다.
+
+
+## Native dependency migration (0.4)
+
+The complete module now uses C++23 standard types and open-source backends.
+Qt and the installed iiXml/iiHtmlBlock packages are not runtime or public-package
+dependencies. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml
+and persistence uses nlohmann/json. The markup algorithms retain the first-party
+range/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)
+for byte-string API changes, ABI compatibility, prior-file verification and the
+Thinking Space schema-2 byte-diff encoding.

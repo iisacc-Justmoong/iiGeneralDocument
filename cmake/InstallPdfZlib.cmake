@@ -1,0 +1,8 @@
+file(MAKE_DIRECTORY "${DESTINATION}/include" "${DESTINATION}/lib")
+if(WIN32)
+  file(COPY "${BINARY_DIR}/zlibstatic.lib" DESTINATION "${DESTINATION}/lib")
+  file(RENAME "${DESTINATION}/lib/zlibstatic.lib" "${DESTINATION}/lib/z.lib")
+else()
+  file(COPY "${BINARY_DIR}/libz.a" DESTINATION "${DESTINATION}/lib")
+endif()
+file(COPY "${SOURCE_DIR}/zlib.h" "${BINARY_DIR}/zconf.h" DESTINATION "${DESTINATION}/include")

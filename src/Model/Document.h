@@ -3,8 +3,9 @@
 #include "Core/PdfValue.h"
 #include "Model/Element.h"
 #include "Model/Page.h"
+#include "Pdf/Objects.h"
 #include "iiGeneralDocument/Export.h"
-#include <iiFileProvider.h>
+#include <iiFileProviderNative.h>
 
 #include <compare>
 #include <cstdint>
@@ -17,6 +18,7 @@ namespace ii::document {
 
 class PdfDocumentReader;
 class PdfDocumentWriter;
+class DocumentEditor;
 
 struct FormFieldId {
     std::uint64_t value{0};
@@ -48,6 +50,8 @@ public:
     void clearUtf8Value() noexcept;
     [[nodiscard]] int flags() const noexcept;
     void setFlags(int flags) noexcept;
+    [[nodiscard]] const std::optional<int>& maximumLength() const noexcept;
+    void setMaximumLength(std::optional<int> maximum) noexcept;
     [[nodiscard]] const std::vector<std::string>& choices() const noexcept;
     void setChoices(std::vector<std::string> choices);
     [[nodiscard]] const std::optional<SourceReference>& source() const noexcept;
@@ -61,6 +65,7 @@ private:
     PdfValue value_;
     std::optional<std::string> utf8Value_;
     int flags_{0};
+    std::optional<int> maximumLength_;
     std::vector<std::string> choices_;
     std::optional<SourceReference> source_;
 };
@@ -78,9 +83,10 @@ public:
     [[nodiscard]] std::vector<Page>& pages() noexcept;
     void addPage(Page page);
 
-    [[nodiscard]] const iiFileProvider::Authorship& authorship() const noexcept;
-    bool setFileAuthor(const iiFileProvider::FileAuthor& author);
+    [[nodiscard]] const iiFileProvider::native::Authorship& authorship() const noexcept;
+    bool setFileAuthor(const iiFileProvider::native::FileAuthor& author);
     bool setMetadata(std::string key, std::string value);
+    bool removeMetadata(std::string_view key);
     // For legacy direct aggregate edits, call once after a successful change.
     void recordChange();
     // Reader boundary: validates stored metadata and clears the active identity.
@@ -97,6 +103,8 @@ public:
     void setPdfVersion(std::string version);
     [[nodiscard]] bool isEncrypted() const noexcept;
     [[nodiscard]] bool hasDigitalSignatures() const noexcept;
+    [[nodiscard]] bool hasXfa() const noexcept;
+    [[nodiscard]] const std::vector<pdf::Attachment>& attachments() const noexcept;
     [[nodiscard]] bool hasSourcePdf() const noexcept;
 
 private:
@@ -106,17 +114,20 @@ private:
         std::string password;
         bool encrypted{false};
         bool digitallySigned{false};
+        bool xfa{false};
     };
 
     std::vector<Page> pages_;
     std::map<std::string, std::string> metadata_;
-    iiFileProvider::Authorship authorship_;
+    iiFileProvider::native::Authorship authorship_;
     std::vector<FormField> formFields_;
+    std::vector<pdf::Attachment> attachments_;
     std::string pdfVersion_{"1.7"};
     std::optional<Origin> origin_;
 
     friend class PdfDocumentReader;
     friend class PdfDocumentWriter;
+    friend class DocumentEditor;
 };
 
 } // namespace ii::document

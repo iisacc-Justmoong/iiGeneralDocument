@@ -10,6 +10,8 @@ public:
     [[nodiscard]] ReadResult read(
         const std::filesystem::path& source,
         const ReadOptions& options = {}) const override;
+    [[nodiscard]] ReadResult readBytes(std::span<const std::byte> bytes,
+        std::string description = "memory PDF", const ReadOptions& options = {}) const;
 };
 
 } // namespace ii::document

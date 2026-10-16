@@ -106,6 +106,15 @@ std::vector<Diagnostic> DocumentValidator::validate(const Document& document) co
             addError(diagnostics, "page.invalid_rotation",
                      "PDF page rotation must be a multiple of 90 degrees.", pageContext);
         }
+        if (!page.cropBox().isFinite() || page.cropBox().width <= 0.0
+            || page.cropBox().height <= 0.0) {
+            addError(diagnostics, "page.invalid_crop_box",
+                     "The page crop box must have finite positive dimensions.", pageContext);
+        }
+        if (!std::isfinite(page.userUnit()) || page.userUnit() <= 0.0) {
+            addError(diagnostics, "page.invalid_user_unit",
+                     "Page UserUnit must be finite and positive.", pageContext);
+        }
 
         validateElements(page.elements(), pageContext, diagnostics, elementIds, visitedForms);
 

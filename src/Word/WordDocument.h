@@ -1,7 +1,7 @@
 #pragma once
 
 #include "iiGeneralDocument/Export.h"
-#include <iiFileProvider.h>
+#include <iiFileProviderNative.h>
 
 #include <map>
 #include <functional>
@@ -89,8 +89,8 @@ public:
     void appendParagraph(WordParagraph paragraph);
     void appendTable(WordTable table);
 
-    [[nodiscard]] const iiFileProvider::Authorship& authorship() const noexcept;
-    bool setFileAuthor(const iiFileProvider::FileAuthor& author);
+    [[nodiscard]] const iiFileProvider::native::Authorship& authorship() const noexcept;
+    bool setFileAuthor(const iiFileProvider::native::FileAuthor& author);
     bool setMetadata(std::string key, std::string value);
     // For legacy direct aggregate edits, call once after a successful change.
     void recordChange();
@@ -108,7 +108,7 @@ public:
 private:
     std::vector<WordBlock> blocks_;
     std::map<std::string, std::string> metadata_;
-    iiFileProvider::Authorship authorship_;
+    iiFileProvider::native::Authorship authorship_;
     WordSectionProperties section_;
 };
 

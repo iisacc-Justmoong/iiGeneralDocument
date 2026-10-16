@@ -2,7 +2,7 @@
 
 #include "Core/Diagnostic.h"
 
-#include <iiHtmlBlock>
+#include "Codec/Private/Markup/BlockRangeTracker.h"
 
 #include <algorithm>
 #include <limits>
@@ -30,8 +30,8 @@ std::string_view trimAscii(std::string_view value) noexcept
 }
 
 bool strictlyContains(
-    const iiHtmlBlock::BlockRangeTracker::TrackedBlock& outer,
-    const iiHtmlBlock::BlockRangeTracker::TrackedBlock& inner) noexcept
+    const detail::blocks::BlockRangeTracker::TrackedBlock& outer,
+    const detail::blocks::BlockRangeTracker::TrackedBlock& inner) noexcept
 {
     return outer.raw_begin <= inner.raw_begin
         && inner.raw_end <= outer.raw_end
@@ -160,25 +160,11 @@ bool HtmlBlockEditor::remove(HtmlBlockId id)
 
     const std::size_t begin = target->rawBegin();
     const std::size_t end = target->rawEnd();
-    const std::size_t sourceIndex = target->sourceIndex_;
 
     std::string expected = document_.html_;
     expected.erase(begin, end - begin);
 
-    iiHtmlBlock::DeleteBlock deleter;
-    if (!deleter.Parse(document_.html_)) {
-        throw DocumentError("HTML block delete parse failed: " + deleter.GetError());
-    }
-    if (sourceIndex >= deleter.GetBlocks().size()) {
-        throw DocumentError("HTML block delete source index is out of range");
-    }
-    if (deleter.Delete(sourceIndex)) {
-        if (deleter.GetHTMLText() != expected) {
-            throw DocumentError("HTML block delete backend produced an unexpected source");
-        }
-    } else {
-        static_cast<void>(HtmlBlockDocument::parseBlocks(expected));
-    }
+    static_cast<void>(HtmlBlockDocument::parseBlocks(expected));
 
     replaceRange(begin, end, {}, std::nullopt, false);
     return true;
@@ -191,7 +177,7 @@ std::string HtmlBlockEditor::serializeSingleBlock(std::string_view blockHtml)
         throw DocumentError("HTML block fragment is empty");
     }
 
-    iiHtmlBlock::BlockRangeTracker tracker;
+    detail::blocks::BlockRangeTracker tracker;
     if (!tracker.Parse(trimmed)) {
         std::string reason = tracker.GetError();
         if (reason.empty()) {
@@ -225,18 +211,7 @@ std::string HtmlBlockEditor::serializeSingleBlock(std::string_view blockHtml)
         throw DocumentError("HTML block fragment contains content outside its block root");
     }
 
-    iiHtmlBlock::BlockHTMLSerializer serializer;
-    if (!serializer.SerializeBlocks({root.element})) {
-        std::string reason = serializer.GetError();
-        if (reason.empty()) {
-            reason = "unknown iiHtmlBlock serialization failure";
-        }
-        throw DocumentError("HTML block fragment serialization failed: " + reason);
-    }
-    if (serializer.GetHTMLText() != trimmed) {
-        throw DocumentError("HTML block fragment serialization changed its root source");
-    }
-    return serializer.GetHTMLText();
+    return root.element.raw;
 }
 
 void HtmlBlockEditor::replaceRange(

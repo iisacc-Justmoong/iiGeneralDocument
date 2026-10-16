@@ -1,6 +1,7 @@
 #include "Pdf/PdfDocumentWriter.h"
 
 #include "Validation/DocumentValidator.h"
+#include "Pdf/Private/TextValidation.h"
 
 #include <qpdf/QPDF.hh>
 #include <qpdf/QPDFAcroFormDocumentHelper.hh>
@@ -10,7 +11,7 @@
 #include <qpdf/QPDFPageDocumentHelper.hh>
 #include <qpdf/QPDFPageObjectHelper.hh>
 #include <qpdf/QPDFWriter.hh>
-#include <iiFileProvider.h>
+#include <iiFileProviderNative.h>
 
 #include <algorithm>
 #include <cstddef>
@@ -30,14 +31,18 @@ using ResourceOverrides = std::unordered_map<ElementId, std::string>;
 
 QPDFObjectHandle parseValue(QPDF& pdf, const PdfValue& value)
 {
-    return QPDFObjectHandle::parse(&pdf, value.toPdfSyntax(), "iiGeneralDocument value");
+    // QPDF recognizes indirect references inside containers, not as a top-level
+    // standalone parse. Annotation /P and widget /AP entries must keep identity.
+    auto container = QPDFObjectHandle::parse(&pdf, "[" + value.toPdfSyntax() + "]", "iiGeneralDocument value");
+    if (container.getArrayNItems() != 1) throw DocumentError("A PDF value must contain exactly one object");
+    return container.getArrayItem(0);
 }
 
 QPDFObjectHandle parseOptionalSyntax(QPDF& pdf, const std::string& syntax)
 {
     return syntax.empty()
         ? QPDFObjectHandle::newNull()
-        : QPDFObjectHandle::parse(&pdf, syntax, "iiGeneralDocument stream parameter");
+        : parseValue(pdf, PdfValue::raw(syntax));
 }
 
 std::string bytesAsString(const std::vector<std::byte>& bytes)
@@ -232,12 +237,12 @@ void setPageGeometry(QPDFPageObjectHelper& target, const Page& source)
         "/MediaBox",
         QPDFObjectHandle::newArray(QPDFObjectHandle::Rectangle{
             box.x, box.y, box.x + box.width, box.y + box.height}));
-    if (source.rotation() == 0) {
-        target.getObjectHandle().removeKey("/Rotate");
-    } else {
-        target.getObjectHandle().replaceKey(
-            "/Rotate", QPDFObjectHandle::newInteger(source.rotation()));
-    }
+    const auto& crop = source.cropBox();
+    target.getObjectHandle().replaceKey("/CropBox", QPDFObjectHandle::newArray(
+        QPDFObjectHandle::Rectangle{crop.x, crop.y, crop.x + crop.width, crop.y + crop.height}));
+    target.getObjectHandle().replaceKey("/UserUnit", QPDFObjectHandle::newReal(source.userUnit(), 12));
+    // Explicit zero overrides an inherited Rotate rather than exposing it again.
+    target.getObjectHandle().replaceKey("/Rotate", QPDFObjectHandle::newInteger(source.rotation()));
 }
 
 void applyDictionary(QPDF& pdf, QPDFObjectHandle target, const PdfValue& value)
@@ -268,6 +273,8 @@ void applyAnnotation(QPDF& pdf, QPDFObjectHandle target, const Annotation& annot
         QPDFObjectHandle::newArray(QPDFObjectHandle::Rectangle{
             rect.x, rect.y, rect.x + rect.width, rect.y + rect.height}));
     target.replaceKey("/F", QPDFObjectHandle::newInteger(annotation.flags()));
+    if (annotation.author().empty()) target.removeKey("/T");
+    else target.replaceKey("/T", QPDFObjectHandle::newUnicodeString(annotation.author()));
     if (annotation.contents().empty()) {
         target.removeKey("/Contents");
     } else {
@@ -279,7 +286,6 @@ void applyAnnotation(QPDF& pdf, QPDFObjectHandle target, const Annotation& annot
 void syncAnnotations(
     QPDF& pdf, QPDFPageObjectHelper& targetPage, const Page& sourcePage)
 {
-    const auto existingAnnotations = targetPage.getAnnotations();
     std::vector<QPDFObjectHandle> output;
     output.reserve(sourcePage.annotations().size());
     for (std::size_t index = 0; index < sourcePage.annotations().size(); ++index) {
@@ -288,12 +294,11 @@ void syncAnnotations(
         if (annotation.source()) {
             target = pdf.getObject(
                 annotation.source()->objectNumber, annotation.source()->generation);
-        } else if (index < existingAnnotations.size()) {
-            target = existingAnnotations[index].getObjectHandle();
         } else {
             target = pdf.makeIndirectObject(QPDFObjectHandle::newDictionary());
         }
         applyAnnotation(pdf, target, annotation);
+        target.replaceKey("/P", targetPage.getObjectHandle());
         output.push_back(target);
     }
     if (output.empty()) {
@@ -345,9 +350,9 @@ void syncMetadata(QPDF& pdf, const Document& document)
                                   "Producer", "CreationDate", "ModDate", "iisacc:authorship"}) {
         const auto value = document.metadata().find(key);
         const std::string pdfKey = "/" + key;
-        if (key == iiFileProvider::Authorship::MetadataKey) {
+        if (key == iiFileProvider::native::Authorship::MetadataKey) {
             if (document.authorship().isEmpty()) info.removeKey(pdfKey);
-            else info.replaceKey(pdfKey, QPDFObjectHandle::newUnicodeString(document.authorship().dump().toStdString()));
+            else info.replaceKey(pdfKey, QPDFObjectHandle::newUnicodeString(document.authorship().dump()));
             continue;
         }
         if (value == document.metadata().end()) {
@@ -418,12 +423,22 @@ void syncFormFields(QPDF& pdf, const Document& document, WriteResult& result)
         const auto value = source.utf8Value()
             ? QPDFObjectHandle::newUnicodeString(*source.utf8Value())
             : parseValue(pdf, source.value());
+        if (source.utf8Value() && !detail::validPdfText(*source.utf8Value())) throw DocumentError("Invalid UTF-8 form value");
+        const auto oldValue = field.getValue();
+        const bool unchanged = value.isString() && oldValue.isString()
+            ? value.getUTF8Value() == oldValue.getUTF8Value() : value.unparse() == oldValue.unparse();
+        if (unchanged) continue;
+        if (field.isText() && ((field.getFlags() & 1)
+            || (field.getFlags() & (1 << 25)) || !field.getInheritableFieldValue("/MaxLen").isNull()))
+            throw DocumentError("Read-only, rich-text and MaxLen-constrained text fields cannot be updated");
         const bool asciiAppearance = source.utf8Value()
             ? stringIsAscii(*source.utf8Value())
             : (source.value().kind() == PdfValueKind::string
                && stringIsAscii(source.value().stringValue()));
         if (variableText && !asciiAppearance) {
             field.setV(value, true);
+            field.getObjectHandle().removeKey("/RV");
+            for (auto widget : forms.getAnnotationsForField(field)) widget.getObjectHandle().removeKey("/AP");
             result.diagnostics.push_back({
                 DiagnosticSeverity::warning,
                 "pdf.form_appearance_deferred",
@@ -448,12 +463,11 @@ void syncFormFields(QPDF& pdf, const Document& document, WriteResult& result)
 }
 
 void verifyWrittenPdf(
-    const QByteArray& bytes, const std::filesystem::path& destination, std::size_t expectedPages, WriteResult& result)
+    std::span<const std::byte> bytes, const std::string& description, std::size_t expectedPages, WriteResult& result)
 {
     QPDF verification;
     verification.setSuppressWarnings(true);
-    const std::string filename = destination.string();
-    verification.processMemoryFile(filename.c_str(), bytes.constData(), static_cast<std::size_t>(bytes.size()));
+    verification.processMemoryFile(description.c_str(), reinterpret_cast<const char*>(bytes.data()), bytes.size());
     const auto pages = QPDFPageDocumentHelper::get(verification).getAllPages();
     if (pages.size() != expectedPages) {
         throw DocumentError("Written PDF page count does not match the document model");
@@ -469,18 +483,33 @@ void verifyWrittenPdf(
     }
     for (const auto& warning : verification.getWarnings()) {
         result.diagnostics.push_back({DiagnosticSeverity::warning, "pdf.write_warning",
-                                      warning.what(), destination.string()});
+                                      warning.what(), description});
     }
 }
 
 } // namespace
 
 WriteResult PdfDocumentWriter::write(
-    const Document& document,
-    const std::filesystem::path& destination,
-    const WriteOptions& options) const
+    const Document& document, const std::filesystem::path& destination, const WriteOptions& options) const
 {
-    WriteResult result;
+    auto encoded = writeBytes(document, options);
+    WriteResult result{std::move(encoded.diagnostics)};
+    for (auto& diagnostic : result.diagnostics)
+        if (diagnostic.context == "iiGeneralDocument encoded PDF") diagnostic.context = destination.string();
+    if (result.hasErrors()) return result;
+    try {
+        iiFileProvider::native::File::write(destination, std::span<const std::byte>(encoded.bytes));
+    } catch (const std::exception& error) {
+        result.diagnostics.push_back({DiagnosticSeverity::error, "pdf.write_failed", error.what(), destination.string()});
+    }
+    return result;
+}
+
+PdfBytesResult PdfDocumentWriter::writeBytes(
+    const Document& document, const WriteOptions& options) const
+{
+    PdfBytesResult result;
+    const std::string description = "iiGeneralDocument encoded PDF";
     result.diagnostics = DocumentValidator{}.validate(document);
     if (result.hasErrors()) {
         return result;
@@ -490,7 +519,7 @@ WriteResult PdfDocumentWriter::write(
             DiagnosticSeverity::error,
             "pdf.signed_document_rejected",
             "Writing would invalidate at least one digital signature; opt in explicitly to continue.",
-            destination.string()});
+            description});
         return result;
     }
     if (document.isEncrypted() && !options.allowRemovingEncryption) {
@@ -498,10 +527,15 @@ WriteResult PdfDocumentWriter::write(
             DiagnosticSeverity::error,
             "pdf.encrypted_document_rejected",
             "The current writer emits an unencrypted result; opt in explicitly to remove encryption.",
-            destination.string()});
+            description});
         return result;
     }
 
+    if (document.hasXfa()) {
+        result.diagnostics.push_back({DiagnosticSeverity::error, "pdf.xfa_edit_unsupported",
+            "Editing XFA documents is not supported.", description});
+        return result;
+    }
     try {
         QPDF pdf;
         pdf.setSuppressWarnings(true);
@@ -544,20 +578,19 @@ WriteResult PdfDocumentWriter::write(
             return result;
         }
 
-        const std::string filename = destination.string();
         QPDFWriter writer(pdf);
         writer.setOutputMemory();
         writer.setLinearization(options.linearize);
         writer.write();
         const auto buffer = writer.getBufferSharedPointer();
-        const QByteArray bytes(reinterpret_cast<const char *>(buffer->getBuffer()),
-                               static_cast<qsizetype>(buffer->getSize()));
-        verifyWrittenPdf(bytes, destination, document.pages().size(), result);
-        iiFileProvider::File::write(iiFileProvider::File::pathString(destination), bytes);
+        result.bytes.resize(buffer->getSize());
+        std::copy_n(reinterpret_cast<const std::byte*>(buffer->getBuffer()), buffer->getSize(), result.bytes.begin());
+        verifyWrittenPdf(result.bytes, description, document.pages().size(), result);
     } catch (const std::exception& error) {
         result.diagnostics.push_back({DiagnosticSeverity::error, "pdf.write_failed",
-                                      error.what(), destination.string()});
+                                      error.what(), description});
     }
+    if (result.hasErrors()) result.bytes.clear();
     return result;
 }
 

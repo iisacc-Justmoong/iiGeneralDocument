@@ -1,64 +1,52 @@
-# Third-party notices
+# Dependency notices
 
-## QPDF 12.3.2
+The enclosing iiGeneralDocument SDK is AGPL-3.0-only. All format dependencies below
+are open source; full license texts are installed under
+`share/licenses/iiGeneralDocument`. Qt is absent from the version-0.4 dependency
+graph, including the full document target and its Native provider.
 
-QPDF is a content-preserving PDF transformation library. iiGeneralDocument pins commit `a898bb3a7289d1d05789d6d3f0d5dd534943a8da` from release 12.3.2 and builds only its static library.
+| Dependency | Version | License | Use |
+| --- | --- | --- | --- |
+| QPDF | 12.3.2 | Apache-2.0 (upstream notices also include Artistic-2.0) | PDF interpretation/transformation |
+| zlib | 1.3.1 | zlib | PDF/ZIP compression |
+| libjpeg-turbo | 3.2.0 | IJG, BSD-style, zlib | PDF DCT streams |
+| libzip | 1.11.4 | BSD-3-Clause | DOCX/ODT ZIP packages |
+| pugixml | 1.16 | MIT | Private Word XML codec |
+| nlohmann/json | 3.12.0 | MIT | Private JSON persistence |
+| utf8proc (Native provider) | 2.11.3 | MIT plus Unicode data terms | Author Unicode normalization |
 
-- Project: https://github.com/qpdf/qpdf
-- License: Apache License 2.0
-- Copyright: 2005-2021 Jay Berkenbilt; 2022-2026 Jay Berkenbilt and Manfred Holger
+QPDF, zlib and libjpeg-turbo release archives and licenses are recorded with
+SHA-256 in `third_party/dependencies.json`. DOCX/ODT use pinned libzip commit
+`6f8a0cdd24a0dc6cce9dac4a7679da784ab124ea`, or an explicitly requested system
+libzip. Its crypto and optional compression/tool backends are disabled in the
+pinned build. pugixml/nlohmann single-source files and licenses are recorded in
+`third_party/document-dependencies.json`. Native provider dependency hashes and
+licenses live under `iiFileProvider/Native/third_party` and are installed with
+`iiFileProviderNative`. All private archive symbols are hidden from the SDK ABI.
 
-The full license is available at https://github.com/qpdf/qpdf/blob/v12.3.2/LICENSE.txt.
+First-party iiXml/iiHtmlBlock range, declaration, attribute and block-classification
+algorithms were adapted into standard C++ private sources. Their original QObject
+bindings/signals/debug logging are excluded. The source paths and original hashes
+are recorded in `third_party/first-party-markup-provenance.json`; their existing
+AGPL-3.0-only license is retained in `licenses/first-party-markup/LICENSE`.
+Neither installed binary package is needed by iiGeneralDocument.
 
-## zlib
+The PDF object codec and fixture adapt the iisacc-authored MIT engineering
+counterpart; its full notice is preserved in
+`third_party/licenses/acrobat-counterpart/LICENSE`. Native SHA-256 adapts the same
+first-party standard implementation with its MIT notice in the provider's
+`iisacc-counterpart/LICENSE`. No Adobe proprietary source, binary or extracted
+resource is redistributed or required by these implementations.
 
-QPDF uses zlib for PDF stream compression and decompression. zlib is distributed under the zlib license: https://zlib.net/zlib_license.html.
+Legacy `.doc` optionally launches user-installed LibreOffice. LibreOffice is not
+linked or bundled with this SDK. Its distribution uses MPL-2.0/LGPL-3.0+ terms:
+https://www.libreoffice.org/about-us/licenses/
 
-## libzip 1.11.4
-
-libzip reads and creates the ZIP packages used by DOCX and ODT.
-iiGeneralDocument pins commit `6f8a0cdd24a0dc6cce9dac4a7679da784ab124ea`
-from release 1.11.4 and builds only its static library with optional crypto and
-additional compression backends disabled.
-
-- Project: https://libzip.org/
-- License: BSD 3-Clause
-- Copyright: 1999-2025 Dieter Baron and Thomas Klausner
-
-The full license is installed with iiGeneralDocument when the pinned dependency
-is used.
-
-## LibreOffice
-
-Legacy `.doc` support optionally invokes a user-installed LibreOffice process.
-LibreOffice is not linked, redistributed, or downloaded by iiGeneralDocument.
-The installed LibreOffice distribution and its licenses govern that runtime.
-
-- Project: https://www.libreoffice.org/
-- Licensing: Mozilla Public License 2.0 and GNU LGPL v3+ dual licensing
-
-## libjpeg-turbo
-
-QPDF uses the system JPEG implementation for DCT streams. Static
-iiGeneralDocument builds and platforms without the ELF PIC constraint prefer
-an available static `libjpeg` archive. ELF shared builds link the CMake
-`JPEG::JPEG` shared target because common system static archives are not built
-as position-independent code. libjpeg-turbo carries IJG, BSD-style, and zlib
-licenses: https://github.com/libjpeg-turbo/libjpeg-turbo/blob/main/LICENSE.md.
-
-## Qt Core 6.8.3
-
-iiGeneralDocument, `iiXml`, and `iiHtmlBlock` link Qt Core. Qt is available under commercial and
-open-source license options; the selected Qt distribution terms apply. The
-locally installed Qt source includes the applicable LGPL, GPL, and commercial
-license texts under the Qt source `LICENSES` directories.
-
-- Project: https://www.qt.io/
-- Licensing: https://www.qt.io/licensing/
-
-## iiXml 0.1.0 and iiHtmlBlock 0.1.0
-
-These first-party iisacc libraries are resolved as installed CMake packages rather than vendored into this repository. `iiHtmlBlock` depends on `iiXml`; iiGeneralDocument records both as direct public package dependencies. The XML tree adapter uses iiXml's declaration recognition, hierarchical `TagDocument` ranges, and typed attribute metadata. The HTML block CRUD adapter uses iiHtmlBlock's block classification, source-range tracking, fragment serialization, and deletion contracts.
-
-- iiXml: https://github.com/iisacc-Justmoong/iiXml
-- iiHtmlBlock: https://github.com/iisacc-Justmoong/iiHtmlBlock
+Primary upstream projects:
+https://github.com/qpdf/qpdf,
+https://zlib.net/,
+https://github.com/libjpeg-turbo/libjpeg-turbo,
+https://libzip.org/,
+https://pugixml.org/,
+https://github.com/nlohmann/json,
+https://github.com/JuliaStrings/utf8proc.

@@ -4,7 +4,7 @@
 #include "Word/Private/LegacyDocConverter.h"
 #include "Word/Private/OdfTextCodec.h"
 
-#include <QTemporaryDir>
+#include <iiFileProviderNative.h>
 
 #include <algorithm>
 #include <cctype>
@@ -53,7 +53,7 @@ WordWriteResult WordDocumentWriter::write(
         return result;
     }
 
-    QTemporaryDir bridgeDirectory;
+    iiFileProvider::native::TemporaryDirectory bridgeDirectory;
     WordWriteResult result;
     if (!bridgeDirectory.isValid()) {
         result.diagnostics.push_back({
@@ -64,7 +64,7 @@ WordWriteResult WordDocumentWriter::write(
         });
         return result;
     }
-    const auto bridge = std::filesystem::path(bridgeDirectory.path().toStdString())
+    const auto bridge = std::filesystem::path(bridgeDirectory.path().string())
         / (destination.stem().string() + ".docx");
     result = detail::writeDocxPackage(document, bridge, options);
     if (result.hasErrors()) {
@@ -81,7 +81,7 @@ WordWriteResult WordDocumentWriter::write(
         return result;
     }
 
-    QTemporaryDir validationDirectory;
+    iiFileProvider::native::TemporaryDirectory validationDirectory;
     if (!validationDirectory.isValid()) {
         result.diagnostics.push_back({
             DiagnosticSeverity::error,
@@ -91,7 +91,7 @@ WordWriteResult WordDocumentWriter::write(
         });
         return result;
     }
-    const auto reopenedDocx = std::filesystem::path(validationDirectory.path().toStdString())
+    const auto reopenedDocx = std::filesystem::path(validationDirectory.path().string())
         / (destination.stem().string() + ".docx");
     auto validationConversion = detail::convertWordFile(
         destination, reopenedDocx, options.libreOfficeExecutable, options.conversionTimeout,

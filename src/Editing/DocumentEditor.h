@@ -9,6 +9,11 @@
 
 namespace ii::document {
 
+struct DocumentPageSelection {
+    std::reference_wrapper<const Document> document;
+    std::vector<std::size_t> pages; // Empty selects all; zero based, ordered, repeated.
+};
+
 class IIGENERALDOCUMENT_EXPORT DocumentEditor {
 public:
     explicit DocumentEditor(Document& document) noexcept;
@@ -37,6 +42,14 @@ public:
 
     AnnotationId addAnnotation(std::size_t pageIndex, Annotation annotation);
     bool removeAnnotation(AnnotationId id);
+
+    [[nodiscard]] Document extractPages(std::span<const std::size_t> pages) const;
+    [[nodiscard]] static Document mergePages(std::span<const DocumentPageSelection> selections);
+    void rotatePages(std::span<const std::size_t> pages, int clockwiseDegrees);
+    AnnotationId addTextNote(std::size_t pageIndex, Rect rectangle,
+        std::string contents, std::string author = {});
+    bool setTextField(std::string_view name, std::string value);
+    bool setMetadataBatch(std::span<const pdf::MetadataChange> changes);
 
 private:
     [[nodiscard]] Page& page(std::size_t index);

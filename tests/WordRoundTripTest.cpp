@@ -82,6 +82,7 @@ int main()
 
     auto document = sampleDocument();
     const auto written = WordDocumentWriter{}.write(document, createdPath);
+    if(written.hasErrors())for(const auto& d:written.diagnostics)std::cerr<<d.code<<": "<<d.message<<" ["<<d.context<<"]\n";
     expect(!written.hasErrors(), "a DOCX document is written");
     expect(std::filesystem::file_size(createdPath) > 0, "written DOCX is non-empty");
 

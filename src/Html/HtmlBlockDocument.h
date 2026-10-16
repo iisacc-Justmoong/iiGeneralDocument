@@ -1,7 +1,7 @@
 #pragma once
 
 #include "iiGeneralDocument/Export.h"
-#include <iiFileProvider.h>
+#include <iiFileProviderNative.h>
 
 #include <compare>
 #include <cstddef>
@@ -63,7 +63,7 @@ private:
     std::size_t sourceIndex_{0};
     std::string tagName_;
     std::string value_;
-    iiFileProvider::Authorship authorship_;
+    iiFileProvider::native::Authorship authorship_;
     std::string html_;
     std::size_t rawBegin_{0};
     std::size_t valueBegin_{0};
@@ -76,11 +76,11 @@ private:
 class IIGENERALDOCUMENT_EXPORT HtmlBlockDocument {
 public:
     HtmlBlockDocument() = default;
-    [[nodiscard]] const iiFileProvider::Authorship& authorship() const noexcept;
+    [[nodiscard]] const iiFileProvider::native::Authorship& authorship() const noexcept;
     void recordChange();
-    bool setFileAuthor(const iiFileProvider::FileAuthor& author);
-    [[nodiscard]] QByteArray toFileBytes() const;
-    [[nodiscard]] static HtmlBlockDocument fromFileBytes(const QByteArray& bytes);
+    bool setFileAuthor(const iiFileProvider::native::FileAuthor& author);
+    [[nodiscard]] std::string toFileBytes() const;
+    [[nodiscard]] static HtmlBlockDocument fromFileBytes(std::string_view bytes);
 
     [[nodiscard]] static HtmlBlockDocument fromHtml(std::string html);
 
@@ -97,7 +97,7 @@ private:
     [[nodiscard]] static std::vector<HtmlBlockId> rebuildHierarchy(
         std::vector<HtmlBlock>& blocks);
 
-    iiFileProvider::Authorship authorship_;
+    iiFileProvider::native::Authorship authorship_;
     std::string html_;
     std::vector<HtmlBlock> blocks_;
     std::vector<HtmlBlockId> rootIds_;

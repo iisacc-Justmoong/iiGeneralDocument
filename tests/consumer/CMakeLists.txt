@@ -1,18 +1,23 @@
 cmake_minimum_required(VERSION 3.31)
 project(iiGeneralDocumentConsumer LANGUAGES CXX)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(iiGeneralDocument 0.2 CONFIG REQUIRED)
+set(CMAKE_DISABLE_FIND_PACKAGE_Qt6 TRUE)
+set(CMAKE_DISABLE_FIND_PACKAGE_iiFileProvider TRUE)
+set(CMAKE_DISABLE_FIND_PACKAGE_iiXml TRUE)
+set(CMAKE_DISABLE_FIND_PACKAGE_iiHtmlBlock TRUE)
+find_package(iiGeneralDocument 0.4 CONFIG REQUIRED)
 
 get_target_property(iiGeneralDocumentDependencies
     iiGeneralDocument::iiGeneralDocument INTERFACE_LINK_LIBRARIES)
-foreach(required_dependency IN ITEMS
-        iiFileProvider::iiFileProvider
-        iiXml::iiXml
-        iiHtmlBlock::iiHtmlBlock
-        Qt6::Core)
+foreach(required_dependency IN ITEMS iiFileProvider::Native iiGeneralDocument::Pdf)
     if(NOT required_dependency IN_LIST iiGeneralDocumentDependencies)
-        message(FATAL_ERROR
-            "iiGeneralDocument package does not expose ${required_dependency}.")
+        message(FATAL_ERROR "Missing native SDK component: ${required_dependency}")
+    endif()
+endforeach()
+foreach(forbidden IN ITEMS Qt6::Core iiFileProvider::iiFileProvider iiXml::iiXml iiHtmlBlock::iiHtmlBlock)
+    if(TARGET ${forbidden})
+        message(FATAL_ERROR "Unexpected dependency in native consumer: ${forbidden}")
     endif()
 endforeach()
 
@@ -24,3 +29,11 @@ enable_testing()
 add_executable(iiGeneralDocumentInstalledAuthorship ../AuthorshipTest.cpp)
 target_link_libraries(iiGeneralDocumentInstalledAuthorship PRIVATE iiGeneralDocument::iiGeneralDocument)
 add_test(NAME iiGeneralDocument.InstalledAuthorship COMMAND iiGeneralDocumentInstalledAuthorship)
+
+if(DEFINED IIGENERALDOCUMENT_EXPECTED_NATIVE_PROVIDER_PREFIX)
+    get_target_property(_native_provider_location iiFileProvider::Native IMPORTED_LOCATION_RELEASE)
+    string(FIND "${_native_provider_location}" "${IIGENERALDOCUMENT_EXPECTED_NATIVE_PROVIDER_PREFIX}/" _native_prefix_index)
+    if(NOT _native_prefix_index EQUAL 0)
+        message(FATAL_ERROR "Native provider was not discovered from the requested SDK root: ${_native_provider_location}")
+    endif()
+endif()

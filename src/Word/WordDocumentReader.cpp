@@ -4,7 +4,7 @@
 #include "Word/Private/LegacyDocConverter.h"
 #include "Word/Private/OdfTextCodec.h"
 
-#include <QTemporaryDir>
+#include <iiFileProviderNative.h>
 
 #include <algorithm>
 #include <cctype>
@@ -52,7 +52,7 @@ WordReadResult WordDocumentReader::read(
         return result;
     }
 
-    QTemporaryDir bridgeDirectory;
+    iiFileProvider::native::TemporaryDirectory bridgeDirectory;
     WordReadResult result;
     if (!bridgeDirectory.isValid()) {
         result.diagnostics.push_back({
@@ -63,7 +63,7 @@ WordReadResult WordDocumentReader::read(
         });
         return result;
     }
-    const auto converted = std::filesystem::path(bridgeDirectory.path().toStdString())
+    const auto converted = std::filesystem::path(bridgeDirectory.path().string())
         / (source.stem().string() + ".docx");
     result.diagnostics = detail::convertWordFile(
         source, converted, options.libreOfficeExecutable, options.conversionTimeout,

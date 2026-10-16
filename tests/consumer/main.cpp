@@ -1,8 +1,6 @@
+#include <iiFileProviderNative.h>
 #include <iiGeneralDocument/iiGeneralDocument.h>
-#include <iiHtmlBlock>
-#include <iiXml>
 
-#include <QTemporaryDir>
 
 #include <filesystem>
 #include <utility>
@@ -17,12 +15,12 @@ int main()
     wordDocument.appendParagraph(std::move(wordParagraph));
     const auto unsupportedWordRead =
         ii::document::WordDocumentReader{}.read("unsupported.txt");
-    QTemporaryDir odfDirectory;
+    iiFileProvider::native::TemporaryDirectory odfDirectory;
     if (!odfDirectory.isValid()) {
         return 1;
     }
     const auto odfDirectoryPath = std::filesystem::path(
-        odfDirectory.path().toStdString());
+        odfDirectory.path().string());
     const auto odtPath = odfDirectoryPath / "install-consumer.odt";
     const auto fodtPath = odfDirectoryPath / "install-consumer.fodt";
     const auto odtWrite = ii::document::WordDocumentWriter{}.write(wordDocument, odtPath);
@@ -73,13 +71,7 @@ int main()
             == thinkingSpaceVersion.objectId
         && thinkingSpaceDocument.versionHistory.verifyIntegrity();
 
-    const iiXml::Parser::TagParser parser;
-    const auto parsed = parser.Parse("<p>text</p>");
-    const iiHtmlBlock::GetHTML html;
     return document.pages().size() == 1
-            && parsed.has_value()
-            && parsed->TagName == "p"
-            && html.GetHTMLText().empty()
             && createdBlockReadable
             && updatedBlockReadable
             && removedBlock

@@ -139,3 +139,25 @@ editor.remove(border);
 ## 결과 및 진단
 
 독자와 작성자는 `ReadResult` 및 `WriteResult`를 반환합니다. 출력을 사용하거나 전달하기 전에 `hasErrors()`를 확인하십시오. 치명적이지 않은 수리, 모양 및 쓰기 후 경고는 안정적인 코드 및 컨텍스트 문자열과 함께 `diagnostics`에 남아 있습니다.
+
+## PDF document-operation objects (0.3)
+
+The [Acrobat absorption contract](ACROBAT_ABSORPTION.md) maps each operation to its
+SDK owner and gives the Qt-free component consumption example. `DocumentEditor`
+adds ordered/repeated extraction, multi-document page selection/merge, relative
+rotation batches, Unicode text notes, existing text-field updates, and metadata
+batches. `Document` adds metadata removal, readonly attachment summaries and an
+XFA flag. `Page` adds effective CropBox/UserUnit and `Annotation` adds author.
+`PdfDocumentReader::readBytes` and `PdfDocumentWriter::writeBytes` avoid filesystem
+round trips while preserving the existing path-based provider boundary.
+
+
+## Native dependency migration (0.4)
+
+The complete module now uses C++23 standard types and open-source backends.
+Qt and the installed iiXml/iiHtmlBlock packages are not runtime or public-package
+dependencies. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml
+and persistence uses nlohmann/json. The markup algorithms retain the first-party
+range/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)
+for byte-string API changes, ABI compatibility, prior-file verification and the
+Thinking Space schema-2 byte-diff encoding.

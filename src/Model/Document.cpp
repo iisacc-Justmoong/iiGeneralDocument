@@ -81,6 +81,9 @@ void FormField::setFlags(int flags) noexcept
     flags_ = flags;
 }
 
+const std::optional<int>& FormField::maximumLength() const noexcept { return maximumLength_; }
+void FormField::setMaximumLength(std::optional<int> maximum) noexcept { maximumLength_ = maximum; }
+
 const std::vector<std::string>& FormField::choices() const noexcept
 {
     return choices_;
@@ -175,9 +178,12 @@ bool Document::hasSourcePdf() const noexcept
     return origin_.has_value();
 }
 
+bool Document::hasXfa() const noexcept { return origin_ && origin_->xfa; }
+const std::vector<pdf::Attachment>& Document::attachments() const noexcept { return attachments_; }
 
-const iiFileProvider::Authorship& Document::authorship() const noexcept { return authorship_; }
-bool Document::setFileAuthor(const iiFileProvider::FileAuthor& author) {
+
+const iiFileProvider::native::Authorship& Document::authorship() const noexcept { return authorship_; }
+bool Document::setFileAuthor(const iiFileProvider::native::FileAuthor& author) {
     auto next = authorship_; const bool changed = next.setAuthor(author);
     detail::storeAuthorship(next, metadata_); authorship_ = std::move(next); return changed;
 }
@@ -187,10 +193,20 @@ void Document::recordChange() {
 }
 void Document::restoreAuthorship() { authorship_ = detail::readAuthorship(metadata_); }
 bool Document::setMetadata(std::string key, std::string value) {
-    if (key == iiFileProvider::Authorship::MetadataKey) throw DocumentError("Authorship is managed by iiFileProvider");
+    if (key == iiFileProvider::native::Authorship::MetadataKey) throw DocumentError("Authorship is managed by iiFileProvider");
     const auto found = metadata_.find(key);
     if (found != metadata_.end() && found->second == value) return false;
     auto next = metadata_; next[std::move(key)] = std::move(value);
+    auto author = authorship_; author.recordChange(); detail::storeAuthorship(author, next);
+    metadata_ = std::move(next); authorship_ = std::move(author); return true;
+}
+
+bool Document::removeMetadata(std::string_view key) {
+    if (key == iiFileProvider::native::Authorship::MetadataKey)
+        throw DocumentError("Authorship is managed by iiFileProvider");
+    const auto found = metadata_.find(std::string(key));
+    if (found == metadata_.end()) return false;
+    auto next = metadata_; next.erase(std::string(key));
     auto author = authorship_; author.recordChange(); detail::storeAuthorship(author, next);
     metadata_ = std::move(next); authorship_ = std::move(author); return true;
 }

@@ -102,11 +102,11 @@ private:
 
 struct IIGENERALDOCUMENT_EXPORT ThinkingSpaceDocument {
     static constexpr std::string_view fileExtension{".tsdoc"};
-    [[nodiscard]] const iiFileProvider::Authorship& authorship() const noexcept;
-    bool setFileAuthor(const iiFileProvider::FileAuthor& author);
+    [[nodiscard]] const iiFileProvider::native::Authorship& authorship() const noexcept;
+    bool setFileAuthor(const iiFileProvider::native::FileAuthor& author);
     bool edit(const std::function<bool(ThinkingSpaceDocument&)>& callback);
-    [[nodiscard]] QByteArray toFileBytes() const;
-    [[nodiscard]] static ThinkingSpaceDocument fromFileBytes(const QByteArray& bytes);
+    [[nodiscard]] std::string toFileBytes() const;
+    [[nodiscard]] static ThinkingSpaceDocument fromFileBytes(std::string_view bytes);
 
     ThinkingSpaceDocumentHeader header;
     ThinkingSpaceDocumentBody body;

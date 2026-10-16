@@ -3,7 +3,7 @@
 
 #include "Core/Diagnostic.h"
 
-#include <iiHtmlBlock>
+#include "Codec/Private/Markup/BlockRangeTracker.h"
 
 #include <algorithm>
 #include <limits>
@@ -229,7 +229,7 @@ std::vector<HtmlBlock> HtmlBlockDocument::parseBlocks(std::string_view html)
         return {};
     }
 
-    iiHtmlBlock::BlockRangeTracker tracker;
+    detail::blocks::BlockRangeTracker tracker;
     if (!tracker.Parse(html)) {
         std::string reason = tracker.GetError();
         if (reason.empty()) {
@@ -322,11 +322,11 @@ std::vector<HtmlBlockId> HtmlBlockDocument::rebuildHierarchy(
 }
 
 
-const iiFileProvider::Authorship& HtmlBlockDocument::authorship() const noexcept { return authorship_; }
+const iiFileProvider::native::Authorship& HtmlBlockDocument::authorship() const noexcept { return authorship_; }
 void HtmlBlockDocument::recordChange() { authorship_.recordChange(); }
-bool HtmlBlockDocument::setFileAuthor(const iiFileProvider::FileAuthor& author) { return authorship_.setAuthor(author); }
-QByteArray HtmlBlockDocument::toFileBytes() const { return detail::markupBytes(html_, authorship_); }
-HtmlBlockDocument HtmlBlockDocument::fromFileBytes(const QByteArray& bytes) {
+bool HtmlBlockDocument::setFileAuthor(const iiFileProvider::native::FileAuthor& author) { return authorship_.setAuthor(author); }
+std::string HtmlBlockDocument::toFileBytes() const { return detail::markupBytes(html_, authorship_); }
+HtmlBlockDocument HtmlBlockDocument::fromFileBytes(std::string_view bytes) {
     auto parsed = detail::readMarkup(bytes);
     auto document = fromHtml(std::move(parsed.body));
     document.authorship_ = std::move(parsed.author); return document;

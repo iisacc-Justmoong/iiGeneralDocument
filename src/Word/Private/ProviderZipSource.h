@@ -1,15 +1,15 @@
 #pragma once
 
-#include <iiFileProvider.h>
+#include <iiFileProviderNative.h>
 #include <zip.h>
 
 namespace ii::document::detail {
 // libzip owns this adapter. The device is opened and owned by iiFileProvider;
 // ZIP interpretation and decompression remain private to the document codec.
 struct ProviderZipInput {
-    std::unique_ptr<QIODevice> device;
+    std::unique_ptr<iiFileProvider::native::ReadFile> device;
     zip_error_t error;
-    explicit ProviderZipInput(std::unique_ptr<QIODevice> input) : device(std::move(input)) { zip_error_init(&error); }
+    explicit ProviderZipInput(std::unique_ptr<iiFileProvider::native::ReadFile> input) : device(std::move(input)) { zip_error_init(&error); }
     ~ProviderZipInput() { zip_error_fini(&error); }
     static zip_int64_t command(void *context, void *data, zip_uint64_t length, zip_source_cmd_t operation) {
         auto &input = *static_cast<ProviderZipInput *>(context);
@@ -18,8 +18,8 @@ struct ProviderZipInput {
             if (input.device->seek(0)) return 0;
             zip_error_set(&input.error, ZIP_ER_SEEK, 0); return -1;
         case ZIP_SOURCE_READ: {
-            const auto count = input.device->read(static_cast<char *>(data), static_cast<qint64>(
-                std::min<zip_uint64_t>(length, std::numeric_limits<qint64>::max())));
+            const auto count = input.device->read(static_cast<char *>(data), static_cast<std::int64_t>(
+                std::min<zip_uint64_t>(length, std::numeric_limits<std::int64_t>::max())));
             if (count < 0) zip_error_set(&input.error, ZIP_ER_READ, 0);
             return count;
         }
@@ -35,10 +35,10 @@ struct ProviderZipInput {
         case ZIP_SOURCE_SEEK: {
             const auto offset = zip_source_seek_compute_offset(static_cast<zip_uint64_t>(input.device->pos()),
                 static_cast<zip_uint64_t>(input.device->size()), data, length, &input.error);
-            if (offset < 0 || !input.device->seek(offset)) { zip_error_set(&input.error, ZIP_ER_SEEK, 0); return -1; }
+            if (offset < 0 || !input.device->seek(static_cast<std::uint64_t>(offset))) { zip_error_set(&input.error, ZIP_ER_SEEK, 0); return -1; }
             return 0;
         }
-        case ZIP_SOURCE_TELL: return input.device->pos();
+        case ZIP_SOURCE_TELL: return input.device->pos() > static_cast<std::uint64_t>(std::numeric_limits<zip_int64_t>::max()) ? -1 : static_cast<zip_int64_t>(input.device->pos());
         case ZIP_SOURCE_SUPPORTS: return ZIP_SOURCE_SUPPORTS_SEEKABLE;
         default: zip_error_set(&input.error, ZIP_ER_OPNOTSUPP, 0); return -1;
         }
@@ -47,7 +47,7 @@ struct ProviderZipInput {
 
 inline zip_t *openProviderZip(const std::filesystem::path &path, int *openError) {
     try {
-        auto input = std::make_unique<ProviderZipInput>(iiFileProvider::File::openRead(iiFileProvider::File::pathString(path)));
+        auto input = std::make_unique<ProviderZipInput>(iiFileProvider::native::File::openRead(iiFileProvider::native::File::pathString(path)));
         zip_error_t error; zip_error_init(&error);
         auto *source = zip_source_function_create(ProviderZipInput::command, input.get(), &error);
         if (source) input.release();
@@ -55,6 +55,6 @@ inline zip_t *openProviderZip(const std::filesystem::path &path, int *openError)
         if (!archive && source) zip_source_free(source);
         *openError = zip_error_code_zip(&error); zip_error_fini(&error);
         return archive;
-    } catch (const iiFileProvider::FileError &) { *openError = ZIP_ER_OPEN; return nullptr; }
+    } catch (const iiFileProvider::native::FileError &) { *openError = ZIP_ER_OPEN; return nullptr; }
 }
 } // namespace ii::document::detail
