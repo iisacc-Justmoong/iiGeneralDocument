@@ -122,6 +122,7 @@ if(BUILD_TESTING)
     if(NOT IIGENERALDOCUMENT_PDF_SANITIZERS)
         add_test(NAME iiGeneralDocument.PdfObjects.InstallConsumer
             COMMAND ${CMAKE_COMMAND}
+                "-DIIGENERALDOCUMENT_CONFIG=$<CONFIG>"
                 -DIIGENERALDOCUMENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}
                 -DIIGENERALDOCUMENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
                 -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/PdfInstallConsumerTest.cmake)

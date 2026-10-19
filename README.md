@@ -1,5 +1,10 @@
 # iiGeneralDocument
 
+The Windows legacy DOC integration test allows two minutes per cold, isolated
+LibreOffice profile. Applications retain control of `conversionTimeout`; its
+default is unchanged. The console launcher is preferred for captured conversion
+results on Windows.
+
 Package release: **0.4.1** (2026-10-19). This patch packages the current
 source snapshot; build, test and installation evidence is recorded in the SDK
 patch-release report. Earlier versioned feature notes remain historical.
@@ -112,3 +117,11 @@ See [API](docs/API.md), [architecture](docs/ARCHITECTURE.md),
 The enclosing SDK keeps its existing AGPL-3.0-only license. Full dependency
 licenses are shipped with the installation; see [notices](THIRD_PARTY_NOTICES.md).
 No Adobe proprietary source, extracted resources or runtime is included.
+
+MSVC builds link the bundled libjpeg-turbo archive as `jpeg-static.lib`, matching
+the upstream Windows target name. The installed consumer test puts the package's
+own `bin/` first on Windows to exercise the installed DLLs.
+Both full-module and PDF-only installed consumers inherit the SDK build
+configuration so MSVC runtime and standard-library layouts match the DLLs.
+Windows legacy Word conversion prefers LibreOffice's console launcher
+`soffice.com` so the native process boundary can capture completion and errors.

@@ -1,6 +1,10 @@
 include(ExternalProject)
 
 set(IIGENERALDOCUMENT_PDF_DEP_PREFIX "${CMAKE_BINARY_DIR}/pdf-object-deps/install")
+set(_pdf_jpeg_name jpeg)
+if(MSVC)
+  set(_pdf_jpeg_name jpeg-static)
+endif()
 file(MAKE_DIRECTORY "${IIGENERALDOCUMENT_PDF_DEP_PREFIX}/include")
 set(dep_flags "")
 if(NOT MSVC)
@@ -47,7 +51,7 @@ ExternalProject_Add(iiGeneralDocumentPdfJpegBuild
     -DWITH_TURBOJPEG=OFF -DWITH_SIMD=OFF -DWITH_TOOLS=OFF -DWITH_TESTS=OFF
   BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --target jpeg-static --parallel 4
   INSTALL_COMMAND ${CMAKE_COMMAND} --install <BINARY_DIR>
-  BUILD_BYPRODUCTS "${IIGENERALDOCUMENT_PDF_DEP_PREFIX}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}jpeg${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  BUILD_BYPRODUCTS "${IIGENERALDOCUMENT_PDF_DEP_PREFIX}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${_pdf_jpeg_name}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 ExternalProject_Add(iiGeneralDocumentPdfQpdfBuild
   PREFIX "${CMAKE_BINARY_DIR}/pdf-object-deps/qpdf"
   DEPENDS iiGeneralDocumentPdfZlibBuild iiGeneralDocumentPdfJpegBuild
@@ -61,12 +65,12 @@ ExternalProject_Add(iiGeneralDocumentPdfQpdfBuild
     -DZLIB_H_PATH=${IIGENERALDOCUMENT_PDF_DEP_PREFIX}/include
     -DZLIB_LIB_PATH=${IIGENERALDOCUMENT_PDF_DEP_PREFIX}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}z${CMAKE_STATIC_LIBRARY_SUFFIX}
     -DLIBJPEG_H_PATH=${IIGENERALDOCUMENT_PDF_DEP_PREFIX}/include
-    -DLIBJPEG_LIB_PATH=${IIGENERALDOCUMENT_PDF_DEP_PREFIX}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}jpeg${CMAKE_STATIC_LIBRARY_SUFFIX}
+    -DLIBJPEG_LIB_PATH=${IIGENERALDOCUMENT_PDF_DEP_PREFIX}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${_pdf_jpeg_name}${CMAKE_STATIC_LIBRARY_SUFFIX}
   BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --target libqpdf --parallel 4
   INSTALL_COMMAND ${CMAKE_COMMAND} --install <BINARY_DIR> --component dev
   BUILD_BYPRODUCTS "${IIGENERALDOCUMENT_PDF_DEP_PREFIX}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}qpdf${CMAKE_STATIC_LIBRARY_SUFFIX}")
 
-foreach(pair IN ITEMS "Qpdf;qpdf;iiGeneralDocumentPdfQpdfBuild" "Jpeg;jpeg;iiGeneralDocumentPdfJpegBuild" "Zlib;z;iiGeneralDocumentPdfZlibBuild")
+foreach(pair IN ITEMS "Qpdf;qpdf;iiGeneralDocumentPdfQpdfBuild" "Jpeg;${_pdf_jpeg_name};iiGeneralDocumentPdfJpegBuild" "Zlib;z;iiGeneralDocumentPdfZlibBuild")
   list(GET pair 0 target_name)
   list(GET pair 1 file_name)
   list(GET pair 2 build_name)

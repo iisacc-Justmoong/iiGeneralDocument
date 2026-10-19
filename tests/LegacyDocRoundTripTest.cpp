@@ -23,6 +23,10 @@ int main()
 
     WordWriteOptions writeOptions;
     writeOptions.libreOfficeExecutable = IIGENERALDOCUMENT_TEST_SOFFICE;
+#ifdef _WIN32
+    // Each conversion initializes an isolated LibreOffice profile from scratch.
+    writeOptions.conversionTimeout = std::chrono::minutes(2);
+#endif
     const auto written = WordDocumentWriter{}.write(document, docPath, writeOptions);
     for (const auto& item : written.diagnostics) {
         std::cerr << item.code << ": " << item.message << " [" << item.context << "]\n";
@@ -39,6 +43,9 @@ int main()
 
     WordReadOptions readOptions;
     readOptions.libreOfficeExecutable = IIGENERALDOCUMENT_TEST_SOFFICE;
+#ifdef _WIN32
+    readOptions.conversionTimeout = std::chrono::minutes(2);
+#endif
     const auto read = WordDocumentReader{}.read(docPath, readOptions);
     for (const auto& item : read.diagnostics) {
         std::cerr << item.code << ": " << item.message << " [" << item.context << "]\n";

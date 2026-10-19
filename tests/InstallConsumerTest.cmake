@@ -4,6 +4,7 @@ file(REMOVE_RECURSE "${install_prefix}" "${consumer_build}")
 
 execute_process(
     COMMAND "${IIGENERALDOCUMENT_CMAKE_COMMAND}" --install "${IIGENERALDOCUMENT_BINARY_DIR}"
+            --config "${IIGENERALDOCUMENT_CONFIG}"
             --prefix "${install_prefix}"
     RESULT_VARIABLE install_result
     OUTPUT_VARIABLE install_output
@@ -31,6 +32,7 @@ execute_process(
             -S "${IIGENERALDOCUMENT_SOURCE_DIR}/tests/consumer"
             -B "${consumer_build}"
             -G Ninja
+            "-DCMAKE_BUILD_TYPE=${IIGENERALDOCUMENT_CONFIG}"
             "-DCMAKE_PREFIX_PATH=${install_prefix}"
             "-DiiFileProviderNative_DIR=${IIGENERALDOCUMENT_NATIVE_PROVIDER_DIR}"
     RESULT_VARIABLE configure_result
@@ -43,6 +45,7 @@ endif()
 execute_process(
     COMMAND ${consumer_environment_command}
             "${IIGENERALDOCUMENT_CMAKE_COMMAND}" --build "${consumer_build}"
+            --config "${IIGENERALDOCUMENT_CONFIG}"
     RESULT_VARIABLE build_result
     OUTPUT_VARIABLE build_output
     ERROR_VARIABLE build_error)
@@ -50,6 +53,9 @@ if(NOT build_result EQUAL 0)
     message(FATAL_ERROR "Consumer build failed:\n${build_output}\n${build_error}")
 endif()
 
+if(WIN32)
+    set(ENV{PATH} "${install_prefix}/bin;$ENV{PATH}")
+endif()
 execute_process(
     COMMAND "${IIGENERALDOCUMENT_CMAKE_COMMAND}" -E env
             --unset=DYLD_LIBRARY_PATH --unset=DYLD_FALLBACK_LIBRARY_PATH

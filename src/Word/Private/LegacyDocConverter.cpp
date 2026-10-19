@@ -13,7 +13,7 @@ std::filesystem::path resolveExecutable(const std::filesystem::path &requested) 
         std::string_view paths(search);
 #ifdef _WIN32
         constexpr char delimiter = ';';
-        constexpr std::array names{"soffice.exe", "libreoffice.exe"};
+        constexpr std::array names{"soffice.com", "soffice.exe", "libreoffice.exe"};
 #else
         constexpr char delimiter = ':';
         constexpr std::array names{"soffice", "libreoffice"};
