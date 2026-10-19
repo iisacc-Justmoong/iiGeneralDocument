@@ -1,5 +1,10 @@
 # iiGeneralDocument
 
+Package release: **0.4.1** (2026-10-19). This patch packages the current
+source snapshot; build, test and installation evidence is recorded in the SDK
+patch-release report. Earlier versioned feature notes remain historical.
+
+
 `iiGeneralDocument` is a native C++23 document library with standard public types
 and open-source format backends. Version 0.4 removes Qt from the entire library,
 including file access, author metadata, Word XML, JSON persistence, conversion

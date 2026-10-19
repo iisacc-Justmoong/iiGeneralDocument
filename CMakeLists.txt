@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.31)
-project(iiGeneralDocument VERSION 0.4.0 LANGUAGES C CXX)
+project(iiGeneralDocument VERSION 0.4.1 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
