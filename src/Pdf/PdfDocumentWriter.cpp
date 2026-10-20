@@ -386,15 +386,18 @@ void syncFormFields(QPDF& pdf, const Document& document, WriteResult& result)
         return;
     }
     auto existing = forms.getFormFields();
+    std::map<std::pair<int, int>, std::size_t> bySource;
+    for (std::size_t i = 0; i < existing.size(); ++i) {
+        const auto reference = existing[i].getObjectHandle().getObjGen();
+        // Keep the first occurrence, matching the previous linear search.
+        bySource.try_emplace(std::pair{reference.getObj(), reference.getGen()}, i);
+    }
     for (std::size_t index = 0; index < document.formFields().size(); ++index) {
         const auto& source = document.formFields()[index];
         auto found = existing.end();
         if (source.source()) {
-            found = std::ranges::find_if(existing, [&](const auto& candidate) {
-                const auto reference = candidate.getObjectHandle().getObjGen();
-                return reference.getObj() == source.source()->objectNumber
-                    && reference.getGen() == source.source()->generation;
-            });
+            const auto position = bySource.find({source.source()->objectNumber, source.source()->generation});
+            if (position != bySource.end()) found = existing.begin() + static_cast<std::ptrdiff_t>(position->second);
         }
         if (found == existing.end()) {
             for (auto candidate = existing.begin(); candidate != existing.end(); ++candidate) {

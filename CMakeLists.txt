@@ -259,6 +259,7 @@ install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/iiGeneralDocumentConfigVersion.cmake"
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/iiGeneralDocument)
 install(FILES docs/FILE_AUTHORSHIP.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/iiGeneralDocument)
+install(FILES docs/PERFORMANCE.md DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/iiGeneralDocument)
 install(FILES README.md THIRD_PARTY_NOTICES.md docs/API.md docs/ARCHITECTURE.md docs/PDF_SUPPORT.md
     docs/ACROBAT_ABSORPTION.md docs/HTML_BLOCK_CRUD.md docs/ODF_SUPPORT.md docs/WORD_SUPPORT.md
     docs/THINKING_SPACE_DOCUMENT.md docs/XML_TREE_CRUD.md
@@ -367,6 +368,9 @@ if(BUILD_TESTING)
     target_compile_definitions(iiGeneralDocumentPdfRoundTripTest PRIVATE
         IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output")
     add_test(NAME iiGeneralDocument.PdfRoundTrip COMMAND iiGeneralDocumentPdfRoundTripTest)
+    add_executable(iiGeneralDocumentPdfFormLookupTest tests/PdfFormLookupTest.cpp)
+    target_link_libraries(iiGeneralDocumentPdfFormLookupTest PRIVATE iiGeneralDocument::iiGeneralDocument)
+    add_test(NAME iiGeneralDocument.PdfFormLookup COMMAND iiGeneralDocumentPdfFormLookupTest)
 
     add_executable(iiGeneralDocumentValidationTest tests/ValidationTest.cpp)
     target_link_libraries(iiGeneralDocumentValidationTest PRIVATE iiGeneralDocument::iiGeneralDocument)
