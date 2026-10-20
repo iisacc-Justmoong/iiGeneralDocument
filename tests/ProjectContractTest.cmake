@@ -1,3 +1,11 @@
+foreach(license_path "LICENSE" "third_party/licenses/first-party-markup/LICENSE")
+    file(READ "${IIGENERALDOCUMENT_SOURCE_DIR}/${license_path}" license_text)
+    if(NOT license_text MATCHES "MIT License"
+            OR NOT license_text MATCHES "Permission is hereby granted, free of charge")
+        message(FATAL_ERROR "First-party code must ship its MIT license: ${license_path}")
+    endif()
+endforeach()
+
 set(required_files
     "install.sh"
     "README.md"

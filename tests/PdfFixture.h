@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: MIT
 // Independent xref-table fixture; adapted from the iisacc MIT engineering counterpart.
 #pragma once
 #include <iomanip>

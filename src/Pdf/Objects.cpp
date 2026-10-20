@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: AGPL-3.0-only
+// SPDX-License-Identifier: MIT
 // Adapted from the iisacc-authored Acrobat engineering counterpart (MIT).
 // The preserved MIT notice is in third_party/licenses/acrobat-counterpart/LICENSE.
 #include "Pdf/Objects.h"

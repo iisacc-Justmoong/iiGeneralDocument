@@ -1,6 +1,6 @@
 # Dependency notices
 
-The enclosing iiGeneralDocument SDK is AGPL-3.0-only. All format dependencies below
+The enclosing iiGeneralDocument SDK is MIT. All format dependencies below
 are open source; full license texts are installed under
 `share/licenses/iiGeneralDocument`. Qt is absent from the version-0.4 dependency
 graph, including the full document target and its Native provider.
@@ -27,8 +27,8 @@ licenses live under `iiFileProvider/Native/third_party` and are installed with
 First-party iiXml/iiHtmlBlock range, declaration, attribute and block-classification
 algorithms were adapted into standard C++ private sources. Their original QObject
 bindings/signals/debug logging are excluded. The source paths and original hashes
-are recorded in `third_party/first-party-markup-provenance.json`; their existing
-AGPL-3.0-only license is retained in `licenses/first-party-markup/LICENSE`.
+are recorded in `third_party/first-party-markup-provenance.json`; their MIT
+license is included in `third_party/licenses/first-party-markup/LICENSE`.
 Neither installed binary package is needed by iiGeneralDocument.
 
 The PDF object codec and fixture adapt the iisacc-authored MIT engineering

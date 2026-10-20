@@ -42,9 +42,9 @@
     },
     {
       "file": "licenses/first-party-markup/LICENSE",
-      "source": "first-party iiXml and iiHtmlBlock AGPL-3.0-only",
-      "sha256": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef",
-      "bytes": 34523
+      "source": "first-party iiXml and iiHtmlBlock MIT",
+      "sha256": "e482fff586169cb69c9d3ac3aa30f47aa7922006a099ec90885642c9368c1398",
+      "bytes": 1063
     }
   ]
 }

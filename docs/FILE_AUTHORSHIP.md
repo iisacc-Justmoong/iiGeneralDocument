@@ -50,7 +50,7 @@ auto result = ii::document::WordDocumentWriter{}.write(word, "revised.docx");
 
 ## 종속성 및 유효성 검사
 
-작성자와 파일 처리는 동일한 AGPL-3.0-only의 형제 프로젝트 `iiFileProvider::Native`가 소유한다. JSON은 nlohmann/json, Unicode 정규화는 utf8proc, 시간·문자열·파일 인터페이스는 C++23 표준 타입을 사용한다. 공개 모델의 ABI 버전은 0.4이므로 기존 전체 모듈 소비자는 재빌드한다. 이전 프로필 및 장부의 형식과 내용은 유지되며 Qt 의존성은 없다.
+작성자와 파일 처리는 동일한 MIT의 형제 프로젝트 `iiFileProvider::Native`가 소유한다. JSON은 nlohmann/json, Unicode 정규화는 utf8proc, 시간·문자열·파일 인터페이스는 C++23 표준 타입을 사용한다. 공개 모델의 ABI 버전은 0.4이므로 기존 전체 모듈 소비자는 재빌드한다. 이전 프로필 및 장부의 형식과 내용은 유지되며 Qt 의존성은 없다.
 
 테스트는 즉시 덤프, 무작위/거부된 편집, PDF / DOCX / DOC / ODT / FODT 및 마크업 라운드 트립, LibreOffice 의 기본 문자열 타입, 잘못된 형식/미래 메타데이터 및 완전/가려진 `.tsdoc` 이력을 다룹니다. 독립적으로 설치된 패키지 테스트는 내보낸 CMake 타겟과 헤더를 통해 동일한 계약을 연습합니다.
 

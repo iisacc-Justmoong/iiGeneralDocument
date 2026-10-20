@@ -13,6 +13,13 @@ if(NOT install_result EQUAL 0)
     message(FATAL_ERROR "Install failed:\n${install_output}\n${install_error}")
 endif()
 
+foreach(license_path "LICENSE" "first-party-markup/LICENSE")
+    file(READ "${install_prefix}/share/licenses/iiGeneralDocument/${license_path}" license_text)
+    if(NOT license_text MATCHES "MIT License")
+        message(FATAL_ERROR "Installed first-party MIT license is missing: ${license_path}")
+    endif()
+endforeach()
+
 set(consumer_environment_command "${IIGENERALDOCUMENT_CMAKE_COMMAND}" -E env
     --unset=CPLUS_INCLUDE_PATH --unset=C_INCLUDE_PATH
     "CPATH=${IIGENERALDOCUMENT_SOURCE_DIR}/tests/foreign-headers")

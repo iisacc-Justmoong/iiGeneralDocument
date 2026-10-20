@@ -116,7 +116,7 @@ See [API](docs/API.md), [architecture](docs/ARCHITECTURE.md),
 [Thinking Space](docs/THINKING_SPACE_DOCUMENT.md) and
 [Acrobat feature absorption](docs/ACROBAT_ABSORPTION.md).
 
-The enclosing SDK keeps its existing AGPL-3.0-only license. Full dependency
+The enclosing SDK keeps its existing MIT license. Full dependency
 licenses are shipped with the installation; see [notices](THIRD_PARTY_NOTICES.md).
 No Adobe proprietary source, extracted resources or runtime is included.
 
@@ -127,3 +127,11 @@ Both full-module and PDF-only installed consumers inherit the SDK build
 configuration so MSVC runtime and standard-library layouts match the DLLs.
 Windows legacy Word conversion prefers LibreOffice's console launcher
 `soffice.com` so the native process boundary can capture completion and errors.
+
+## License
+
+SPDX-License-Identifier: MIT
+
+The original code and documentation in this repository are licensed under the
+[MIT License](LICENSE). Third-party code, libraries, fonts, tools, and model
+weights retain their respective licenses.

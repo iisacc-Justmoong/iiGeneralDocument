@@ -416,6 +416,7 @@ if(BUILD_TESTING)
         -DIIGENERALDOCUMENT_LIBRARY=$<TARGET_FILE:iiGeneralDocument>
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/NativeDependenciesTest.cmake)
 endif()
+install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument)
 install(DIRECTORY third_party/licenses/ DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument)
 install(FILES third_party/document-dependencies.json DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument)
 
