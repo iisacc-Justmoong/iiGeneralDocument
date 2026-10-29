@@ -35,15 +35,27 @@ endif()
 option(IIGENERALDOCUMENT_PDF_ONLY "Build only the independent PDF object component." OFF)
 option(IIGENERALDOCUMENT_PDF_SANITIZERS "Instrument the PDF component and its private dependencies." OFF)
 include(cmake/PdfObjects.cmake)
+include(cmake/QtBoundary.cmake)
+iigeneraldocument_require_qt_free(iiGeneralDocumentPdf)
+if(BUILD_TESTING)
+    add_test(NAME iiGeneralDocument.QtBoundary COMMAND ${CMAKE_COMMAND}
+        "-DIIGENERALDOCUMENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
+        "-DIIGENERALDOCUMENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/QtBoundaryTest.cmake)
+    add_test(NAME iiGeneralDocument.QtBinaryAudit COMMAND ${CMAKE_COMMAND}
+        "-DIIGENERALDOCUMENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/QtBinaryAuditTest.cmake)
+endif()
 if(IIGENERALDOCUMENT_PDF_ONLY)
     return()
 endif()
 
 set(IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT "$ENV{HOME}/.local/SDK" CACHE PATH
     "Root directory containing installed iisacc libraries.")
-list(APPEND CMAKE_PREFIX_PATH "${IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT}/iiFileProvider")
+list(APPEND CMAKE_PREFIX_PATH "${IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT}/iiFileProvider" "${IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT}/iiXml")
 include(cmake/DocumentDependencies.cmake)
 find_package(iiFileProviderNative 0.5.0 CONFIG REQUIRED)
+find_package(iiXmlMarkup 0.1 CONFIG REQUIRED)
 set(IIGENERALDOCUMENT_QPDF_TARGET iiGeneralDocumentPdfQpdf)
 set(IIGENERALDOCUMENT_JPEG_TARGET iiGeneralDocumentPdfJpeg)
 
@@ -170,14 +182,6 @@ add_library(iiGeneralDocument ${IIGENERALDOCUMENT_LIBRARY_TYPE}
     src/Validation/DocumentValidator.h
     src/iiGeneralDocument.h
     src/Word/Private/ConversionProcess.cpp
-    src/Codec/Private/Markup/Diagnostics.cpp
-    src/Codec/Private/Markup/InlineProperties.cpp
-    src/Codec/Private/Markup/OpenTag.cpp
-    src/Codec/Private/Markup/Doctype.cpp
-    src/Codec/Private/Markup/TagParser.cpp
-    src/Codec/Private/Markup/GetTagInfo.cpp
-    src/Codec/Private/Markup/DivideBlock.cpp
-    src/Codec/Private/Markup/BlockRangeTracker.cpp
     third_party/pugixml/pugixml.cpp)
 add_library(iiGeneralDocument::iiGeneralDocument ALIAS iiGeneralDocument)
 
@@ -196,10 +200,12 @@ target_link_libraries(iiGeneralDocument
         iiFileProvider::Native
         iiGeneralDocumentPdf
     PRIVATE
+        iiXml::Markup
         ${IIGENERALDOCUMENT_QPDF_TARGET}
         ${IIGENERALDOCUMENT_LIBZIP_TARGET}
         iiGeneralDocumentPdfZlib
         ${IIGENERALDOCUMENT_JPEG_TARGET})
+iigeneraldocument_require_qt_free(iiGeneralDocument)
 if(APPLE)
     target_link_directories(iiGeneralDocument PRIVATE "${IIGENERALDOCUMENT_PDF_DEP_PREFIX}/lib")
     foreach(_archive IN ITEMS qpdf jpeg z)
@@ -389,6 +395,7 @@ if(BUILD_TESTING)
             -DIIGENERALDOCUMENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DIIGENERALDOCUMENT_CMAKE_COMMAND=${CMAKE_COMMAND}
             "-DIIGENERALDOCUMENT_NATIVE_PROVIDER_DIR=${iiFileProviderNative_DIR}"
+            "-DIIGENERALDOCUMENT_XML_MARKUP_DIR=${iiXmlMarkup_DIR}"
             "-DIIGENERALDOCUMENT_NATIVE_PROVIDER_LIBRARY_DIR=$<TARGET_FILE_DIR:iiFileProvider::Native>"
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/InstallConsumerTest.cmake)
     endif()
@@ -407,6 +414,8 @@ if(BUILD_TESTING)
     add_executable(iiGeneralDocumentAuthorshipTest tests/AuthorshipTest.cpp)
     target_include_directories(iiGeneralDocumentAuthorshipTest PRIVATE third_party)
     target_link_libraries(iiGeneralDocumentAuthorshipTest PRIVATE iiGeneralDocument::iiGeneralDocument)
+    target_compile_definitions(iiGeneralDocumentAuthorshipTest PRIVATE
+        IIGENERALDOCUMENT_TEST_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/resources")
     add_test(NAME iiGeneralDocument.Authorship COMMAND iiGeneralDocumentAuthorshipTest)
 endif()
 
@@ -414,7 +423,19 @@ if(BUILD_TESTING)
     add_test(NAME iiGeneralDocument.NativeDependencies COMMAND ${CMAKE_COMMAND}
         -DIIGENERALDOCUMENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
         -DIIGENERALDOCUMENT_LIBRARY=$<TARGET_FILE:iiGeneralDocument>
+        -DIIGENERALDOCUMENT_PDF_LIBRARY=$<TARGET_FILE:iiGeneralDocumentPdf>
+        -DIIGENERALDOCUMENT_NATIVE_PROVIDER_LIBRARY=$<TARGET_FILE:iiFileProvider::Native>
+        -DIIGENERALDOCUMENT_MARKUP_LIBRARY=$<TARGET_FILE:iiXml::Markup>
+        -DIIGENERALDOCUMENT_NM=${CMAKE_NM}
+        -DIIGENERALDOCUMENT_CROSS_COMPILING=${CMAKE_CROSSCOMPILING}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/NativeDependenciesTest.cmake)
+    add_test(NAME iiGeneralDocument.QtInstalledBoundary COMMAND ${CMAKE_COMMAND}
+        "-DIIGENERALDOCUMENT_CONFIG=$<CONFIG>"
+        "-DIIGENERALDOCUMENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}"
+        "-DIIGENERALDOCUMENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+        "-DIIGENERALDOCUMENT_NATIVE_PROVIDER_DIR=${iiFileProviderNative_DIR}"
+        "-DIIGENERALDOCUMENT_XML_MARKUP_DIR=${iiXmlMarkup_DIR}"
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/QtInstalledBoundaryTest.cmake)
 endif()
 install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument)
 install(DIRECTORY third_party/licenses/ DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument)

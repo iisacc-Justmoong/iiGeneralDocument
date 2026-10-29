@@ -1,0 +1,538 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:4d5379cfdfcbc361fa27def1573a62d460235099a6460e6843248819092daa38",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiGeneralDocument",
+    "name": "iiGeneralDocument",
+    "root": "SDK/iiGeneralDocument",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/PDF_SUPPORT.md",
+    "sha256": "c709dbea68efcc063a18f49d022d92c24485312d7d2131b8a0e9df11e225e657",
+    "bytes": 4048,
+    "line_count": 60,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "PDF 지원 계약",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"pdf-support-contract\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# PDF 지원 계약\n",
+      "level": 1,
+      "title": "PDF 지원 계약"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "html",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "<a id=\"first-class-editable-objects\"></a>\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "heading",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "## 최고 수준의 편집 가능한 객체\n",
+      "level": 2,
+      "title": "최고 수준의 편집 가능한 객체"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "table",
+      "start_line": 9,
+      "end_line": 23,
+      "raw": "|PDF 문제|읽기||쓰기|\n| --- | --- | --- | --- |\n|페이지 미디어·자르기 경계, 회전 및 UserUnit|예|예|예|\n|텍스트 개체 및 문자열 피연산자|예|예|예|\n|벡터 경로 및 페인트 연산자|예|예|예|\n|이미지 XObject 및 인코딩된 바이트|예|예|예|\n|재귀 양식 XObjects|예|예, 공유 리소스 의미 체계|예|\n|인라인 이미지|예|명령어 수준|예|\n|음영|예|명령어 수준|예|\n|표시된 내용|예|명령어 수준|예|\n|그래픽 상태 및 색상 연산자|예|명령어 수준|예|\n|알 수 없는/미래 연산자|보존됨|명령어 수준|예|\n|주석|예|예|예|\n|기존 터미널 AcroForm 필드|예|예|예|\n|문서 정보 사전|공통 키|예|예|\n",
+      "columns": [
+        "PDF 문제",
+        "읽기",
+        "",
+        "쓰기"
+      ],
+      "rows": [
+        [
+          "페이지 미디어·자르기 경계, 회전 및 UserUnit",
+          "예",
+          "예",
+          "예"
+        ],
+        [
+          "텍스트 개체 및 문자열 피연산자",
+          "예",
+          "예",
+          "예"
+        ],
+        [
+          "벡터 경로 및 페인트 연산자",
+          "예",
+          "예",
+          "예"
+        ],
+        [
+          "이미지 XObject 및 인코딩된 바이트",
+          "예",
+          "예",
+          "예"
+        ],
+        [
+          "재귀 양식 XObjects",
+          "예",
+          "예, 공유 리소스 의미 체계",
+          "예"
+        ],
+        [
+          "인라인 이미지",
+          "예",
+          "명령어 수준",
+          "예"
+        ],
+        [
+          "음영",
+          "예",
+          "명령어 수준",
+          "예"
+        ],
+        [
+          "표시된 내용",
+          "예",
+          "명령어 수준",
+          "예"
+        ],
+        [
+          "그래픽 상태 및 색상 연산자",
+          "예",
+          "명령어 수준",
+          "예"
+        ],
+        [
+          "알 수 없는/미래 연산자",
+          "보존됨",
+          "명령어 수준",
+          "예"
+        ],
+        [
+          "주석",
+          "예",
+          "예",
+          "예"
+        ],
+        [
+          "기존 터미널 AcroForm 필드",
+          "예",
+          "예",
+          "예"
+        ],
+        [
+          "문서 정보 사전",
+          "공통 키",
+          "예",
+          "예"
+        ]
+      ]
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "html",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "<a id=\"preserved-but-not-first-class-in-01\"></a>\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "heading",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "## 0.1에서는 보존되었으나 일류는 아님\n",
+      "level": 2,
+      "title": "0.1에서는 보존되었으나 일류는 아님"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "개요, 목적지, 선택적 콘텐츠 그룹, 구조 트리, 페이지 레이블, JavaScript, 그리고 임의의 카탈로그 확장자는 로드된 문서가 다시 작성될 때 QPDF 소스 객체 그래프에 남아 있습니다. 아직 전용 도메인 객체가 없습니다. 페이지 콘텐츠 스트림을 교체하면 서명, 태그된 PDF 연결, 또는 프로덕트별 가정에도 여전히 영향을 미칠 수 있으므로 제품 워크플로우는 대표 파일을 테스트해야 합니다.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "html",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "<a id=\"explicit-limits\"></a>\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "heading",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "## 명시적 제한\n",
+      "level": 2,
+      "title": "명시적 제한"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "list",
+      "start_line": 35,
+      "end_line": 41,
+      "raw": "- 텍스트 피연산자는 글꼴로 인코딩된 바이트입니다. 임의의 내장 글꼴에 대한 범용 Unicode 추출 및 자동 재인코딩은 주장되지 않습니다.\n- 새 문서에서는 Helvetica/WinAnsi 대체 경로를 사용합니다. 호출자 제공 글꼴을 포함하고 하위 설정하는 것은 구현되지 않습니다.\n- 기존 페이지 벡터를 직접 재배열하는 쓰기 경로는 허용되지 않습니다. `DocumentEditor::extractPages/mergePages`는 순서·반복을 포함한 새 문서 객체와 소스 그래프를 구성하며 저장이 가능합니다.\n- 기존 AcroForm 필드를 업데이트할 수 있습니다. 새로운 필드/위젯/모양 계층 구조를 구성하는 것은 구현되지 않습니다.\n- 다시 작성한 후에는 디지털 서명이 보존되지 않습니다. 작성자는 `allowInvalidatingDigitalSignatures`가 true가 아닌 한 서명된 입력을 거부합니다.\n- 암호화 설정은 재현되지 않습니다. 작성자는 `allowRemovingEncryption`가 true가 아닌 이상 암호화된 입력을 거부합니다.\n- QPDF 복구 경고가 표시됩니다. 성공적인 복구는 손상된 소스가 제작자의 원래 의도와 일치한다는 증거가 아닙니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "텍스트 피연산자는 글꼴로 인코딩된 바이트입니다. 임의의 내장 글꼴에 대한 범용 Unicode 추출 및 자동 재인코딩은 주장되지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "새 문서에서는 Helvetica/WinAnsi 대체 경로를 사용합니다. 호출자 제공 글꼴을 포함하고 하위 설정하는 것은 구현되지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기존 페이지 벡터를 직접 재배열하는 쓰기 경로는 허용되지 않습니다. `DocumentEditor::extractPages/mergePages`는 순서·반복을 포함한 새 문서 객체와 소스 그래프를 구성하며 저장이 가능합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "기존 AcroForm 필드를 업데이트할 수 있습니다. 새로운 필드/위젯/모양 계층 구조를 구성하는 것은 구현되지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "다시 작성한 후에는 디지털 서명이 보존되지 않습니다. 작성자는 `allowInvalidatingDigitalSignatures`가 true가 아닌 한 서명된 입력을 거부합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "암호화 설정은 재현되지 않습니다. 작성자는 `allowRemovingEncryption`가 true가 아닌 이상 암호화된 입력을 거부합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "QPDF 복구 경고가 표시됩니다. 성공적인 복구는 손상된 소스가 제작자의 원래 의도와 일치한다는 증거가 아닙니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "html",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "<a id=\"verification\"></a>\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "heading",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "## 검증\n",
+      "level": 2,
+      "title": "검증"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "작가는 변형 전에 모델을 검증하고 QPDF 를 통해 작성하며, 목적지를 다시 엽니다. 모든 페이지 콘텐츠 스트림을 파싱하고 페이지 수를 확인한 후 경고 메시지를 반환합니다. 릴리스 검증은 추가로 Poppler 를 사용하여 대표 PDF 를 렌더링하고 텍스트, 경로, 이미지, 주석, 클리핑, 및 페이지 기하학을 시각적으로 확인합니다.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "heading",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "## 0.3 Acrobat operation absorption\n",
+      "level": 2,
+      "title": "0.3 Acrobat operation absorption"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 51,
+      "end_line": 60,
+      "raw": "[The detailed object and dependency contract](ACROBAT_ABSORPTION.md) describes\n`DocumentEditor::extractPages/mergePages/rotatePages/addTextNote/setTextField/setMetadataBatch`,\n`Document::removeMetadata/attachments/hasXfa`, `Page::cropBox/userUnit`,\n`Annotation::author`, and the standard byte reader/writer entry points.\nThe same seven format operations are available in the standalone Qt-free\n`iiGeneralDocument::Pdf` component. Attachment metadata now has readonly objects;\nattachment payload mutation remains outside this contract. New manipulation\nmethods refuse signed, encrypted and XFA inputs and validate full batches before\ncommitting changes. Text values are logical Unicode values; Unicode widget\nappearance rendering/font embedding is not claimed.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "PDF 지원 계약",
+      "anchor": "pdf-지원-계약",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000007",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "최고 수준의 편집 가능한 객체",
+      "anchor": "최고-수준의-편집-가능한-객체",
+      "start_line": 7
+    },
+    {
+      "block_id": "b000013",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "0.1에서는 보존되었으나 일류는 아님",
+      "anchor": "01에서는-보존되었으나-일류는-아님",
+      "start_line": 27
+    },
+    {
+      "block_id": "b000019",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "명시적 제한",
+      "anchor": "명시적-제한",
+      "start_line": 33
+    },
+    {
+      "block_id": "b000025",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "검증",
+      "anchor": "검증",
+      "start_line": 45
+    },
+    {
+      "block_id": "b000029",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "0.3 Acrobat operation absorption",
+      "anchor": "03-acrobat-operation-absorption",
+      "start_line": 49
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000031",
+        "label": "The detailed object and dependency contract",
+        "target": "ACROBAT_ABSORPTION.md",
+        "kind": "relative",
+        "line": 51
+      }
+    ],
+    "tables": [
+      {
+        "block_id": "b000009",
+        "columns": [
+          "PDF 문제",
+          "읽기",
+          "",
+          "쓰기"
+        ],
+        "rows": [
+          [
+            "페이지 미디어·자르기 경계, 회전 및 UserUnit",
+            "예",
+            "예",
+            "예"
+          ],
+          [
+            "텍스트 개체 및 문자열 피연산자",
+            "예",
+            "예",
+            "예"
+          ],
+          [
+            "벡터 경로 및 페인트 연산자",
+            "예",
+            "예",
+            "예"
+          ],
+          [
+            "이미지 XObject 및 인코딩된 바이트",
+            "예",
+            "예",
+            "예"
+          ],
+          [
+            "재귀 양식 XObjects",
+            "예",
+            "예, 공유 리소스 의미 체계",
+            "예"
+          ],
+          [
+            "인라인 이미지",
+            "예",
+            "명령어 수준",
+            "예"
+          ],
+          [
+            "음영",
+            "예",
+            "명령어 수준",
+            "예"
+          ],
+          [
+            "표시된 내용",
+            "예",
+            "명령어 수준",
+            "예"
+          ],
+          [
+            "그래픽 상태 및 색상 연산자",
+            "예",
+            "명령어 수준",
+            "예"
+          ],
+          [
+            "알 수 없는/미래 연산자",
+            "보존됨",
+            "명령어 수준",
+            "예"
+          ],
+          [
+            "주석",
+            "예",
+            "예",
+            "예"
+          ],
+          [
+            "기존 터미널 AcroForm 필드",
+            "예",
+            "예",
+            "예"
+          ],
+          [
+            "문서 정보 사전",
+            "공통 키",
+            "예",
+            "예"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

@@ -1,0 +1,598 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:77ab4885c1e5d815d5f7dff6c3241687e969126ed415a33a3486fee8d6c767b7",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiGeneralDocument",
+    "name": "iiGeneralDocument",
+    "root": "SDK/iiGeneralDocument",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/HTML_BLOCK_CRUD.md",
+    "sha256": "5ae42eb9662452276966fb91892e1ab80b15b741d93dd9746d948c6c664881ae",
+    "bytes": 7886,
+    "line_count": 88,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "HTML 블록 CRUD 지원",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"html-block-crud-support\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# HTML 블록 CRUD 지원\n",
+      "level": 1,
+      "title": "HTML 블록 CRUD 지원"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "html",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "<a id=\"scope\"></a>\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "heading",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "## 범위\n",
+      "level": 2,
+      "title": "범위"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "`HtmlBlockDocument` 는 `iiHtmlBlock 0.1.0` 위에 구축된 편집 가능한 HTML / iiXml 소스 모델입니다. 원래 소스 바이트 문자열은 문서의 기준 원본 입니다. `iiXml::Markup 블록 추적기` 은 블록 요소와 그 소스 범위를 인식하며, 공개 iiGeneralDocument API 는 이러한 의존성 타입을 안정된 `HtmlBlockId` 객체로 변환합니다.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "이 모듈은 의도적으로 PDF 페이지 모델, Word 흐름 모델 및 애플리케이션 지속성 레이어와 분리되어 있습니다. 메모리 내 블록 CRUD를 수행합니다. 파일이나 데이터베이스가 관련되어 있는 경우 호출자는 `HtmlBlockDocument::html()`를 로드하고 유지하는 책임을 집니다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "<a id=\"public-model\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "## 공개 모델\n",
+      "level": 2,
+      "title": "공개 모델"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "`HtmlBlockDocument::fromHtml()`는 제공된 소스를 바이트 단위로 보존하고 `HtmlBlock` 뷰의 순서가 지정된 읽기 전용 컬렉션을 노출합니다. 각 블록에는 다음이 포함됩니다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 19,
+      "end_line": 24,
+      "raw": "- 문서 전체 `HtmlBlockId`;\n- 선택적 상위 ID, 순서가 지정된 직계 하위 ID 및 계층 구조 깊이\n- 정확한 시작 태그와 일치하는 종료 태그는 iiHtmlBlock / iiXml에 의해 보고된 값 경계에서 구분됩니다;\n- 태그 이름, 내부 값 및 완전한 원시 HTML;\n- 전체 문서 원시 및 값 바이트 범위;\n- `iiHtmlBlock`에서 인식되는 모든 `display` 재정의.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "문서 전체 `HtmlBlockId`;",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "선택적 상위 ID, 순서가 지정된 직계 하위 ID 및 계층 구조 깊이",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "정확한 시작 태그와 일치하는 종료 태그는 iiHtmlBlock / iiXml에 의해 보고된 값 경계에서 구분됩니다;",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "태그 이름, 내부 값 및 완전한 원시 HTML;",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "전체 문서 원시 및 값 바이트 범위;",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`iiHtmlBlock`에서 인식되는 모든 `display` 재정의.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "`HtmlBlockDocument::rootIds()`는 모든 최상위 블록 ID를 소스 순서대로 반환합니다. `openingTag()`에는 속성과 최종 `>`가 포함되어 있습니다. `closingTag()`에는 일치하는 `</name>` 마크업이 포함되어 있거나 `isSelfClosing()`가 true인 경우 비어 있습니다.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "빈 문서와 XML, DOCTYPE, 또는 ASCII 공백만 포함하는 소스는 유효하며 0 블록을 포함합니다. 유효하지 않은 마크업은 `DocumentError` 를 던지고 부분적으로 초기화된 문서를 생성하지 않습니다. ID 는 하나의 `HtmlBlockDocument` 인스턴스 내에서만 안정적입니다. 소스에 추가되거나 영속화되지 않으며 HTML 를 다시 로드하면 새로운 런타임 정체성 집합이 생성됩니다.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "html",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "<a id=\"crud-contract\"></a>\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "## CRUD 계약\n",
+      "level": 2,
+      "title": "CRUD 계약"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "fenced_code",
+      "start_line": 34,
+      "end_line": 50,
+      "raw": "```cpp\n#include <iiGeneralDocument/iiGeneralDocument.h>\n\nusing namespace ii::document;\n\nauto document = HtmlBlockDocument::fromHtml(\n    \"<main><p>Existing</p></main>\");\nHtmlBlockEditor editor(document);\n\nconst HtmlBlockId mainId = document.blocks().front().id();\nconst HtmlBlockId created = editor.create(\"<p>Created</p>\", mainId);\nconst HtmlBlock* read = editor.read(created);\neditor.update(created, \"<article>Updated</article>\");\neditor.remove(created);\n\nconst std::string& result = document.html();\n```\n",
+      "language": "cpp",
+      "code": "#include <iiGeneralDocument/iiGeneralDocument.h>\n\nusing namespace ii::document;\n\nauto document = HtmlBlockDocument::fromHtml(\n    \"<main><p>Existing</p></main>\");\nHtmlBlockEditor editor(document);\n\nconst HtmlBlockId mainId = document.blocks().front().id();\nconst HtmlBlockId created = editor.create(\"<p>Created</p>\", mainId);\nconst HtmlBlock* read = editor.read(created);\neditor.update(created, \"<article>Updated</article>\");\neditor.remove(created);\n\nconst std::string& result = document.html();\n",
+      "closed": true
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "`create(fragment)` 는 문서에 최상위 블록 하나를 추가합니다. `create(fragment, parentId)` 는 이를 부모의 마지막 자식으로 추가합니다. 프래그먼트 주변의 앞뒤 ASCII 공백은 버려집니다. 프래그먼트 자체는 `source-range validation and exact original fragment serialization` 를 통해 정확히 하나의 최상위 블록으로 직렬화되어야 하며, 인라인 전용, 잘못된 형식, 또는 여러 루트 프래그먼트는 거부됩니다.\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "`read(id)`는 현재 불변 블록 뷰에 대한 포인터를 반환하거나 알 수 없는 ID에 대해 `nullptr`를 반환합니다. 성공적인 변형은 뷰 컬렉션을 다시 작성하므로 이전에 반환된 포인터가 `create`, `update` 또는 `remove`에서 유지되어서는 안 됩니다.\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "`update(id, fragment)` 는 선택된 원시 범위를 정확히 대체합니다. 태그가 변경되더라도 선택된 블록은 ID 를 유지합니다. 기존 조상과 관련 없는 블록도 ID 를 유지하며, 대체 후손은 새로운 ID 를 받습니다. 동일한 직렬화된 블록 HTML 로 업데이트하는 것은 모든 후손 ID 를 보존하고 리비전을 증가시키지 않는 무작위 작업입니다.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "`remove(id)` 는 해당 백엔드가 나머지를 표현할 수 있을 때 `iiHtmlBlock::DeleteBlock` 결과를 사용합니다. 마지막 블록을 제거하는 것도 지원되며, XML 선언이나 DOCTYPE 만 남는 경우에도 해당됩니다. 부모를 제거하면 모든 후손 블록 정체성이 제거됩니다. 알 수 없는 ID 는 변형 없이 `false` 를 반환합니다.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "html",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "<a id=\"atomicity-and-identity\"></a>\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "## 원자성과 정체성\n",
+      "level": 2,
+      "title": "원자성과 정체성"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "각 소스 변경 편집은 임시 소스와 블록 상태로 준비되어 재해석되고, 안정적 ID 가 할당되며, 루트와 부모/자식 관계로 다시 구축된 후에만 커밋됩니다. 성공적인 소스 변형은 `revision()` 를 정확히 한 번 증가시킵니다. 동일한 업데이트와 누락된 ID 제거는 무작위 작업입니다. 파싱 실패, 누락된 ID, 유효하지 않은 조각, 범위 오버플로우, 동일성 조정 실패, 및 계층 구조 재구성 실패는 소스, 블록, 관계, ID, 다음 ID 시퀀스, 및 리버전을 변경하지 않습니다.\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "iiXml는 엄격한 트리를 형성하는 대신 서로 겹칠 수 있는 독립적으로 닫힌 범위를 허용한다. 다른 겹치는 블록을 가르는 작업은 아무런 알림 없이 해당 블록을 삭제하거나 손상시키는 대신 거부한다. 완전히 중첩된 자손은 선택한 부모 CRUD 단위에 계속 포함된다. 부모는 자식의 대응 닫기 태그를 자신의 대응 닫기 태그가 완전히 감싸는 가장 가까운 열기 태그 범위이다. 서로를 포함하지 않는 교차 범위는 별도의 루트이며 잘못된 부모 ID를 받지 않는다.\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "html",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "<a id=\"syntax-boundary\"></a>\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "heading",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "## 구문 경계\n",
+      "level": 2,
+      "title": "구문 경계"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "paragraph",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "블록 분류는 `iiHtmlBlock::DivideBlock` 를 따르며, 표준 블록 태그와 명시적 `display: block` , `flex` , `grid` , `table` , 또는 관련 블록 표시 값을 포함합니다. 이것은 iiHtmlBlock / iiXml 범위 문법이며 브라우저 HTML5 오류 복구 파서가 아닙니다. 전체 네임스페이스 의미론, 엔티티 해석, 및 의미론 DOM 노드는 CDATA 와 주석에 대한 의존성의 현재 표준 범위를 벗어납니다. 명시적인 자기 닫기 마크업은 짝을 이루는 열기/닫기 태그와 구별되지만, 브라우저 스타일의 암시적인 닫기와 빈 요소 복구 수행은 이루어지지 않습니다. 임의의 웹 HTML 를 허용하는 호출자는 이 모델을 생성하기 전에 HTML5 파서로 이를 정규화해야 합니다.\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "html",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "<a id=\"verification\"></a>\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "heading",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "## 검증\n",
+      "level": 2,
+      "title": "검증"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "`iiGeneralDocument.HtmlBlockCrud` 는 순차적인 루트, 부모/자식 탐색, 깊이, 열기/닫기 태그 경계, 자기 닫힘 블록, 중첩 읽기, Unicode 범위, 사용자 지정 표시 블록, 최상위 및 자식 생성, 이동된 범위 전반에 걸친 안정적인 ID, 업데이트 후 계층 구조 재구성, 재귀적 삭제, 최종 루트 삭제, 접두어 보존, 유효하지 않은 조각 롤백, 알 수 없는 ID, 빈 문서, 그리고 중첩된 iiXml 범위를 포함합니다. `iiGeneralDocument.InstallConsumer` 는 설치된 CMake 패키지에서 동일한 API 를 컴파일하고 실행합니다.\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 79,
+      "end_line": 80,
+      "raw": "\n\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "heading",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "## Native dependency migration (0.4)\n",
+      "level": 2,
+      "title": "Native dependency migration (0.4)"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "paragraph",
+      "start_line": 83,
+      "end_line": 88,
+      "raw": "The complete module now uses C++23 standard types and open-source backends.\nThe full document package requires the Qt-free `iiXmlMarkup` package; the PDF-only component does not. Qt and the legacy iiXml/iiHtmlBlock packages are not required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml\nand persistence uses nlohmann/json. The markup algorithms retain the first-party\nrange/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)\nfor byte-string API changes, ABI compatibility, prior-file verification and the\nThinking Space schema-2 byte-diff encoding.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "HTML 블록 CRUD 지원",
+      "anchor": "html-블록-crud-지원",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000007",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "범위",
+      "anchor": "범위",
+      "start_line": 7
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "공개 모델",
+      "anchor": "공개-모델",
+      "start_line": 15
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "CRUD 계약",
+      "anchor": "crud-계약",
+      "start_line": 32
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "원자성과 정체성",
+      "anchor": "원자성과-정체성",
+      "start_line": 62
+    },
+    {
+      "block_id": "b000049",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "구문 경계",
+      "anchor": "구문-경계",
+      "start_line": 70
+    },
+    {
+      "block_id": "b000055",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "검증",
+      "anchor": "검증",
+      "start_line": 76
+    },
+    {
+      "block_id": "b000059",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "Native dependency migration (0.4)",
+      "anchor": "native-dependency-migration-04",
+      "start_line": 81
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000061",
+        "line": 84,
+        "text": "The full document package requires the Qt-free `iiXmlMarkup` package; the PDF-only component does not. Qt and the legacy iiXml/iiHtmlBlock packages are not required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000061",
+        "label": "migration details",
+        "target": "QT_REMOVAL.md",
+        "kind": "relative",
+        "line": 86
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

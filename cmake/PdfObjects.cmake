@@ -81,6 +81,8 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/generated-pdf/iiGeneralDocument/PdfEx
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iiGeneralDocument)
 install(EXPORT iiGeneralDocumentPdfTargets FILE iiGeneralDocumentPdfTargets.cmake
     NAMESPACE iiGeneralDocument:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/iiGeneralDocument)
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/cmake/QtBoundary.cmake"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/iiGeneralDocument)
 install(DIRECTORY third_party/licenses/ DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument/pdf)
 install(FILES third_party/dependencies.json
     DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument/pdf)

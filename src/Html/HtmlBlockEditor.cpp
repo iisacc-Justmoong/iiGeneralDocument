@@ -2,7 +2,7 @@
 
 #include "Core/Diagnostic.h"
 
-#include "Codec/Private/Markup/BlockRangeTracker.h"
+#include <iiXml/Markup/BlockRangeTracker.h>
 
 #include <algorithm>
 #include <limits>
@@ -30,8 +30,8 @@ std::string_view trimAscii(std::string_view value) noexcept
 }
 
 bool strictlyContains(
-    const detail::blocks::BlockRangeTracker::TrackedBlock& outer,
-    const detail::blocks::BlockRangeTracker::TrackedBlock& inner) noexcept
+    const ii::xml::blocks::BlockRangeTracker::TrackedBlock& outer,
+    const ii::xml::blocks::BlockRangeTracker::TrackedBlock& inner) noexcept
 {
     return outer.raw_begin <= inner.raw_begin
         && inner.raw_end <= outer.raw_end
@@ -177,7 +177,7 @@ std::string HtmlBlockEditor::serializeSingleBlock(std::string_view blockHtml)
         throw DocumentError("HTML block fragment is empty");
     }
 
-    detail::blocks::BlockRangeTracker tracker;
+    ii::xml::blocks::BlockRangeTracker tracker;
     if (!tracker.Parse(trimmed)) {
         std::string reason = tracker.GetError();
         if (reason.empty()) {

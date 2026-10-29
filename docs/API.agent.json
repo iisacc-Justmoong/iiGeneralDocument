@@ -1,0 +1,973 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:7908aebdc0939a2e75b2dc7f64a6e98cb7e86355ea35dcc16e06b0ffed93f963",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiGeneralDocument",
+    "name": "iiGeneralDocument",
+    "root": "SDK/iiGeneralDocument",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/API.md",
+    "sha256": "f738965b04538c480e63976b5d907ed5a4d112c62ecac1d8dd7c23027b4fd882",
+    "bytes": 12999,
+    "line_count": 162,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "API",
+    "role": "reference",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# API\n",
+      "level": 1,
+      "title": "API"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "html",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "<a id=\"hierarchical-xml-documents\"></a>\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "heading",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "## 계층적 XML 문서\n",
+      "level": 2,
+      "title": "계층적 XML 문서"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "`XmlTreeDocument::fromXml()` 는  `iiXml::Parser::TagDocument` 를 공중 헤더에  iiXml 타입을 노출하지 않은 엄격한 단일 루트 계층 구조로 변환합니다 각  `XmlNode` 는  런타임 -안정적인  ID , 선택적 부모  ID , 순차 직접 자식 ID, 계층 구조 깊이, 이름, 내부/원시  XML , 정확한 열기 및 닫기 태그 뷰, 속성, 자기 닫기 상태, 및 전체 문서 바이트 범위를 제공합니다 `openingTag()` 는 속성과 최종  `>` 를 포함하며;  `closingTag()` 는 자기 닫기 노드의 경우 비어 있습니다 `XmlAttribute` 는  iiXml 의 문자, 정수, 실수, 및 부울 타입 추론을 유지합니다\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "`XmlTreeEditor`는 하위 트리 수준 CRUD를 제공합니다.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "fenced_code",
+      "start_line": 11,
+      "end_line": 22,
+      "raw": "```cpp\nauto document = XmlTreeDocument::fromXml(\n    \"<catalog><item>Existing</item></catalog>\");\nXmlTreeEditor editor(document);\n\nconst XmlNodeId catalogId = *document.rootId();\nconst XmlNodeId created = editor.create(\n    \"<item enabled=true>Created</item>\", catalogId);\nconst XmlNode* node = editor.read(created);\neditor.update(created, \"<entry>Updated</entry>\");\neditor.remove(created);\n```\n",
+      "language": "cpp",
+      "code": "auto document = XmlTreeDocument::fromXml(\n    \"<catalog><item>Existing</item></catalog>\");\nXmlTreeEditor editor(document);\n\nconst XmlNodeId catalogId = *document.rootId();\nconst XmlNodeId created = editor.create(\n    \"<item enabled=true>Created</item>\", catalogId);\nconst XmlNode* node = editor.read(created);\neditor.update(created, \"<entry>Updated</entry>\");\neditor.remove(created);\n",
+      "closed": true
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "Create 는 정확히 하나만 있는 맨홀 요소 단편을 받아들이고 이를 마지막 자식으로 추가합니다 비어 있는 편집자 상태는 하나의 새로운 루트를 허용하며; 비어 있지 않은 문서는 두 번째 루트를 거부합니다 자기 닫힘 부모 아래 생성하면 이를 짝 태그로 확장합니다. 업데이트는 선택된 루트 ID 를 유지하면서 하위 요소를 대체하며, 제거는 선택된 전체 서브트리를 삭제합니다. 모든 소스 변경 변형은 원자적 커밋 전에 임시 상태에 파싱되고 동일성 조정됩니다. `XML_TREE_CRUD.md` 를 참조하여 프롤로그 처리, 포인터 수명, 동일성, 및 문법 경계를 확인하세요.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "html",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "<a id=\"html-block-documents\"></a>\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "## HTML 블록 문서\n",
+      "level": 2,
+      "title": "HTML 블록 문서"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "`HtmlBlockDocument::fromHtml()` 는 `iiHtmlBlock` 를 사용하여 모든 블록 요소를 인식하면서 완전한 소스 문자열을 보존합니다. `rootIds()` 는 소스 순서로 최상위 블록 루트를 노출합니다. 모든 `HtmlBlock` 는 안정적인 ID, 선택적 부모 ID, 순차 직접 자식 ID, 깊이, 정확한 열림 및 닫힘 태그 뷰, 자기 닫힘 상태, 태그, 값, 원본 HTML, 소스 범위, 및 디스플레이 오버라이드 메타데이터를 불변 뷰로 노출합니다.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "부모 관계는 iiHtmlBlock / iiXml 가 제공하는 일치하는 열림/닫힘 범위에서 결정됩니다: 블록을 완전히 포함하는 가장 가까운 블록 범위가 그 부모입니다. 서로를 완전히 포함하지 않는 교차 닫힘 오버레이 범위는 가짜 트리 관계를 받는 대신 독립적인 루트로 남습니다.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "`HtmlBlockEditor`는 블록 수준 CRUD를 제공합니다.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "fenced_code",
+      "start_line": 36,
+      "end_line": 46,
+      "raw": "```cpp\nauto document = HtmlBlockDocument::fromHtml(\n    \"<main><p>Existing</p></main>\");\nHtmlBlockEditor editor(document);\n\nconst HtmlBlockId mainId = document.blocks().front().id();\nconst HtmlBlockId created = editor.create(\"<p>Created</p>\", mainId);\nconst HtmlBlock* block = editor.read(created);\neditor.update(created, \"<article>Updated</article>\");\neditor.remove(created);\n```\n",
+      "language": "cpp",
+      "code": "auto document = HtmlBlockDocument::fromHtml(\n    \"<main><p>Existing</p></main>\");\nHtmlBlockEditor editor(document);\n\nconst HtmlBlockId mainId = document.blocks().front().id();\nconst HtmlBlockId created = editor.create(\"<p>Created</p>\", mainId);\nconst HtmlBlock* block = editor.read(created);\neditor.update(created, \"<article>Updated</article>\");\neditor.remove(created);\n",
+      "closed": true
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "생성은 문서 수준에서 추가하거나 제공된 부모의 마지막 자식으로 추가합니다. 생성 및 업데이트는 정확히 하나의 직렬화된 블록 루트를 받습니다. 업데이트는 대상 ID 를 유지하며, 제거는 선택된 블록과 그 중첩된 동일성을 삭제합니다. 모든 성공적인 변형은 임시 상태를 다시 파싱하고 `revision()` 를 한 번 증가시키며, 모든 실패는 완전히 롤백됩니다. `HTML_BLOCK_CRUD.md` 를 참조하여 동일성, 포인터 수명, iiXml 중첩, 및 허용된 문법 경계를 확인하세요.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "html",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "<a id=\"flow-text-documents\"></a>\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "heading",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "## 유동 텍스트 문서\n",
+      "level": 2,
+      "title": "유동 텍스트 문서"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "`WordDocument` 는 PDF 페이지 모델과 분리된 순차, 흐름 지향 모델입니다. 그 `WordBlock` 값은 `WordParagraph` 또는 `WordTable` 입니다. 문단 줄은 Unicode 텍스트, 탭, 줄 바꿈, 강조, 별도의 라틴/동아시아 글꼴, 크기, 및 색상을 포함하여 독립적으로 편집 가능하게 유지됩니다. 페이지 치수와 여백은 Word twips 를 사용합니다. `WordParagraphProperties::numberingId` 과 `numberingLevel` 는 목록과 그 깊이를 식별하며, `numberingContinuation` 는 동일한 ODF 목록 항목에 속하는 추가 문단을 표시하여 다른 번호 매기기 항목을 생성하지 않습니다.\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "`WordDocumentReader` 와 `WordDocumentWriter` 는 `.docx`, `.doc`, `.odt`, 또는 `.fodt` 에서 백엔드를 선택합니다. DOCX, ODT, 및 FODT 는 네이티브 패키지/XML 코덱을 사용합니다. DOC 는 LibreOffice 를 격리된 변환 프로세스로 사용하며, 호출자는 일치하는 옵션 타입에서 실행 가능 파일과 시간 제한을 지정할 수 있습니다. 각 백엔드는 안정적인 진단과 `hasErrors()` 를 반환합니다. 리더 및 작성자 옵션은 모두 `maximumXmlPartBytes` 를 노출하며, DOCX 작성자는 생성된 모든 XML/관계 부분과 모든 네이티브 작성자가 사전 커밋 재오프닝 검증을 위해 이를 사용하므로 실패한 검증은 기존 DOCX/ODT/FODT 목적지를 결코 대체하지 않습니다.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "fenced_code",
+      "start_line": 58,
+      "end_line": 67,
+      "raw": "```cpp\nWordDocument document;\nWordParagraph paragraph;\nparagraph.runs.push_back({\"Hello Word\", {.fontFamily = \"Arial\"}});\ndocument.appendParagraph(std::move(paragraph));\n\nauto result = WordDocumentWriter{}.write(document, \"hello.docx\");\nauto reopened = WordDocumentReader{}.read(\"hello.docx\");\nauto odf = WordDocumentWriter{}.write(reopened.document, \"hello.odt\");\n```\n",
+      "language": "cpp",
+      "code": "WordDocument document;\nWordParagraph paragraph;\nparagraph.runs.push_back({\"Hello Word\", {.fontFamily = \"Arial\"}});\ndocument.appendParagraph(std::move(paragraph));\n\nauto result = WordDocumentWriter{}.write(document, \"hello.docx\");\nauto reopened = WordDocumentReader{}.read(\"hello.docx\");\nauto odf = WordDocumentWriter{}.write(reopened.document, \"hello.odt\");\n",
+      "closed": true
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "지원되는 객체 매트릭스, 충실도 경계, LibreOffice 런타임 계약, 보안 제한 및 검증 게이트는 `WORD_SUPPORT.md`를 참조하세요. ODT/FODT 패키징, 의미 체계 매핑 및 CRUD 제한은 `ODF_SUPPORT.md`를 참조하세요.\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "html",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "<a id=\"thinking-space-documents\"></a>\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "heading",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "## Thinking Space 문서\n",
+      "level": 2,
+      "title": "Thinking Space 문서"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "`ThinkingSpaceDocument`는 `.tsdoc` 형식에 대한 메모리 내 객체 경계입니다. `ThinkingSpaceDocumentHeader`는 독립적으로 주소를 지정할 수 있는 사용자 정의 태그 블록을 위해 기존 `HtmlBlockDocument`를 소유하는 `ThinkingSpaceDocumentBody`와 별도로 문자열 키-값 메타데이터를 유지합니다.\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "paragraph",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "`recordVersion(label, createdAtUtc)` 는 현재 헤더와 정확한 본문 HTML 를 `ThinkingSpaceDocumentVersionHistory` 에 포착합니다. 헤더/본문 blob, 스냅샷 트리, 차이, 및 버전 커밋은 Git 스타일의 콘텐츠 주소 기반 SHA-256 ID 를 사용합니다. 각 버전은 부모 커밋, 대상 스냅샷, 및 가역적 차이 객체를 가리킵니다. 동일한 콘텐츠는 동일한 blob/트리 ID 를 생성합니다. `verifyIntegrity()` 는 유지된 객체 그래프와 델타 재구성을 확인합니다.\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "최신 100 버전을 시간순으로 유지합니다. 오버플로가 오래된 커밋을 먼저 제거하고 참조되지 않은 스냅샷/디프 객체를 가비지 수집합니다. 첫 번째 유지된 커밋은 불변 ID 를 재작성하지 않고 삭제된 부모 ID 를 얕은 기록 경계로 보존합니다. 기록은 명시적이며, 일반 헤더 또는 본문 편집은 커밋이 아닙니다.\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "paragraph",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "`.tsdoc` 판독기, 기록기, 물리적 봉투, 필수 메타데이터 스키마 또는 사용자 정의 태그 어휘가 아직 정의되지 않았습니다. 정확한 구현 및 지연 계약은 `THINKING_SPACE_DOCUMENT.md`를 참조하세요.\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "html",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "<a id=\"document-model\"></a>\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "heading",
+      "start_line": 85,
+      "end_line": 85,
+      "raw": "## 문서 모델\n",
+      "level": 2,
+      "title": "문서 모델"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 87,
+      "end_line": 87,
+      "raw": "`Document`는 페이지, 메타데이터 및 터미널 AcroForm 필드를 소유합니다. `Page`는 미디어 상자, 회전, 정렬된 요소 및 주석을 소유합니다. 문서와 페이지는 이동 전용이므로 리소스 ID가 실수로 복제되지 않습니다.\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 88,
+      "end_line": 88,
+      "raw": "\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "paragraph",
+      "start_line": 89,
+      "end_line": 89,
+      "raw": "모든 페이지 요소에는 다음이 포함됩니다.\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 90,
+      "end_line": 90,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "list",
+      "start_line": 91,
+      "end_line": 94,
+      "raw": "- 안정적인 문서 전체 `ElementId`;\n- `ElementKind`;\n- 주문된 변경 가능한 `std::vector<PdfInstruction>`;\n- 추측 없이 파생될 수 있는 경우 선택적 범위입니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "안정적인 문서 전체 `ElementId`;",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ElementKind`;",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "주문된 변경 가능한 `std::vector<PdfInstruction>`;",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "추측 없이 파생될 수 있는 경우 선택적 범위입니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000062",
+      "kind": "blank",
+      "start_line": 95,
+      "end_line": 95,
+      "raw": "\n"
+    },
+    {
+      "id": "b000063",
+      "kind": "paragraph",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "`PdfValue`는 null, 부울, 정수, 실수, 이름, 문자열 바이트, 배열, 사전 또는 보존된 원시 구문을 나타냅니다. 배열과 사전은 재귀적입니다. `toPdfSyntax()`는 쓰기 전에 항상 이름과 리터럴 문자열을 이스케이프합니다.\n"
+    },
+    {
+      "id": "b000064",
+      "kind": "blank",
+      "start_line": 97,
+      "end_line": 97,
+      "raw": "\n"
+    },
+    {
+      "id": "b000065",
+      "kind": "html",
+      "start_line": 98,
+      "end_line": 98,
+      "raw": "<a id=\"high-level-editing\"></a>\n"
+    },
+    {
+      "id": "b000066",
+      "kind": "blank",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "\n"
+    },
+    {
+      "id": "b000067",
+      "kind": "heading",
+      "start_line": 100,
+      "end_line": 100,
+      "raw": "## 높은 수준의 편집\n",
+      "level": 2,
+      "title": "높은 수준의 편집"
+    },
+    {
+      "id": "b000068",
+      "kind": "blank",
+      "start_line": 101,
+      "end_line": 101,
+      "raw": "\n"
+    },
+    {
+      "id": "b000069",
+      "kind": "paragraph",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "`DocumentEditor`는 고유 ID를 할당하고 일반적인 작업을 제공합니다.\n"
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "fenced_code",
+      "start_line": 104,
+      "end_line": 113,
+      "raw": "```cpp\nDocument document;\ndocument.addPage(Page(Rect{0, 0, 612, 792}));\n\nDocumentEditor editor(document);\nconst auto text = editor.addText(0, \"Hello\", Point{72, 700}, 18);\nconst auto border = editor.addRectangle(0, Rect{60, 640, 200, 40});\neditor.replaceText(text, 0, \"Hello PDF\");\neditor.remove(border);\n```\n",
+      "language": "cpp",
+      "code": "Document document;\ndocument.addPage(Page(Rect{0, 0, 612, 792}));\n\nDocumentEditor editor(document);\nconst auto text = editor.addText(0, \"Hello\", Point{72, 700}, 18);\nconst auto border = editor.addRectangle(0, Rect{60, 640, 200, 40});\neditor.replaceText(text, 0, \"Hello PDF\");\neditor.remove(border);\n",
+      "closed": true
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 114,
+      "end_line": 114,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "paragraph",
+      "start_line": 115,
+      "end_line": 115,
+      "raw": "`find`, `replaceText`, `replaceImage` 및 `remove`는 최상위 페이지 요소뿐만 아니라 재귀 양식 XObject 콘텐츠를 트래버스합니다. 공유 양식은 공유 `FormContent`를 사용하기 때문에 하나의 중첩 요소는 여러 번 그려도 하나의 ID를 갖습니다.\n"
+    },
+    {
+      "id": "b000074",
+      "kind": "blank",
+      "start_line": 116,
+      "end_line": 116,
+      "raw": "\n"
+    },
+    {
+      "id": "b000075",
+      "kind": "paragraph",
+      "start_line": 117,
+      "end_line": 117,
+      "raw": "일반적이지 않은 작업의 경우 `Element::instructions()`를 직접 편집하세요. 호출자는 유효한 PDF 연산자 개수 및 리소스 참조에 대한 책임을 집니다. `DocumentValidator`는 구조적 불변성을 검사하지만 완전한 ISO 32000 적합성 검사기는 아닙니다.\n"
+    },
+    {
+      "id": "b000076",
+      "kind": "blank",
+      "start_line": 118,
+      "end_line": 118,
+      "raw": "\n"
+    },
+    {
+      "id": "b000077",
+      "kind": "html",
+      "start_line": 119,
+      "end_line": 119,
+      "raw": "<a id=\"images\"></a>\n"
+    },
+    {
+      "id": "b000078",
+      "kind": "blank",
+      "start_line": 120,
+      "end_line": 120,
+      "raw": "\n"
+    },
+    {
+      "id": "b000079",
+      "kind": "heading",
+      "start_line": 121,
+      "end_line": 121,
+      "raw": "## 이미지\n",
+      "level": 2,
+      "title": "이미지"
+    },
+    {
+      "id": "b000080",
+      "kind": "blank",
+      "start_line": 122,
+      "end_line": 122,
+      "raw": "\n"
+    },
+    {
+      "id": "b000081",
+      "kind": "paragraph",
+      "start_line": 123,
+      "end_line": 123,
+      "raw": "`ImageElement`는 배치 지침을 `ImageInfo`와 분리합니다. 판독기는 차원, 색상 공간, 필터/디코드 매개변수 구문, 인코딩된 스트림 바이트 및 소스 객체 참조를 노출합니다. `replaceImage`는 새 바이트와 전체 이미지 디코딩 계약을 허용합니다.\n"
+    },
+    {
+      "id": "b000082",
+      "kind": "blank",
+      "start_line": 124,
+      "end_line": 124,
+      "raw": "\n"
+    },
+    {
+      "id": "b000083",
+      "kind": "paragraph",
+      "start_line": 125,
+      "end_line": 125,
+      "raw": "필터링되지 않은 8비트 `/DeviceRGB` 페이로드는 정확히 `width * height * 3` 바이트를 포함해야 합니다. 인코딩된 데이터는 `/DCTDecode`와 같은 필터를 지정할 수 있습니다. 바이트는 이미 선언된 필터와 일치해야 합니다.\n"
+    },
+    {
+      "id": "b000084",
+      "kind": "blank",
+      "start_line": 126,
+      "end_line": 126,
+      "raw": "\n"
+    },
+    {
+      "id": "b000085",
+      "kind": "html",
+      "start_line": 127,
+      "end_line": 127,
+      "raw": "<a id=\"annotations-and-forms\"></a>\n"
+    },
+    {
+      "id": "b000086",
+      "kind": "blank",
+      "start_line": 128,
+      "end_line": 128,
+      "raw": "\n"
+    },
+    {
+      "id": "b000087",
+      "kind": "heading",
+      "start_line": 129,
+      "end_line": 129,
+      "raw": "## 주석 및 양식\n",
+      "level": 2,
+      "title": "주석 및 양식"
+    },
+    {
+      "id": "b000088",
+      "kind": "blank",
+      "start_line": 130,
+      "end_line": 130,
+      "raw": "\n"
+    },
+    {
+      "id": "b000089",
+      "kind": "paragraph",
+      "start_line": 131,
+      "end_line": 131,
+      "raw": "주석은 페이지 페인트 지침 외부에 표시됩니다. 표준 하위 유형, 직사각형, 내용, 플래그 및 전체 PDF 사전을 독립적으로 편집할 수 있습니다. 쓰기는 페이지 주석 배열을 다시 작성하여 사전에 포함된 간접 필드/위젯 관계를 유지합니다.\n"
+    },
+    {
+      "id": "b000090",
+      "kind": "blank",
+      "start_line": 132,
+      "end_line": 132,
+      "raw": "\n"
+    },
+    {
+      "id": "b000091",
+      "kind": "paragraph",
+      "start_line": 133,
+      "end_line": 133,
+      "raw": "기존 터미널 AcroForm 필드는 이름, 유형, 값, 플래그, 선택지 및 출처 동일성을 노출합니다. 값이 QPDF 를 지원할 때 텍스트와 선택지 출력이 재생성됩니다. ASCII 가 아닌 값은 정통 필드 값을 업데이트하고 경고가 생성되며, QPDF 는 그 출력을 신뢰할 수 있게 합성할 수 없습니다. 새로운 AcroForm /위젯 계층 구조를 만드는 것은 버전 0.1밖입니다.\n"
+    },
+    {
+      "id": "b000092",
+      "kind": "blank",
+      "start_line": 134,
+      "end_line": 134,
+      "raw": "\n"
+    },
+    {
+      "id": "b000093",
+      "kind": "paragraph",
+      "start_line": 135,
+      "end_line": 135,
+      "raw": "텍스트 및 선택 값에는 `FormField::setUtf8Value()`를 사용하십시오. 작성자는 이를 PDF Unicode 문자열로 인코딩합니다. `setValue()`는 버튼 이름 및 기타 하위 수준 PDF 값에 계속 사용할 수 있습니다.\n"
+    },
+    {
+      "id": "b000094",
+      "kind": "blank",
+      "start_line": 136,
+      "end_line": 136,
+      "raw": "\n"
+    },
+    {
+      "id": "b000095",
+      "kind": "html",
+      "start_line": 137,
+      "end_line": 137,
+      "raw": "<a id=\"results-and-diagnostics\"></a>\n"
+    },
+    {
+      "id": "b000096",
+      "kind": "blank",
+      "start_line": 138,
+      "end_line": 138,
+      "raw": "\n"
+    },
+    {
+      "id": "b000097",
+      "kind": "heading",
+      "start_line": 139,
+      "end_line": 139,
+      "raw": "## 결과 및 진단\n",
+      "level": 2,
+      "title": "결과 및 진단"
+    },
+    {
+      "id": "b000098",
+      "kind": "blank",
+      "start_line": 140,
+      "end_line": 140,
+      "raw": "\n"
+    },
+    {
+      "id": "b000099",
+      "kind": "paragraph",
+      "start_line": 141,
+      "end_line": 141,
+      "raw": "독자와 작성자는 `ReadResult` 및 `WriteResult`를 반환합니다. 출력을 사용하거나 전달하기 전에 `hasErrors()`를 확인하십시오. 치명적이지 않은 수리, 모양 및 쓰기 후 경고는 안정적인 코드 및 컨텍스트 문자열과 함께 `diagnostics`에 남아 있습니다.\n"
+    },
+    {
+      "id": "b000100",
+      "kind": "blank",
+      "start_line": 142,
+      "end_line": 142,
+      "raw": "\n"
+    },
+    {
+      "id": "b000101",
+      "kind": "heading",
+      "start_line": 143,
+      "end_line": 143,
+      "raw": "## PDF document-operation objects (0.3)\n",
+      "level": 2,
+      "title": "PDF document-operation objects (0.3)"
+    },
+    {
+      "id": "b000102",
+      "kind": "blank",
+      "start_line": 144,
+      "end_line": 144,
+      "raw": "\n"
+    },
+    {
+      "id": "b000103",
+      "kind": "paragraph",
+      "start_line": 145,
+      "end_line": 152,
+      "raw": "The [Acrobat absorption contract](ACROBAT_ABSORPTION.md) maps each operation to its\nSDK owner and gives the Qt-free component consumption example. `DocumentEditor`\nadds ordered/repeated extraction, multi-document page selection/merge, relative\nrotation batches, Unicode text notes, existing text-field updates, and metadata\nbatches. `Document` adds metadata removal, readonly attachment summaries and an\nXFA flag. `Page` adds effective CropBox/UserUnit and `Annotation` adds author.\n`PdfDocumentReader::readBytes` and `PdfDocumentWriter::writeBytes` avoid filesystem\nround trips while preserving the existing path-based provider boundary.\n"
+    },
+    {
+      "id": "b000104",
+      "kind": "blank",
+      "start_line": 153,
+      "end_line": 154,
+      "raw": "\n\n"
+    },
+    {
+      "id": "b000105",
+      "kind": "heading",
+      "start_line": 155,
+      "end_line": 155,
+      "raw": "## Native dependency migration (0.4)\n",
+      "level": 2,
+      "title": "Native dependency migration (0.4)"
+    },
+    {
+      "id": "b000106",
+      "kind": "blank",
+      "start_line": 156,
+      "end_line": 156,
+      "raw": "\n"
+    },
+    {
+      "id": "b000107",
+      "kind": "paragraph",
+      "start_line": 157,
+      "end_line": 162,
+      "raw": "The complete module now uses C++23 standard types and open-source backends.\nThe full document package requires the Qt-free `iiXmlMarkup` component; the standalone PDF component does not. Neither Qt nor the legacy Qt-based iiXml/iiHtmlBlock packages are required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml\nand persistence uses nlohmann/json. The markup algorithms retain the first-party\nrange/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)\nfor byte-string API changes, ABI compatibility, prior-file verification and the\nThinking Space schema-2 byte-diff encoding.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "API",
+      "anchor": "api",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000005",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "계층적 XML 문서",
+      "anchor": "계층적-xml-문서",
+      "start_line": 5
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "HTML 블록 문서",
+      "anchor": "html-블록-문서",
+      "start_line": 28
+    },
+    {
+      "block_id": "b000031",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "유동 텍스트 문서",
+      "anchor": "유동-텍스트-문서",
+      "start_line": 52
+    },
+    {
+      "block_id": "b000043",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Thinking Space 문서",
+      "anchor": "thinking-space-문서",
+      "start_line": 73
+    },
+    {
+      "block_id": "b000055",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "문서 모델",
+      "anchor": "문서-모델",
+      "start_line": 85
+    },
+    {
+      "block_id": "b000067",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "높은 수준의 편집",
+      "anchor": "높은-수준의-편집",
+      "start_line": 100
+    },
+    {
+      "block_id": "b000079",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "이미지",
+      "anchor": "이미지",
+      "start_line": 121
+    },
+    {
+      "block_id": "b000087",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "주석 및 양식",
+      "anchor": "주석-및-양식",
+      "start_line": 129
+    },
+    {
+      "block_id": "b000097",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "결과 및 진단",
+      "anchor": "결과-및-진단",
+      "start_line": 139
+    },
+    {
+      "block_id": "b000101",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "PDF document-operation objects (0.3)",
+      "anchor": "pdf-document-operation-objects-03",
+      "start_line": 143
+    },
+    {
+      "block_id": "b000105",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Native dependency migration (0.4)",
+      "anchor": "native-dependency-migration-04",
+      "start_line": 155
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000051",
+        "line": 81,
+        "text": "`.tsdoc` 판독기, 기록기, 물리적 봉투, 필수 메타데이터 스키마 또는 사용자 정의 태그 어휘가 아직 정의되지 않았습니다. 정확한 구현 및 지연 계약은 `THINKING_SPACE_DOCUMENT.md`를 참조하세요.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000107",
+        "line": 158,
+        "text": "The full document package requires the Qt-free `iiXmlMarkup` component; the standalone PDF component does not. Neither Qt nor the legacy Qt-based iiXml/iiHtmlBlock packages are required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000103",
+        "label": "Acrobat absorption contract",
+        "target": "ACROBAT_ABSORPTION.md",
+        "kind": "relative",
+        "line": 145
+      },
+      {
+        "block_id": "b000107",
+        "label": "migration details",
+        "target": "QT_REMOVAL.md",
+        "kind": "relative",
+        "line": 160
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

@@ -17,7 +17,8 @@ int main() {
     const auto dump = pdf.metadata().at(iiFileProvider::native::Authorship::MetadataKey);
     editor.replaceText(text,0,"Before"); expect(!editor.remove(ElementId{999}), "missing removal is no-op");
     expect(pdf.metadata().at(iiFileProvider::native::Authorship::MetadataKey) == dump, "no-op preserves PDF author metadata");
-    iiFileProvider::native::TemporaryDirectory dir; expect(dir.isValid(), "temporary directory");
+    iiFileProvider::native::TemporaryDirectory dir{IIGENERALDOCUMENT_TEST_RESOURCE_DIR};
+    expect(dir.isValid(), "temporary directory");
     const auto root = std::filesystem::path(dir.path().string());
     expect(!PdfDocumentWriter{}.write(pdf,root/"author.pdf").hasErrors(), "write authored PDF");
     auto read = PdfDocumentReader{}.read(root/"author.pdf");

@@ -1,0 +1,600 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:687a5b9b9fe9c5e41de21d2a31d61c3f574bb70d9666da1946ec710a20443c1f",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiGeneralDocument",
+    "name": "iiGeneralDocument",
+    "root": "SDK/iiGeneralDocument",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/XML_TREE_CRUD.md",
+    "sha256": "58ee17bde578c79731807f7d1e4c8b92b4be2fa890c53435125e04764bdb8790",
+    "bytes": 7622,
+    "line_count": 88,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "계층적 XML CRUD 지원",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"hierarchical-xml-crud-support\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# 계층적 XML CRUD 지원\n",
+      "level": 1,
+      "title": "계층적 XML CRUD 지원"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "html",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "<a id=\"scope\"></a>\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "heading",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "## 범위\n",
+      "level": 2,
+      "title": "범위"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "`XmlTreeDocument` 는 `iiXml 0.1.0` 위에 구축된 소스 보존 계층적 XML 모델이며, `iiXml::Markup 태그 파서` 는 요소 범위, 계층 구조, 및 타입화된 속성 필드를 제공합니다. 공개 어댑터는 이러한 구현 타입을 안정된 `XmlNodeId`, `XmlNode`, 및 `XmlAttribute` 값으로 변환하고 서브트리 CRUD 에 적합한 엄격한 단일 루트 경계를 추가합니다.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "이 모듈은 PDF 페이지 모델, HTML 블록 모델, 워드 흐름 모델 및 애플리케이션 지속성 레이어와 독립적입니다. 메모리 내 CRUD를 수행합니다. 호출자는 파일 또는 데이터베이스 로딩을 소유하고 `XmlTreeDocument::xml()`를 유지합니다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "html",
+      "start_line": 13,
+      "end_line": 13,
+      "raw": "<a id=\"public-model\"></a>\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 14,
+      "end_line": 14,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "heading",
+      "start_line": 15,
+      "end_line": 15,
+      "raw": "## 공개 모델\n",
+      "level": 2,
+      "title": "공개 모델"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "`XmlTreeDocument::fromXml()`는 제공된 바이트를 보존하고 사전 순서로 노드를 노출합니다. 각 `XmlNode`에는 다음이 포함됩니다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "list",
+      "start_line": 19,
+      "end_line": 23,
+      "raw": "- 문서 전체 런타임 `XmlNodeId`;\n- 선택적 상위 ID, 순서가 지정된 직계 하위 ID 및 계층 구조 깊이\n- 해당 요소 이름, 정확한 시작 및 일치하는 종료 태그 뷰, 내부 XML, 완전한 원시 XML, 그리고 자동 종료 상태;\n- 전체 문서 원시 및 값 바이트 범위;\n- 이름, 선택적 값, 추론된 값 유형 및 iiXml 선언형 플래그가 포함된 정렬된 속성.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "문서 전체 런타임 `XmlNodeId`;",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "선택적 상위 ID, 순서가 지정된 직계 하위 ID 및 계층 구조 깊이",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "해당 요소 이름, 정확한 시작 및 일치하는 종료 태그 뷰, 내부 XML, 완전한 원시 XML, 그리고 자동 종료 상태;",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "전체 문서 원시 및 값 바이트 범위;",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "이름, 선택적 값, 추론된 값 유형 및 iiXml 선언형 플래그가 포함된 정렬된 속성.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "XML 선언, doctype, 주석, 처리 명령, 루트 마크업, 뒤따르는 XML 공백과 UTF-8 BOM는 바이트 그대로 보존한다. 어댑터 경계에서 iiXml의 `<!Doctype root>` 표기와 표준 `<!DOCTYPE root>` 표기를 모두 받는다. 로드한 문서에는 정확히 하나의 루트가 있어야 한다. ID는 하나의 문서 인스턴스 안에만 존재하고 직렬화하지 않는다. 다시 로드하면 새로운 런타임 식별자 집합을 할당한다.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "`openingTag()`에는 속성과 최종 `>`가 포함됩니다. `closingTag()`는 일치하는 `</name>` 소스 뷰이며 자체 폐쇄 노드의 경우 비어 있습니다. 이러한 보기는 iiXml의 일치된 시작/끝 범위에서 직접 제공됩니다. 원본 소스를 정규화하거나 다시 직렬화하지 않습니다.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "html",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "<a id=\"crud-contract\"></a>\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "## CRUD 계약\n",
+      "level": 2,
+      "title": "CRUD 계약"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "fenced_code",
+      "start_line": 33,
+      "end_line": 50,
+      "raw": "```cpp\n#include <iiGeneralDocument/iiGeneralDocument.h>\n\nusing namespace ii::document;\n\nauto document = XmlTreeDocument::fromXml(\n    \"<catalog><item>Existing</item></catalog>\");\nXmlTreeEditor editor(document);\n\nconst XmlNodeId catalogId = *document.rootId();\nconst XmlNodeId created = editor.create(\n    \"<item enabled=true>Created</item>\", catalogId);\nconst XmlNode* read = editor.read(created);\neditor.update(created, \"<entry>Updated</entry>\");\neditor.remove(created);\n\nconst std::string& result = document.xml();\n```\n",
+      "language": "cpp",
+      "code": "#include <iiGeneralDocument/iiGeneralDocument.h>\n\nusing namespace ii::document;\n\nauto document = XmlTreeDocument::fromXml(\n    \"<catalog><item>Existing</item></catalog>\");\nXmlTreeEditor editor(document);\n\nconst XmlNodeId catalogId = *document.rootId();\nconst XmlNodeId created = editor.create(\n    \"<item enabled=true>Created</item>\", catalogId);\nconst XmlNode* read = editor.read(created);\neditor.update(created, \"<entry>Updated</entry>\");\neditor.remove(created);\n\nconst std::string& result = document.xml();\n",
+      "closed": true
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "`create(fragment, parentId)` 는 바깥쪽 ASCII 공백을 잘라내고 정확히 하나의 맨 요소 루트를 요구하며, 부모의 마지막 자식으로 전체 서브트리를 추가합니다. 부모가 자기 닫힘인 경우 ID 를 유지하면서 짝 태그로 확장됩니다. `create(fragment)` 는 문서가 빈 편집기 상태일 때만 허용되며, 유일한 루트를 생성하고 두 번째 문서 루트를 거부합니다.\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "`read(id)`는 현재 불변 노드 뷰에 대한 포인터를 반환하거나 알 수 없는 ID에 대해 `nullptr`를 반환합니다. 성공적인 변형은 뷰 컬렉션을 다시 빌드하므로 포인터가 `create`, `update` 또는 `remove` 전체에서 유지되어서는 안 됩니다.\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "`update(id, fragment)` 는 선택된 서브트리 중 정확히 하나를 대체합니다. 대체 루트는 이름이 변경되더라도 선택된 ID 를 유지합니다. 기존 조상과 관련 없는 노드는 ID 를 유지하고, 오래된 자손은 사라지며 대체 자손은 새 ID 를 받습니다. 동일한 정규화된 대체는 모든 ID 를 보존하고 `revision()` 를 증가시키지 않는 무작위 작업입니다.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "`remove(id)` 는 선택된 원시 범위와 모든 자손 식별자를 삭제합니다. 알 수 없는 ID 는 `false` 를 반환합니다. 루트를 제거하면 프롤로그와 트레일링 미스셀러니티스 XML 바이트를 보존하고 의도적으로 편집 가능한 빈 상태를 남깁니다. 이후 `create(fragment)` 로 새 루트를 생성할 수 있습니다.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "html",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "<a id=\"hierarchy-and-atomicity\"></a>\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "## 계층 구조와 원자성\n",
+      "level": 2,
+      "title": "계층 구조와 원자성"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "iiXml 는 독립적으로 닫힌 오버레이 범위를 의도적으로 지원합니다. 일반적인 문서 XML 트리는 그렇지 않습니다: 자매는 순서대로 정렬되고 겹치지 않으며, 모든 자식 범위는 부모의 값 범위 안에 있어야 하고, 문서는 비미스셀러니티스 콘텐츠가 없는 하나의 루트를 가져야 합니다. `<root><a><b></a></b></root>` 와 같은 크로스 닫힌 입력은 거부됩니다.\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "각 소스 변경 작업은 임시 소스를 생성하고 파싱하며, 정확한 범위로 맵의 안정적 식별자를 매핑하고, 부모/자식 식별자 참조를 검증한 후 완전한 후보가 유효할 때만 커밋합니다. 파싱 오류, 범위 오버플로우, 누락된 ID, 유효하지 않은 조각, 중복 식별자, 계층 구조 위반은 소스, 노드, 다음 ID 상태, 및 리버전을 변경하지 않습니다. 성공적인 소스 변형은 `revision()` 를 정확히 한 번 증가시킵니다. 삭제된 ID 는 문서 인스턴스 내에서 다시 사용되지 않습니다.\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 67,
+      "end_line": 67,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "html",
+      "start_line": 68,
+      "end_line": 68,
+      "raw": "<a id=\"syntax-boundary\"></a>\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "heading",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "## 구문 경계\n",
+      "level": 2,
+      "title": "구문 경계"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "paragraph",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "요소 인식, 자기 닫는 태그, 주석, CDATA, 처리 지시문, 태그 이름, 완화된 속성 값, 선언된 타입, 및 값 타입 추론은 iiXml 0.1.0를 따릅니다. 이 어댑터는 계층 구조와 프롤로그 배치 유효성을 검사하지만 W3C XML 스키마, 네임스페이스, DTD 또는 엔티티 해결 엔진이 아닙니다. 엔티티를 확장하거나 루트에 대한 도CTYPE 유효성을 검사하지 않습니다. 호의적이지 않거나 표준 민감도 XML 를 허용하는 애플리케이션은 도메인 객체를 값에서 생성하기 전에 스키마, 네임스페이스, 엔티티 및 리소스 접근 유효성을 수행해야 합니다.\n"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "html",
+      "start_line": 74,
+      "end_line": 74,
+      "raw": "<a id=\"verification\"></a>\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "heading",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "## 검증\n",
+      "level": 2,
+      "title": "검증"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "`iiGeneralDocument.XmlTreeCrud` 는 프롤로그 보존, 표준 및 iiXml 도CTYPE 표기법, Unicode 범위, 계층 구조 탐색 및 깊이, 열기/닫기 태그 경계, 타입화된 속성, 루트 및 서브트리 생성, 자기 닫힘 부모 확장, 이동된 범위 내의 안정적인 ID, 서브트리 교체, 재귀적 삭제, 루트 재창조, 무효 소스 거부, 무작위 업데이트, 롤백 및 재사용되지 않은 ID 를 포함합니다. `iiGeneralDocument.ProjectContract` 는 iiXml 구현 타입이 공개 헤더를 통해 누출되는 것을 방지합니다. `iiGeneralDocument.InstallConsumer` 는 설치된 CMake 패키지의 CRUD 표면을 컴파일하고 실행합니다.\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "blank",
+      "start_line": 79,
+      "end_line": 80,
+      "raw": "\n\n"
+    },
+    {
+      "id": "b000059",
+      "kind": "heading",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "## Native dependency migration (0.4)\n",
+      "level": 2,
+      "title": "Native dependency migration (0.4)"
+    },
+    {
+      "id": "b000060",
+      "kind": "blank",
+      "start_line": 82,
+      "end_line": 82,
+      "raw": "\n"
+    },
+    {
+      "id": "b000061",
+      "kind": "paragraph",
+      "start_line": 83,
+      "end_line": 88,
+      "raw": "The complete module now uses C++23 standard types and open-source backends.\nThe full document package requires the Qt-free `iiXmlMarkup` package; the PDF-only component does not. Qt and the legacy iiXml/iiHtmlBlock packages are not required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml\nand persistence uses nlohmann/json. The markup algorithms retain the first-party\nrange/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)\nfor byte-string API changes, ABI compatibility, prior-file verification and the\nThinking Space schema-2 byte-diff encoding.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "계층적 XML CRUD 지원",
+      "anchor": "계층적-xml-crud-지원",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000007",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "범위",
+      "anchor": "범위",
+      "start_line": 7
+    },
+    {
+      "block_id": "b000015",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "공개 모델",
+      "anchor": "공개-모델",
+      "start_line": 15
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "CRUD 계약",
+      "anchor": "crud-계약",
+      "start_line": 31
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "계층 구조와 원자성",
+      "anchor": "계층-구조와-원자성",
+      "start_line": 62
+    },
+    {
+      "block_id": "b000049",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "구문 경계",
+      "anchor": "구문-경계",
+      "start_line": 70
+    },
+    {
+      "block_id": "b000055",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "검증",
+      "anchor": "검증",
+      "start_line": 76
+    },
+    {
+      "block_id": "b000059",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "Native dependency migration (0.4)",
+      "anchor": "native-dependency-migration-04",
+      "start_line": 81
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000021",
+        "line": 25,
+        "text": "XML 선언, doctype, 주석, 처리 명령, 루트 마크업, 뒤따르는 XML 공백과 UTF-8 BOM는 바이트 그대로 보존한다. 어댑터 경계에서 iiXml의 `<!Doctype root>` 표기와 표준 `<!DOCTYPE root>` 표기를 모두 받는다. 로드한 문서에는 정확히 하나의 루트가 있어야 한다. ID는 하나의 문서 인스턴스 안에만 존재하고 직렬화하지 않는다. 다시 로드하면 새로운 런타임 식별자 집합을 할당한다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000061",
+        "line": 84,
+        "text": "The full document package requires the Qt-free `iiXmlMarkup` package; the PDF-only component does not. Qt and the legacy iiXml/iiHtmlBlock packages are not required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000061",
+        "label": "migration details",
+        "target": "QT_REMOVAL.md",
+        "kind": "relative",
+        "line": 86
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

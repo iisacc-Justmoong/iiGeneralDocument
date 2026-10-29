@@ -1,0 +1,536 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:b47203c412a077294b963a004cadc4ba55d6a7849646b3b90bcc8c8aa07eb57b",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiGeneralDocument",
+    "name": "iiGeneralDocument",
+    "root": "SDK/iiGeneralDocument",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/ACROBAT_ABSORPTION.md",
+    "sha256": "daf6a8ebbb07db21445dc21585fbf39ac6e2dca1ba5b01036553e6dba2ca0d61",
+    "bytes": 8941,
+    "line_count": 147,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Acrobat document-operation absorption (0.3)",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Acrobat document-operation absorption (0.3)\n",
+      "level": 1,
+      "title": "Acrobat document-operation absorption (0.3)"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 7,
+      "raw": "The Acrobat engineering project established seven bounded PDF operation\ncontracts. They are now implemented by SDK-owned objects in this repository.\nNo SDK source, build target, installed header or runtime library loads the\nEngineering project or an Adobe binary. This is an independent implementation\nusing QPDF, not recovered Adobe source code or a claim of full Acrobat parity.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## Object ownership\n",
+      "level": 2,
+      "title": "Object ownership"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "table",
+      "start_line": 11,
+      "end_line": 19,
+      "raw": "| Operation | Existing document model | Qt-free PDF component |\n| --- | --- | --- |\n| Structure inspection | `Document`, `Page`, `Annotation`, `FormField`, `Document::attachments()` | `pdf::Document` and its readonly page/field/attachment snapshots |\n| Ordered page extraction, including repetitions | `DocumentEditor::extractPages()` returns a new `Document` | `pdf::Document::extractPages()` |\n| Merge selected pages from multiple documents | `DocumentEditor::mergePages()` and `DocumentPageSelection` | `pdf::Document::merge()` and `pdf::PageSelection` |\n| Relative batch rotation | `DocumentEditor::rotatePages()` | `pdf::Editor::rotatePages()` |\n| Info metadata updates/removals | `setMetadataBatch()`, `Document::removeMetadata()` | `pdf::Editor::setMetadata()` |\n| Unicode text notes | `addTextNote()`, `Annotation::contents()/author()/rect()` | `pdf::Editor::addTextNote()` |\n| Existing text-field values | `setTextField()`, `FormField::utf8Value()/maximumLength()` | `pdf::Editor::setTextField()` |\n",
+      "columns": [
+        "Operation",
+        "Existing document model",
+        "Qt-free PDF component"
+      ],
+      "rows": [
+        [
+          "Structure inspection",
+          "`Document`, `Page`, `Annotation`, `FormField`, `Document::attachments()`",
+          "`pdf::Document` and its readonly page/field/attachment snapshots"
+        ],
+        [
+          "Ordered page extraction, including repetitions",
+          "`DocumentEditor::extractPages()` returns a new `Document`",
+          "`pdf::Document::extractPages()`"
+        ],
+        [
+          "Merge selected pages from multiple documents",
+          "`DocumentEditor::mergePages()` and `DocumentPageSelection`",
+          "`pdf::Document::merge()` and `pdf::PageSelection`"
+        ],
+        [
+          "Relative batch rotation",
+          "`DocumentEditor::rotatePages()`",
+          "`pdf::Editor::rotatePages()`"
+        ],
+        [
+          "Info metadata updates/removals",
+          "`setMetadataBatch()`, `Document::removeMetadata()`",
+          "`pdf::Editor::setMetadata()`"
+        ],
+        [
+          "Unicode text notes",
+          "`addTextNote()`, `Annotation::contents()/author()/rect()`",
+          "`pdf::Editor::addTextNote()`"
+        ],
+        [
+          "Existing text-field values",
+          "`setTextField()`, `FormField::utf8Value()/maximumLength()`",
+          "`pdf::Editor::setTextField()`"
+        ]
+      ]
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 21,
+      "end_line": 25,
+      "raw": "All page indices are **zero based**, matching the existing SDK model. Extraction\nrequires a nonempty selection and retains order and repetitions. An empty\nselection inside a merge item selects that entire document. Rotation requires\nunique page indices and a multiple of 90 degrees; negative and large rotations\nare normalized into `[0, 360)`.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 27,
+      "end_line": 34,
+      "raw": "Page copies retain page content, resources, boxes, rotation, UserUnit and\nannotations. QPDF repairs copied AcroForm/widget ownership and makes conflicting\nfield names unique, including copies of the same page. New documents created\nby extraction/merge do not copy document-level Info, XMP, attachments, outlines,\npage labels or source authorship from every input. The aggregate adapter copies\nthe first/source document's authorship and active editing context, then records\none derived-document change. It never promotes file attribution into a current\nauthenticated identity. Source documents are not mutated.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 36,
+      "end_line": 42,
+      "raw": "An ordinary edit preserves the existing object graph, embedded attachments and\nXMP. `Page::cropBox()` provides the effective box with a MediaBox fallback;\n`Page::userUnit()` defaults to 1. `Annotation::author()` exposes `/T` text.\nAttachment summaries describe embedded files but do not extract or mutate their\npayloads. `PdfDocumentReader::readBytes()` and\n`PdfDocumentWriter::writeBytes()` provide a standard byte boundary; the existing\npath-based methods continue to use iiFileProvider for physical file CRUD.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 44,
+      "end_line": 47,
+      "raw": "Metadata batches accept Title, Author, Subject, Keywords, Creator and Producer,\nwith unique keys. A null optional removes a key. UTF-8 text rejects malformed\nUnicode, embedded NUL and values larger than 1 MiB. New notes require nonempty\ncontents and finite, positive geometry in unrotated PDF coordinates.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 49,
+      "end_line": 56,
+      "raw": "Text-field editing requires one existing `/Tx` field. Missing/ambiguous names,\nread-only fields, rich text, MaxLen-constrained fields and other field types are\nrejected. This change does not create field/widget hierarchies. Unicode values\nclear stale widget appearances and set NeedAppearances. The logical value is\nverified after serialization; automatic Unicode font embedding and visual\nappearance generation are not implemented. The existing aggregate writer\nretains its ASCII appearance-generation path. Unchanged constrained fields can\nbe preserved; direct aggregate changes still undergo writer validation.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 58,
+      "end_line": 68,
+      "raw": "The native editor commits new bytes and snapshots only after serialization,\nreopening and operation-specific postconditions succeed. New annotations keep\npage references and widget appearance references through aggregate serialization;\nindirect-reference values are parsed inside a single-object container. Page\nassembly initializes the destination field cache before introducing copied\nwidgets, then repairs/registers them. Assembly/edit warnings reject the result\nrather than publishing an apparently repaired object silently. Rejected edits leave\nthe object unchanged. Its snapshots are readonly and references expire after a\nsuccessful edit. The object owns a copy of its input bytes. Aggregate batch\nedits validate the entire request before updating values/authorship. No-op\naggregate edits do not create a revision.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 69,
+      "end_line": 69,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "heading",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "## Dependency boundary and consumption\n",
+      "level": 2,
+      "title": "Dependency boundary and consumption"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 72,
+      "end_line": 78,
+      "raw": "Authored implementation and public interfaces use C++23. The `Pdf` CMake\ncomponent exposes only standard types and embeds pinned static OSS archives:\nQPDF 12.3.2, zlib 1.3.1 and libjpeg-turbo 3.2.0. Archive and preserved license SHA-256 values and full\nlicenses are in `third_party/`. Builds of this component need no network, Qt,\niiFileProvider, iiXml, iiHtmlBlock, Adobe runtime or commercial SDK. QPDF C++\ntranslation units use C++23; upstream C compression/JPEG/crypto files are built\nunchanged as their original open-source libraries.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "fenced_code",
+      "start_line": 80,
+      "end_line": 83,
+      "raw": "```cmake\nfind_package(iiGeneralDocument 0.4 CONFIG REQUIRED COMPONENTS Pdf)\ntarget_link_libraries(application PRIVATE iiGeneralDocument::Pdf)\n```\n",
+      "language": "cmake",
+      "code": "find_package(iiGeneralDocument 0.4 CONFIG REQUIRED COMPONENTS Pdf)\ntarget_link_libraries(application PRIVATE iiGeneralDocument::Pdf)\n",
+      "closed": true
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "fenced_code",
+      "start_line": 85,
+      "end_line": 95,
+      "raw": "```cpp\n#include <iiGeneralDocument/Pdf/Objects.h>\nnamespace pdf = ii::document::pdf;\n\nauto loaded = pdf::Document::fromBytes(inputBytes);\nif (!loaded) return 1;\npdf::Editor editor(*loaded);\nconst std::size_t pages[]{0};\nif (!editor.rotatePages(pages, 90)) return 1;\nauto outputBytes = loaded->toBytes();\n```\n",
+      "language": "cpp",
+      "code": "#include <iiGeneralDocument/Pdf/Objects.h>\nnamespace pdf = ii::document::pdf;\n\nauto loaded = pdf::Document::fromBytes(inputBytes);\nif (!loaded) return 1;\npdf::Editor editor(*loaded);\nconst std::size_t pages[]{0};\nif (!editor.rotatePages(pages, 90)) return 1;\nauto outputBytes = loaded->toBytes();\n",
+      "closed": true
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 96,
+      "end_line": 96,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 97,
+      "end_line": 101,
+      "raw": "Configure the isolated component with\n`cmake -S . -B build/pdf-native -DIIGENERALDOCUMENT_PDF_ONLY=ON`.\n`IIGENERALDOCUMENT_PDF_SANITIZERS=ON` instruments it and its private dependencies\nfor AddressSanitizer/UndefinedBehaviorSanitizer. Build and run CTest from the\nsame directory. All generated files stay below `build/`.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 102,
+      "end_line": 102,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 103,
+      "end_line": 107,
+      "raw": "The original 0.3 absorption introduced the independent PDF component. Version\n0.4 also migrates the entire `iiGeneralDocument::iiGeneralDocument` target to\nstandard C++23 author/file interfaces and open-source Word/XML/HTML codecs.\nBoth targets are Qt-free. The full ABI is now 0.4; full-target clients rebuild\nagainst the new standard headers. See [the completed migration](QT_REMOVAL.md).\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 108,
+      "end_line": 108,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "heading",
+      "start_line": 109,
+      "end_line": 109,
+      "raw": "## Verification and limits\n",
+      "level": 2,
+      "title": "Verification and limits"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 110,
+      "end_line": 110,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 111,
+      "end_line": 122,
+      "raw": "Tests use an independent xref-table PDF fixture with inherited geometry, two\npages, text content, AcroForm/widgets, an attachment and XMP. They exercise both\nobject APIs, saved/reopened results, repeated pages, name collisions, retained\ncontent and catalog data, Unicode metadata/notes/fields, stale appearances,\natomic rejection, input ownership, signatures, encrypted files and XFA.\nInstalled consumers verify that the `Pdf` component works with Qt discovery\ndisabled and without private backend headers on its public interface.\nBoth package targets export their headers as ordinary include directories so a\nstale global CPATH cannot take priority over the selected SDK headers. The\ninstalled tests inject incompatible legacy headers to verify this ordering.\nOn macOS, runtime and symbol audits also reject Qt/Adobe/provider dynamic links\nand public QPDF, zlib or JPEG backend symbols.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 123,
+      "end_line": 123,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 124,
+      "end_line": 130,
+      "raw": "Signature detection includes ByteRange, nonempty signature values and DocMDP;\nit does not validate cryptographic trust. Native manipulation refuses signed,\nencrypted and XFA inputs. The legacy reader retains password/recovery options;\nthe legacy writer's existing explicit encryption/signature overrides remain,\nwhile these new aggregate manipulation methods have no such override. Arbitrary\npage-vector surgery is still rejected by that writer; use the extraction/merge\nobjects to obtain a new assembled source graph.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 131,
+      "end_line": 131,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 132,
+      "end_line": 137,
+      "raw": "The engineering contracts are recorded in the adjacent Acrobat project's\n`src/PdfOperations.cpp`, `tests/pdf_operations.cpp`,\n`evidence/pdf-verification.json` and `evidence/pdf-independent-verification.json`.\nThe iisacc-authored MIT counterpart notice is retained under\n`third_party/licenses/acrobat-counterpart/`. Adobe resources, binaries,\ndecompiler output and proprietary source were not copied into this SDK.\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 138,
+      "end_line": 139,
+      "raw": "\n\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 140,
+      "end_line": 140,
+      "raw": "## Native dependency migration (0.4)\n",
+      "level": 2,
+      "title": "Native dependency migration (0.4)"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 141,
+      "end_line": 141,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 142,
+      "end_line": 147,
+      "raw": "The complete module now uses C++23 standard types and open-source backends.\nThe full document package requires the Qt-free `iiXmlMarkup` component; the standalone PDF component does not. Neither Qt nor the legacy Qt-based iiXml/iiHtmlBlock packages are required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml\nand persistence uses nlohmann/json. The markup algorithms retain the first-party\nrange/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)\nfor byte-string API changes, ABI compatibility, prior-file verification and the\nThinking Space schema-2 byte-diff encoding.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Acrobat document-operation absorption (0.3)",
+      "anchor": "acrobat-document-operation-absorption-03",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000005",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Object ownership",
+      "anchor": "object-ownership",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000021",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Dependency boundary and consumption",
+      "anchor": "dependency-boundary-and-consumption",
+      "start_line": 70
+    },
+    {
+      "block_id": "b000033",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Verification and limits",
+      "anchor": "verification-and-limits",
+      "start_line": 109
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Native dependency migration (0.4)",
+      "anchor": "native-dependency-migration-04",
+      "start_line": 140
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000011",
+        "line": 30,
+        "text": "by extraction/merge do not copy document-level Info, XMP, attachments, outlines,",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000011",
+        "line": 33,
+        "text": "one derived-document change. It never promotes file attribution into a current",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000013",
+        "line": 39,
+        "text": "Attachment summaries describe embedded files but do not extract or mutate their",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000019",
+        "line": 68,
+        "text": "aggregate edits do not create a revision.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000043",
+        "line": 143,
+        "text": "The full document package requires the Qt-free `iiXmlMarkup` component; the standalone PDF component does not. Neither Qt nor the legacy Qt-based iiXml/iiHtmlBlock packages are required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000031",
+        "label": "the completed migration",
+        "target": "QT_REMOVAL.md",
+        "kind": "relative",
+        "line": 107
+      },
+      {
+        "block_id": "b000043",
+        "label": "migration details",
+        "target": "QT_REMOVAL.md",
+        "kind": "relative",
+        "line": 145
+      }
+    ],
+    "tables": [
+      {
+        "block_id": "b000007",
+        "columns": [
+          "Operation",
+          "Existing document model",
+          "Qt-free PDF component"
+        ],
+        "rows": [
+          [
+            "Structure inspection",
+            "`Document`, `Page`, `Annotation`, `FormField`, `Document::attachments()`",
+            "`pdf::Document` and its readonly page/field/attachment snapshots"
+          ],
+          [
+            "Ordered page extraction, including repetitions",
+            "`DocumentEditor::extractPages()` returns a new `Document`",
+            "`pdf::Document::extractPages()`"
+          ],
+          [
+            "Merge selected pages from multiple documents",
+            "`DocumentEditor::mergePages()` and `DocumentPageSelection`",
+            "`pdf::Document::merge()` and `pdf::PageSelection`"
+          ],
+          [
+            "Relative batch rotation",
+            "`DocumentEditor::rotatePages()`",
+            "`pdf::Editor::rotatePages()`"
+          ],
+          [
+            "Info metadata updates/removals",
+            "`setMetadataBatch()`, `Document::removeMetadata()`",
+            "`pdf::Editor::setMetadata()`"
+          ],
+          [
+            "Unicode text notes",
+            "`addTextNote()`, `Annotation::contents()/author()/rect()`",
+            "`pdf::Editor::addTextNote()`"
+          ],
+          [
+            "Existing text-field values",
+            "`setTextField()`, `FormField::utf8Value()/maximumLength()`",
+            "`pdf::Editor::setTextField()`"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

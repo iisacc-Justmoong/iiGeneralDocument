@@ -1,0 +1,267 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:8060c369b9cd5408dede8015d53d981ebc5bb313d514ec2e2cf79ccfd16c429f",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiGeneralDocument",
+    "name": "iiGeneralDocument",
+    "root": "SDK/iiGeneralDocument",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "THIRD_PARTY_NOTICES.md",
+    "sha256": "4f7d55c4f09e07e7e88b121122f6a4d5064dc4319a30d22613b7d0dc91236804",
+    "bytes": 2879,
+    "line_count": 52,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Dependency notices",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Dependency notices\n",
+      "level": 1,
+      "title": "Dependency notices"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 6,
+      "raw": "The enclosing iiGeneralDocument SDK is MIT. All format dependencies below\nare open source; full license texts are installed under\n`share/licenses/iiGeneralDocument`. Qt is absent from the version-0.4 dependency\ngraph, including the full document target and its Native provider.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "table",
+      "start_line": 8,
+      "end_line": 16,
+      "raw": "| Dependency | Version | License | Use |\n| --- | --- | --- | --- |\n| QPDF | 12.3.2 | Apache-2.0 (upstream notices also include Artistic-2.0) | PDF interpretation/transformation |\n| zlib | 1.3.1 | zlib | PDF/ZIP compression |\n| libjpeg-turbo | 3.2.0 | IJG, BSD-style, zlib | PDF DCT streams |\n| libzip | 1.11.4 | BSD-3-Clause | DOCX/ODT ZIP packages |\n| pugixml | 1.16 | MIT | Private Word XML codec |\n| nlohmann/json | 3.12.0 | MIT | Private JSON persistence |\n| utf8proc (Native provider) | 2.11.3 | MIT plus Unicode data terms | Author Unicode normalization |\n",
+      "columns": [
+        "Dependency",
+        "Version",
+        "License",
+        "Use"
+      ],
+      "rows": [
+        [
+          "QPDF",
+          "12.3.2",
+          "Apache-2.0 (upstream notices also include Artistic-2.0)",
+          "PDF interpretation/transformation"
+        ],
+        [
+          "zlib",
+          "1.3.1",
+          "zlib",
+          "PDF/ZIP compression"
+        ],
+        [
+          "libjpeg-turbo",
+          "3.2.0",
+          "IJG, BSD-style, zlib",
+          "PDF DCT streams"
+        ],
+        [
+          "libzip",
+          "1.11.4",
+          "BSD-3-Clause",
+          "DOCX/ODT ZIP packages"
+        ],
+        [
+          "pugixml",
+          "1.16",
+          "MIT",
+          "Private Word XML codec"
+        ],
+        [
+          "nlohmann/json",
+          "3.12.0",
+          "MIT",
+          "Private JSON persistence"
+        ],
+        [
+          "utf8proc (Native provider)",
+          "2.11.3",
+          "MIT plus Unicode data terms",
+          "Author Unicode normalization"
+        ]
+      ]
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 18,
+      "end_line": 25,
+      "raw": "QPDF, zlib and libjpeg-turbo release archives and licenses are recorded with\nSHA-256 in `third_party/dependencies.json`. DOCX/ODT use pinned libzip commit\n`6f8a0cdd24a0dc6cce9dac4a7679da784ab124ea`, or an explicitly requested system\nlibzip. Its crypto and optional compression/tool backends are disabled in the\npinned build. pugixml/nlohmann single-source files and licenses are recorded in\n`third_party/document-dependencies.json`. Native provider dependency hashes and\nlicenses live under `iiFileProvider/Native/third_party` and are installed with\n`iiFileProviderNative`. All private archive symbols are hidden from the SDK ABI.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 27,
+      "end_line": 32,
+      "raw": "First-party iiXml/iiHtmlBlock range, declaration, attribute and block-classification\nalgorithms are provided by the Qt-free iiXmlMarkup component. Their original QObject\nbindings/signals/debug logging are excluded. Their historical source paths and original hashes\nare recorded in `third_party/first-party-markup-provenance.json`; their MIT\nlicense is included in `third_party/licenses/first-party-markup/LICENSE`.\nThe full iiGeneralDocument build requires iiXmlMarkup; the standalone PDF component does not.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 34,
+      "end_line": 39,
+      "raw": "The PDF object codec and fixture adapt the iisacc-authored MIT engineering\ncounterpart; its full notice is preserved in\n`third_party/licenses/acrobat-counterpart/LICENSE`. Native SHA-256 adapts the same\nfirst-party standard implementation with its MIT notice in the provider's\n`iisacc-counterpart/LICENSE`. No Adobe proprietary source, binary or extracted\nresource is redistributed or required by these implementations.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 41,
+      "end_line": 43,
+      "raw": "Legacy `.doc` optionally launches user-installed LibreOffice. LibreOffice is not\nlinked or bundled with this SDK. Its distribution uses MPL-2.0/LGPL-3.0+ terms:\nhttps://www.libreoffice.org/about-us/licenses/\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 45,
+      "end_line": 52,
+      "raw": "Primary upstream projects:\nhttps://github.com/qpdf/qpdf,\nhttps://zlib.net/,\nhttps://github.com/libjpeg-turbo/libjpeg-turbo,\nhttps://libzip.org/,\nhttps://pugixml.org/,\nhttps://github.com/nlohmann/json,\nhttps://github.com/JuliaStrings/utf8proc.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Dependency notices",
+      "anchor": "dependency-notices",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000011",
+        "line": 39,
+        "text": "resource is redistributed or required by these implementations.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [],
+    "tables": [
+      {
+        "block_id": "b000005",
+        "columns": [
+          "Dependency",
+          "Version",
+          "License",
+          "Use"
+        ],
+        "rows": [
+          [
+            "QPDF",
+            "12.3.2",
+            "Apache-2.0 (upstream notices also include Artistic-2.0)",
+            "PDF interpretation/transformation"
+          ],
+          [
+            "zlib",
+            "1.3.1",
+            "zlib",
+            "PDF/ZIP compression"
+          ],
+          [
+            "libjpeg-turbo",
+            "3.2.0",
+            "IJG, BSD-style, zlib",
+            "PDF DCT streams"
+          ],
+          [
+            "libzip",
+            "1.11.4",
+            "BSD-3-Clause",
+            "DOCX/ODT ZIP packages"
+          ],
+          [
+            "pugixml",
+            "1.16",
+            "MIT",
+            "Private Word XML codec"
+          ],
+          [
+            "nlohmann/json",
+            "3.12.0",
+            "MIT",
+            "Private JSON persistence"
+          ],
+          [
+            "utf8proc (Native provider)",
+            "2.11.3",
+            "MIT plus Unicode data terms",
+            "Author Unicode normalization"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

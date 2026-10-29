@@ -76,8 +76,7 @@ SHA-256 프레임링과 부모/트리 의미론은 Git 스타일이지만 이 �
 ## Native dependency migration (0.4)
 
 The complete module now uses C++23 standard types and open-source backends.
-Qt and the installed iiXml/iiHtmlBlock packages are not runtime or public-package
-dependencies. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml
+The full document package requires the Qt-free `iiXmlMarkup` component; the standalone PDF component does not. Neither Qt nor the legacy Qt-based iiXml/iiHtmlBlock packages are required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml
 and persistence uses nlohmann/json. The markup algorithms retain the first-party
 range/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)
 for byte-string API changes, ABI compatibility, prior-file verification and the

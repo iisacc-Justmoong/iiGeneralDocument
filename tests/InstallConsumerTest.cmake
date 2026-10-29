@@ -42,6 +42,7 @@ execute_process(
             "-DCMAKE_BUILD_TYPE=${IIGENERALDOCUMENT_CONFIG}"
             "-DCMAKE_PREFIX_PATH=${install_prefix}"
             "-DiiFileProviderNative_DIR=${IIGENERALDOCUMENT_NATIVE_PROVIDER_DIR}"
+            "-DiiXmlMarkup_DIR=${IIGENERALDOCUMENT_XML_MARKUP_DIR}"
     RESULT_VARIABLE configure_result
     OUTPUT_VARIABLE configure_output
     ERROR_VARIABLE configure_error)

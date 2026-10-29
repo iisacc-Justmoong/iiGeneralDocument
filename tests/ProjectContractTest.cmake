@@ -69,6 +69,9 @@ endif()
 if(EXISTS "${IIGENERALDOCUMENT_SOURCE_DIR}/include")
     message(FATAL_ERROR "Public headers and sources must remain colocated; include/ is forbidden.")
 endif()
+if(EXISTS "${IIGENERALDOCUMENT_SOURCE_DIR}/src/Codec/Private/Markup")
+    message(FATAL_ERROR "Markup parser must be owned by iiXml, not copied into iiGeneralDocument.")
+endif()
 
 file(READ "${IIGENERALDOCUMENT_SOURCE_DIR}/src/ThinkingSpace/ThinkingSpaceDocument.h"
     thinking_space_document_header)
@@ -99,6 +102,8 @@ foreach(required_text
         ".local/SDK"
         "IIGENERALDOCUMENT_LIBZIP_VERSION 1.11.4"
         "find_package(iiFileProviderNative 0.5.0 CONFIG REQUIRED)"
+        "find_package(iiXmlMarkup 0.1 CONFIG REQUIRED)"
+        "iiXml::Markup"
         "iiFileProvider::Native"
         "iiGeneralDocument::iiGeneralDocument"
         "iiGeneralDocument.XmlTreeCrud"

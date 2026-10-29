@@ -3,10 +3,15 @@ project(iiGeneralDocumentConsumer LANGUAGES CXX)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_DISABLE_FIND_PACKAGE_Qt6 TRUE)
+set(CMAKE_DISABLE_FIND_PACKAGE_Qt5 TRUE)
+set(CMAKE_DISABLE_FIND_PACKAGE_Qt TRUE)
 set(CMAKE_DISABLE_FIND_PACKAGE_iiFileProvider TRUE)
 set(CMAKE_DISABLE_FIND_PACKAGE_iiXml TRUE)
 set(CMAKE_DISABLE_FIND_PACKAGE_iiHtmlBlock TRUE)
 find_package(iiGeneralDocument 0.4 CONFIG REQUIRED)
+if(NOT TARGET iiXml::Markup)
+    message(FATAL_ERROR "The native iiXml markup component is required")
+endif()
 
 get_target_property(iiGeneralDocumentDependencies
     iiGeneralDocument::iiGeneralDocument INTERFACE_LINK_LIBRARIES)
@@ -28,6 +33,8 @@ target_link_libraries(iiGeneralDocumentConsumer PRIVATE
 enable_testing()
 add_executable(iiGeneralDocumentInstalledAuthorship ../AuthorshipTest.cpp)
 target_link_libraries(iiGeneralDocumentInstalledAuthorship PRIVATE iiGeneralDocument::iiGeneralDocument)
+target_compile_definitions(iiGeneralDocumentInstalledAuthorship PRIVATE
+    IIGENERALDOCUMENT_TEST_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/../../resources")
 add_test(NAME iiGeneralDocument.InstalledAuthorship COMMAND iiGeneralDocumentInstalledAuthorship)
 
 if(DEFINED IIGENERALDOCUMENT_EXPECTED_NATIVE_PROVIDER_PREFIX)

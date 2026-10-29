@@ -3,7 +3,7 @@
 
 #include "Core/Diagnostic.h"
 
-#include "Codec/Private/Markup/BlockRangeTracker.h"
+#include <iiXml/Markup/BlockRangeTracker.h>
 
 #include <algorithm>
 #include <limits>
@@ -229,7 +229,7 @@ std::vector<HtmlBlock> HtmlBlockDocument::parseBlocks(std::string_view html)
         return {};
     }
 
-    detail::blocks::BlockRangeTracker tracker;
+    ii::xml::blocks::BlockRangeTracker tracker;
     if (!tracker.Parse(html)) {
         std::string reason = tracker.GetError();
         if (reason.empty()) {

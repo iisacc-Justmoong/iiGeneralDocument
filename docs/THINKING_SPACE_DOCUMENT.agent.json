@@ -1,0 +1,625 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:fae387935341e77b0d523d3eea71763f5103b4468409235c8c532a0cc881e570",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiGeneralDocument",
+    "name": "iiGeneralDocument",
+    "root": "SDK/iiGeneralDocument",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/THINKING_SPACE_DOCUMENT.md",
+    "sha256": "ce2a3bdfdd346b56c3831188418fa7bb185410a288154f77b14f860bb4074da7",
+    "bytes": 7130,
+    "line_count": 83,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "Thinking Space 문서",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"thinking-space-document\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# Thinking Space 문서\n",
+      "level": 1,
+      "title": "Thinking Space 문서"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "html",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "<a id=\"implemented-scope\"></a>\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "heading",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "## 구현 범위\n",
+      "level": 2,
+      "title": "구현 범위"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "Thinking Space 문서는 `.tsdoc` 확장을 사용합니다. 현재 모델은 헤더 메타데이터, 하나의 HTML 블록 본문, 및 버전 객체 저장소를 소유합니다. 버전 0.2 은 스키마-1 JSON 파일 직렬화 를 `toFileBytes` / `fromFileBytes` 를 통해 추가하며, iiFileProvider 저작권 및 완전한 유지/가르기 이력을 포함합니다. 정확한 컨테이너 계약은 [파일 저작권](FILE_AUTHORSHIP.md) 을 참조하십시오.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "문서 조립은 4 부분으로 구성됩니다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 13,
+      "end_line": 16,
+      "raw": "- `ThinkingSpaceDocumentHeader`는 문서 내용과 독립적으로 메타데이터를 소유합니다. 메타데이터는 현재 정렬된 문자열 키‐값 맵이며, 아직 필요한 키나 값 스키마가 고정되지 않았습니다.\n- `ThinkingSpaceDocumentBody`는 하나의 `HtmlBlockDocument`를 소유하고 있습니다. 그 소스는 여전히 본문 기준 원본이며, 모든 블록 인식 맞춤 태그는 독립적으로 주소 지정 가능한 `HtmlBlock`로 노출됩니다.\n- `ThinkingSpaceDocument`는 헤더 하나와 본문 하나를 구성하고 파일 확장자를 `.tsdoc`로 선언합니다.\n- `ThinkingSpaceDocumentVersionHistory`는 콘텐츠 주소가 지정된 스냅샷, 가역적인 diff 객체 및 연대순 버전 커밋을 보유하고 있습니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "`ThinkingSpaceDocumentHeader`는 문서 내용과 독립적으로 메타데이터를 소유합니다. 메타데이터는 현재 정렬된 문자열 키‐값 맵이며, 아직 필요한 키나 값 스키마가 고정되지 않았습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ThinkingSpaceDocumentBody`는 하나의 `HtmlBlockDocument`를 소유하고 있습니다. 그 소스는 여전히 본문 기준 원본이며, 모든 블록 인식 맞춤 태그는 독립적으로 주소 지정 가능한 `HtmlBlock`로 노출됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ThinkingSpaceDocument`는 헤더 하나와 본문 하나를 구성하고 파일 확장자를 `.tsdoc`로 선언합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`ThinkingSpaceDocumentVersionHistory`는 콘텐츠 주소가 지정된 스냅샷, 가역적인 diff 객체 및 연대순 버전 커밋을 보유하고 있습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "fenced_code",
+      "start_line": 18,
+      "end_line": 25,
+      "raw": "```cpp\nThinkingSpaceDocument document;\ndocument.header.metadata[\"title\"] = \"Thinking Space\";\ndocument.body.htmlBlocks = HtmlBlockDocument::fromHtml(\n    \"<ts-paragraph style=\\\"display: block\\\">Text</ts-paragraph>\");\nconst ThinkingSpaceDocumentVersion version = document.recordVersion(\n    \"Initial draft\", \"2026-09-01T00:00:00.000Z\");\n```\n",
+      "language": "cpp",
+      "code": "ThinkingSpaceDocument document;\ndocument.header.metadata[\"title\"] = \"Thinking Space\";\ndocument.body.htmlBlocks = HtmlBlockDocument::fromHtml(\n    \"<ts-paragraph style=\\\"display: block\\\">Text</ts-paragraph>\");\nconst ThinkingSpaceDocumentVersion version = document.recordVersion(\n    \"Initial draft\", \"2026-09-01T00:00:00.000Z\");\n",
+      "closed": true
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "paragraph",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "본체는 두 번째 HTML 범위 모델을 도입하는 대신 기존 `HtmlBlockDocument` 모델과 그 `iiHtmlBlock` 어댑터를 의도적으로 재사용합니다. 커스텀 태그는 명시적인 블록 표시 오버라이드와 같은 해당 모델의 블록 분류 계약을 충족해야 합니다. 스키마-1 JSON 컨테이너는 `header`, `bodyHtml`, `history` 를 분리하며; 파일 읽기는 저자성과 역사 무결성을 검증합니다.\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "html",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "<a id=\"git-object-principle\"></a>\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "heading",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "## Git 객체 원리\n",
+      "level": 2,
+      "title": "Git 객체 원리"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "paragraph",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "기록은 패치를 정식 버전으로 취급하지 않고 Git의 논리적 저장소 모델을 따릅니다.\n"
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "list",
+      "start_line": 35,
+      "end_line": 38,
+      "raw": "1. 헤더 메타데이터와 정확한 본문 HTML는 독립적인 `blob` 개체가 됩니다.\n2. 스냅샷 `tree` 는 해당 2 블롭 ID 를 가리킵니다.\n3. `commit` 버전은 트리, 상위 커밋, companion diff, 타임스탬프 및 레이블을 가리킵니다.\n4. 각 ID 는 SHA-256 보다 `type + \" \" + byte-size + NUL + payload` 를 초과하므로, 동일한 논리적 객체 콘텐츠는 동일한 ID 를 생성하며, 변경 가능한 시퀀스 번호 없이 유지된 객체들을 검증할 수 있습니다.\n",
+      "items": [
+        {
+          "marker": "1.",
+          "text": "헤더 메타데이터와 정확한 본문 HTML는 독립적인 `blob` 개체가 됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "2.",
+          "text": "스냅샷 `tree` 는 해당 2 블롭 ID 를 가리킵니다.",
+          "checked": null
+        },
+        {
+          "marker": "3.",
+          "text": "`commit` 버전은 트리, 상위 커밋, companion diff, 타임스탬프 및 레이블을 가리킵니다.",
+          "checked": null
+        },
+        {
+          "marker": "4.",
+          "text": "각 ID 는 SHA-256 보다 `type + \" \" + byte-size + NUL + payload` 를 초과하므로, 동일한 논리적 객체 콘텐츠는 동일한 ID 를 생성하며, 변경 가능한 시퀀스 번호 없이 유지된 객체들을 검증할 수 있습니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 40,
+      "end_line": 40,
+      "raw": "Git 자체는 스냅샷을 정식으로 취급하며 트리 간 차이를 계산합니다. `.tsdoc` 는 명시적으로 차이 객체를 요구하므로 이 모델도 각 버전 옆에 하나씩 콘텐츠 주소를 가진 `ThinkingSpaceDocumentDiff` 를 저장합니다. 그것은 베이스/타겟 스냅샷 ID 와 정확한 헤더/본문 바이트 델타를 기록합니다. 델타는 공통 접두어와 접미어 및 제거/삽입된 중간 바이트를 유지하며; `apply()` 는 잘못된 베이스를 거부하고 올바른 베이스에 대한 정확한 타겟을 재구성합니다. 이는 프레젠테이션 지향의 다 블록 차이보다 더 거칠 수 있지만 손실 없고 가역적입니다.\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 41,
+      "end_line": 41,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "`ThinkingSpaceDocumentDiff::apply(baseSnapshot)`는 논리적 헤더와 본문 델타를 모두 적용하고, Blob/트리 ID를 다시 작성하며, 계산된 트리가 `targetSnapshotObjectId`와 일치하는 경우에만 대상을 반환합니다. 기본 빈 스냅샷은 첫 번째 버전의 유효한 기반입니다.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "SHA-256 프레임링과 부모/트리 의미론은 Git 스타일이지만 이 객체들은 Git 저장소와 바이트 호환이 아닙니다. 헤더 정규화는 미래 물리적 `.tsdoc` 인코딩이 아닌 내부 해시 표현입니다. 객체 ID 는 무결성과 중복 제거 식별을 제공하며 인증이나 디지털 서명이 아닙니다.\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "html",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "<a id=\"recording-and-retention\"></a>\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "heading",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "## 기록 및 보관\n",
+      "level": 2,
+      "title": "기록 및 보관"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "`recordVersion()`는 명시적인 커밋 경계입니다. `header.metadata` 또는 `body.htmlBlocks`를 편집해도 아무런 알림 없이는 버전을 생성하지 않습니다. 호출자는 결정론적 가져오기/테스트를 위해 ISO-8601 UTC 타임스탬프를 제공할 수 있습니다. 생략된 타임스탬프는 현재 UTC 시간에서 생성됩니다.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "버전은 가장 오래된 것부터 최신 버전으로 정렬되며 `head()`는 최신 버전을 반환합니다. 기록에는 최대 `maximumVersionCount == 100` 커밋이 유지됩니다. 오버플로 시:\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "list",
+      "start_line": 54,
+      "end_line": 57,
+      "raw": "- 가장 오래된 커밋을 먼저 제거합니다.\n- 보유된 커밋 참조가 없는 스냅샷 및 차이점 개체를 제거합니다.\n- `prunedVersionCount()`를 증가시킵니다.\n- 첫 번째 보류된 커밋의 누락된 부모 ID를 `shallowBoundaryParentObjectId()`에서 보존합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "가장 오래된 커밋을 먼저 제거합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "보유된 커밋 참조가 없는 스냅샷 및 차이점 개체를 제거합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "`prunedVersionCount()`를 증가시킵니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "첫 번째 보류된 커밋의 누락된 부모 ID를 `shallowBoundaryParentObjectId()`에서 보존합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 58,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 59,
+      "end_line": 59,
+      "raw": "얕은 경계는 Git 의 얕은 역사 원칙을 반영합니다: 살아남은 커밋 ID 는 오래된 조상이 폐기되었기 때문에 단순히 다시 쓰여지지 않습니다. `verifyIntegrity()` 는 단일 선포된 경계를 수용하며 모든 남은 부모 링크, 객체 해시, 타겟 스냅샷, 재구성 가능한 차이를 확인합니다.\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "html",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "<a id=\"deferred-contracts\"></a>\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 62,
+      "end_line": 62,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "heading",
+      "start_line": 63,
+      "end_line": 63,
+      "raw": "## 이연 계약\n",
+      "level": 2,
+      "title": "이연 계약"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 64,
+      "end_line": 64,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 65,
+      "end_line": 65,
+      "raw": "이 개체 모델은 `.tsdoc` 파일이 이미 열리거나 저장될 수 있음을 의미하지 않습니다. 다음 결정은 현재 마일스톤에 포함되지 않습니다.\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 66,
+      "end_line": 66,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "list",
+      "start_line": 67,
+      "end_line": 71,
+      "raw": "- 물리적 엔벨로프 및 헤더/본문 인코딩\n- 필수 메타데이터 키, 입력된 값 및 형식 버전 관리\n- 사용자 정의 태그 어휘 및 중첩 규칙;\n- 리더, 라이터, 디스크 수준 검증, 원자 파일 커밋 및 호환성 동작;\n- 분기, 병합, 저작자, 서명 및 원격 동기화.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "물리적 엔벨로프 및 헤더/본문 인코딩",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "필수 메타데이터 키, 입력된 값 및 형식 버전 관리",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "사용자 정의 태그 어휘 및 중첩 규칙;",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "리더, 라이터, 디스크 수준 검증, 원자 파일 커밋 및 호환성 동작;",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "분기, 병합, 저작자, 서명 및 원격 동기화.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "paragraph",
+      "start_line": 73,
+      "end_line": 73,
+      "raw": "`iiGeneralDocument.ThinkingSpaceDocumentModel`는 집계 표면, `.tsdoc` 확장, 독립적인 메타데이터/본문 구성, 결정적 콘텐츠 ID, 상위 체인, 가역적 델타, 무결성 검사, 얕은 경계, 가장 오래된 것부터 잘라내기 및 정확한 100버전 보존 제한을 확인합니다.\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 74,
+      "end_line": 75,
+      "raw": "\n\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "heading",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "## Native dependency migration (0.4)\n",
+      "level": 2,
+      "title": "Native dependency migration (0.4)"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "paragraph",
+      "start_line": 78,
+      "end_line": 83,
+      "raw": "The complete module now uses C++23 standard types and open-source backends.\nThe full document package requires the Qt-free `iiXmlMarkup` component; the standalone PDF component does not. Neither Qt nor the legacy Qt-based iiXml/iiHtmlBlock packages are required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml\nand persistence uses nlohmann/json. The markup algorithms retain the first-party\nrange/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)\nfor byte-string API changes, ABI compatibility, prior-file verification and the\nThinking Space schema-2 byte-diff encoding.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "Thinking Space 문서",
+      "anchor": "thinking-space-문서",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000007",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "구현 범위",
+      "anchor": "구현-범위",
+      "start_line": 7
+    },
+    {
+      "block_id": "b000021",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "Git 객체 원리",
+      "anchor": "git-객체-원리",
+      "start_line": 31
+    },
+    {
+      "block_id": "b000035",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "기록 및 보관",
+      "anchor": "기록-및-보관",
+      "start_line": 48
+    },
+    {
+      "block_id": "b000047",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "이연 계약",
+      "anchor": "이연-계약",
+      "start_line": 63
+    },
+    {
+      "block_id": "b000055",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "Native dependency migration (0.4)",
+      "anchor": "native-dependency-migration-04",
+      "start_line": 76
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000051",
+        "line": 68,
+        "text": "- 필수 메타데이터 키, 입력된 값 및 형식 버전 관리",
+        "basis": "lexical_match",
+        "context": "list"
+      },
+      {
+        "block_id": "b000057",
+        "line": 79,
+        "text": "The full document package requires the Qt-free `iiXmlMarkup` component; the standalone PDF component does not. Neither Qt nor the legacy Qt-based iiXml/iiHtmlBlock packages are required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000009",
+        "label": "파일 저작권",
+        "target": "FILE_AUTHORSHIP.md",
+        "kind": "relative",
+        "line": 9
+      },
+      {
+        "block_id": "b000057",
+        "label": "migration details",
+        "target": "QT_REMOVAL.md",
+        "kind": "relative",
+        "line": 81
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

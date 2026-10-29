@@ -6,7 +6,7 @@
 
 ## 범위
 
-`XmlTreeDocument` 는 `iiXml 0.1.0` 위에 구축된 소스 보존 계층적 XML 모델이며, `the private standard C++ tag parser` 는 요소 범위, 계층 구조, 및 타입화된 속성 필드를 제공합니다. 공개 어댑터는 이러한 구현 타입을 안정된 `XmlNodeId`, `XmlNode`, 및 `XmlAttribute` 값으로 변환하고 서브트리 CRUD 에 적합한 엄격한 단일 루트 경계를 추가합니다.
+`XmlTreeDocument` 는 `iiXml 0.1.0` 위에 구축된 소스 보존 계층적 XML 모델이며, `iiXml::Markup 태그 파서` 는 요소 범위, 계층 구조, 및 타입화된 속성 필드를 제공합니다. 공개 어댑터는 이러한 구현 타입을 안정된 `XmlNodeId`, `XmlNode`, 및 `XmlAttribute` 값으로 변환하고 서브트리 CRUD 에 적합한 엄격한 단일 루트 경계를 추가합니다.
 
 이 모듈은 PDF 페이지 모델, HTML 블록 모델, 워드 흐름 모델 및 애플리케이션 지속성 레이어와 독립적입니다. 메모리 내 CRUD를 수행합니다. 호출자는 파일 또는 데이터베이스 로딩을 소유하고 `XmlTreeDocument::xml()`를 유지합니다.
 
@@ -81,8 +81,7 @@ iiXml 는 독립적으로 닫힌 오버레이 범위를 의도적으로 지원�
 ## Native dependency migration (0.4)
 
 The complete module now uses C++23 standard types and open-source backends.
-Qt and the installed iiXml/iiHtmlBlock packages are not runtime or public-package
-dependencies. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml
+The full document package requires the Qt-free `iiXmlMarkup` package; the PDF-only component does not. Qt and the legacy iiXml/iiHtmlBlock packages are not required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml
 and persistence uses nlohmann/json. The markup algorithms retain the first-party
 range/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)
 for byte-string API changes, ABI compatibility, prior-file verification and the

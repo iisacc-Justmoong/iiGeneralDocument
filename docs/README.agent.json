@@ -1,0 +1,558 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:aa06b34291d1eaa821dca9f3469251ec5e37191a3f41399cec47beb752af7abc",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiGeneralDocument",
+    "name": "iiGeneralDocument",
+    "root": "SDK/iiGeneralDocument",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/README.md",
+    "sha256": "73d551694b6b0a7117d264283b1040b4a09e7ae2f47bab246a3372f84bd125f0",
+    "bytes": 1967,
+    "line_count": 29,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "iiGeneralDocument Documentation",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# iiGeneralDocument Documentation\n",
+      "level": 1,
+      "title": "iiGeneralDocument Documentation"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "html",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "<!-- workspace-docs:document-map:start -->\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "heading",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "## Human and agent document map\n",
+      "level": 2,
+      "title": "Human and agent document map"
+    },
+    {
+      "id": "b000005",
+      "kind": "blank",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "paragraph",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "Markdown is the maintained human source. Agent JSON is a structured, source-traceable projection.\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "blank",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "table",
+      "start_line": 8,
+      "end_line": 28,
+      "raw": "| Document | Agent JSON |\n| --- | --- |\n| [`AGENT.md`](../AGENT.md) | [JSON](entrypoints/AGENT.agent.json) |\n| [`README.md`](../README.md) | [JSON](entrypoints/README.agent.json) |\n| [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md) | [JSON](entrypoints/THIRD_PARTY_NOTICES.agent.json) |\n| [`docs/ACROBAT_ABSORPTION.md`](ACROBAT_ABSORPTION.md) | [JSON](ACROBAT_ABSORPTION.agent.json) |\n| [`docs/API.md`](API.md) | [JSON](API.agent.json) |\n| [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) | [JSON](ARCHITECTURE.agent.json) |\n| [`docs/FILE_AUTHORSHIP.md`](FILE_AUTHORSHIP.md) | [JSON](FILE_AUTHORSHIP.agent.json) |\n| [`docs/HTML_BLOCK_CRUD.md`](HTML_BLOCK_CRUD.md) | [JSON](HTML_BLOCK_CRUD.agent.json) |\n| [`docs/ODF_SUPPORT.md`](ODF_SUPPORT.md) | [JSON](ODF_SUPPORT.agent.json) |\n| [`docs/PDF_SUPPORT.md`](PDF_SUPPORT.md) | [JSON](PDF_SUPPORT.agent.json) |\n| [`docs/PERFORMANCE.md`](PERFORMANCE.md) | [JSON](PERFORMANCE.agent.json) |\n| [`docs/QT_REMOVAL.md`](QT_REMOVAL.md) | [JSON](QT_REMOVAL.agent.json) |\n| [`docs/THINKING_SPACE_DOCUMENT.md`](THINKING_SPACE_DOCUMENT.md) | [JSON](THINKING_SPACE_DOCUMENT.agent.json) |\n| [`docs/WORD_SUPPORT.md`](WORD_SUPPORT.md) | [JSON](WORD_SUPPORT.agent.json) |\n| [`docs/Windows.md`](Windows.md) | [JSON](Windows.agent.json) |\n| [`docs/WindowsBuildAndRun.md`](WindowsBuildAndRun.md) | [JSON](WindowsBuildAndRun.agent.json) |\n| [`docs/XML_TREE_CRUD.md`](XML_TREE_CRUD.md) | [JSON](XML_TREE_CRUD.agent.json) |\n| [`docs/documentation-structure.md`](documentation-structure.md) | [JSON](documentation-structure.agent.json) |\n| [`tests/fixtures/native-upgrade/README.md`](../tests/fixtures/native-upgrade/README.md) | [JSON](mirrors/tests/fixtures/native-upgrade/README.agent.json) |\n",
+      "columns": [
+        "Document",
+        "Agent JSON"
+      ],
+      "rows": [
+        [
+          "[`AGENT.md`](../AGENT.md)",
+          "[JSON](entrypoints/AGENT.agent.json)"
+        ],
+        [
+          "[`README.md`](../README.md)",
+          "[JSON](entrypoints/README.agent.json)"
+        ],
+        [
+          "[`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md)",
+          "[JSON](entrypoints/THIRD_PARTY_NOTICES.agent.json)"
+        ],
+        [
+          "[`docs/ACROBAT_ABSORPTION.md`](ACROBAT_ABSORPTION.md)",
+          "[JSON](ACROBAT_ABSORPTION.agent.json)"
+        ],
+        [
+          "[`docs/API.md`](API.md)",
+          "[JSON](API.agent.json)"
+        ],
+        [
+          "[`docs/ARCHITECTURE.md`](ARCHITECTURE.md)",
+          "[JSON](ARCHITECTURE.agent.json)"
+        ],
+        [
+          "[`docs/FILE_AUTHORSHIP.md`](FILE_AUTHORSHIP.md)",
+          "[JSON](FILE_AUTHORSHIP.agent.json)"
+        ],
+        [
+          "[`docs/HTML_BLOCK_CRUD.md`](HTML_BLOCK_CRUD.md)",
+          "[JSON](HTML_BLOCK_CRUD.agent.json)"
+        ],
+        [
+          "[`docs/ODF_SUPPORT.md`](ODF_SUPPORT.md)",
+          "[JSON](ODF_SUPPORT.agent.json)"
+        ],
+        [
+          "[`docs/PDF_SUPPORT.md`](PDF_SUPPORT.md)",
+          "[JSON](PDF_SUPPORT.agent.json)"
+        ],
+        [
+          "[`docs/PERFORMANCE.md`](PERFORMANCE.md)",
+          "[JSON](PERFORMANCE.agent.json)"
+        ],
+        [
+          "[`docs/QT_REMOVAL.md`](QT_REMOVAL.md)",
+          "[JSON](QT_REMOVAL.agent.json)"
+        ],
+        [
+          "[`docs/THINKING_SPACE_DOCUMENT.md`](THINKING_SPACE_DOCUMENT.md)",
+          "[JSON](THINKING_SPACE_DOCUMENT.agent.json)"
+        ],
+        [
+          "[`docs/WORD_SUPPORT.md`](WORD_SUPPORT.md)",
+          "[JSON](WORD_SUPPORT.agent.json)"
+        ],
+        [
+          "[`docs/Windows.md`](Windows.md)",
+          "[JSON](Windows.agent.json)"
+        ],
+        [
+          "[`docs/WindowsBuildAndRun.md`](WindowsBuildAndRun.md)",
+          "[JSON](WindowsBuildAndRun.agent.json)"
+        ],
+        [
+          "[`docs/XML_TREE_CRUD.md`](XML_TREE_CRUD.md)",
+          "[JSON](XML_TREE_CRUD.agent.json)"
+        ],
+        [
+          "[`docs/documentation-structure.md`](documentation-structure.md)",
+          "[JSON](documentation-structure.agent.json)"
+        ],
+        [
+          "[`tests/fixtures/native-upgrade/README.md`](../tests/fixtures/native-upgrade/README.md)",
+          "[JSON](mirrors/tests/fixtures/native-upgrade/README.agent.json)"
+        ]
+      ]
+    },
+    {
+      "id": "b000009",
+      "kind": "html",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "<!-- workspace-docs:document-map:end -->\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "iiGeneralDocument Documentation",
+      "anchor": "iigeneraldocument-documentation",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000004",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Human and agent document map",
+      "anchor": "human-and-agent-document-map",
+      "start_line": 4
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000008",
+        "label": "`AGENT.md`",
+        "target": "../AGENT.md",
+        "kind": "relative",
+        "line": 10
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "entrypoints/AGENT.agent.json",
+        "kind": "relative",
+        "line": 10
+      },
+      {
+        "block_id": "b000008",
+        "label": "`README.md`",
+        "target": "../README.md",
+        "kind": "relative",
+        "line": 11
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "entrypoints/README.agent.json",
+        "kind": "relative",
+        "line": 11
+      },
+      {
+        "block_id": "b000008",
+        "label": "`THIRD_PARTY_NOTICES.md`",
+        "target": "../THIRD_PARTY_NOTICES.md",
+        "kind": "relative",
+        "line": 12
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "entrypoints/THIRD_PARTY_NOTICES.agent.json",
+        "kind": "relative",
+        "line": 12
+      },
+      {
+        "block_id": "b000008",
+        "label": "`docs/ACROBAT_ABSORPTION.md`",
+        "target": "ACROBAT_ABSORPTION.md",
+        "kind": "relative",
+        "line": 13
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "ACROBAT_ABSORPTION.agent.json",
+        "kind": "relative",
+        "line": 13
+      },
+      {
+        "block_id": "b000008",
+        "label": "`docs/API.md`",
+        "target": "API.md",
+        "kind": "relative",
+        "line": 14
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "API.agent.json",
+        "kind": "relative",
+        "line": 14
+      },
+      {
+        "block_id": "b000008",
+        "label": "`docs/ARCHITECTURE.md`",
+        "target": "ARCHITECTURE.md",
+        "kind": "relative",
+        "line": 15
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "ARCHITECTURE.agent.json",
+        "kind": "relative",
+        "line": 15
+      },
+      {
+        "block_id": "b000008",
+        "label": "`docs/FILE_AUTHORSHIP.md`",
+        "target": "FILE_AUTHORSHIP.md",
+        "kind": "relative",
+        "line": 16
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "FILE_AUTHORSHIP.agent.json",
+        "kind": "relative",
+        "line": 16
+      },
+      {
+        "block_id": "b000008",
+        "label": "`docs/HTML_BLOCK_CRUD.md`",
+        "target": "HTML_BLOCK_CRUD.md",
+        "kind": "relative",
+        "line": 17
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "HTML_BLOCK_CRUD.agent.json",
+        "kind": "relative",
+        "line": 17
+      },
+      {
+        "block_id": "b000008",
+        "label": "`docs/ODF_SUPPORT.md`",
+        "target": "ODF_SUPPORT.md",
+        "kind": "relative",
+        "line": 18
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "ODF_SUPPORT.agent.json",
+        "kind": "relative",
+        "line": 18
+      },
+      {
+        "block_id": "b000008",
+        "label": "`docs/PDF_SUPPORT.md`",
+        "target": "PDF_SUPPORT.md",
+        "kind": "relative",
+        "line": 19
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "PDF_SUPPORT.agent.json",
+        "kind": "relative",
+        "line": 19
+      },
+      {
+        "block_id": "b000008",
+        "label": "`docs/PERFORMANCE.md`",
+        "target": "PERFORMANCE.md",
+        "kind": "relative",
+        "line": 20
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "PERFORMANCE.agent.json",
+        "kind": "relative",
+        "line": 20
+      },
+      {
+        "block_id": "b000008",
+        "label": "`docs/QT_REMOVAL.md`",
+        "target": "QT_REMOVAL.md",
+        "kind": "relative",
+        "line": 21
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "QT_REMOVAL.agent.json",
+        "kind": "relative",
+        "line": 21
+      },
+      {
+        "block_id": "b000008",
+        "label": "`docs/THINKING_SPACE_DOCUMENT.md`",
+        "target": "THINKING_SPACE_DOCUMENT.md",
+        "kind": "relative",
+        "line": 22
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "THINKING_SPACE_DOCUMENT.agent.json",
+        "kind": "relative",
+        "line": 22
+      },
+      {
+        "block_id": "b000008",
+        "label": "`docs/WORD_SUPPORT.md`",
+        "target": "WORD_SUPPORT.md",
+        "kind": "relative",
+        "line": 23
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "WORD_SUPPORT.agent.json",
+        "kind": "relative",
+        "line": 23
+      },
+      {
+        "block_id": "b000008",
+        "label": "`docs/Windows.md`",
+        "target": "Windows.md",
+        "kind": "relative",
+        "line": 24
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "Windows.agent.json",
+        "kind": "relative",
+        "line": 24
+      },
+      {
+        "block_id": "b000008",
+        "label": "`docs/WindowsBuildAndRun.md`",
+        "target": "WindowsBuildAndRun.md",
+        "kind": "relative",
+        "line": 25
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "WindowsBuildAndRun.agent.json",
+        "kind": "relative",
+        "line": 25
+      },
+      {
+        "block_id": "b000008",
+        "label": "`docs/XML_TREE_CRUD.md`",
+        "target": "XML_TREE_CRUD.md",
+        "kind": "relative",
+        "line": 26
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "XML_TREE_CRUD.agent.json",
+        "kind": "relative",
+        "line": 26
+      },
+      {
+        "block_id": "b000008",
+        "label": "`docs/documentation-structure.md`",
+        "target": "documentation-structure.md",
+        "kind": "relative",
+        "line": 27
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "documentation-structure.agent.json",
+        "kind": "relative",
+        "line": 27
+      },
+      {
+        "block_id": "b000008",
+        "label": "`tests/fixtures/native-upgrade/README.md`",
+        "target": "../tests/fixtures/native-upgrade/README.md",
+        "kind": "relative",
+        "line": 28
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "mirrors/tests/fixtures/native-upgrade/README.agent.json",
+        "kind": "relative",
+        "line": 28
+      }
+    ],
+    "tables": [
+      {
+        "block_id": "b000008",
+        "columns": [
+          "Document",
+          "Agent JSON"
+        ],
+        "rows": [
+          [
+            "[`AGENT.md`](../AGENT.md)",
+            "[JSON](entrypoints/AGENT.agent.json)"
+          ],
+          [
+            "[`README.md`](../README.md)",
+            "[JSON](entrypoints/README.agent.json)"
+          ],
+          [
+            "[`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md)",
+            "[JSON](entrypoints/THIRD_PARTY_NOTICES.agent.json)"
+          ],
+          [
+            "[`docs/ACROBAT_ABSORPTION.md`](ACROBAT_ABSORPTION.md)",
+            "[JSON](ACROBAT_ABSORPTION.agent.json)"
+          ],
+          [
+            "[`docs/API.md`](API.md)",
+            "[JSON](API.agent.json)"
+          ],
+          [
+            "[`docs/ARCHITECTURE.md`](ARCHITECTURE.md)",
+            "[JSON](ARCHITECTURE.agent.json)"
+          ],
+          [
+            "[`docs/FILE_AUTHORSHIP.md`](FILE_AUTHORSHIP.md)",
+            "[JSON](FILE_AUTHORSHIP.agent.json)"
+          ],
+          [
+            "[`docs/HTML_BLOCK_CRUD.md`](HTML_BLOCK_CRUD.md)",
+            "[JSON](HTML_BLOCK_CRUD.agent.json)"
+          ],
+          [
+            "[`docs/ODF_SUPPORT.md`](ODF_SUPPORT.md)",
+            "[JSON](ODF_SUPPORT.agent.json)"
+          ],
+          [
+            "[`docs/PDF_SUPPORT.md`](PDF_SUPPORT.md)",
+            "[JSON](PDF_SUPPORT.agent.json)"
+          ],
+          [
+            "[`docs/PERFORMANCE.md`](PERFORMANCE.md)",
+            "[JSON](PERFORMANCE.agent.json)"
+          ],
+          [
+            "[`docs/QT_REMOVAL.md`](QT_REMOVAL.md)",
+            "[JSON](QT_REMOVAL.agent.json)"
+          ],
+          [
+            "[`docs/THINKING_SPACE_DOCUMENT.md`](THINKING_SPACE_DOCUMENT.md)",
+            "[JSON](THINKING_SPACE_DOCUMENT.agent.json)"
+          ],
+          [
+            "[`docs/WORD_SUPPORT.md`](WORD_SUPPORT.md)",
+            "[JSON](WORD_SUPPORT.agent.json)"
+          ],
+          [
+            "[`docs/Windows.md`](Windows.md)",
+            "[JSON](Windows.agent.json)"
+          ],
+          [
+            "[`docs/WindowsBuildAndRun.md`](WindowsBuildAndRun.md)",
+            "[JSON](WindowsBuildAndRun.agent.json)"
+          ],
+          [
+            "[`docs/XML_TREE_CRUD.md`](XML_TREE_CRUD.md)",
+            "[JSON](XML_TREE_CRUD.agent.json)"
+          ],
+          [
+            "[`docs/documentation-structure.md`](documentation-structure.md)",
+            "[JSON](documentation-structure.agent.json)"
+          ],
+          [
+            "[`tests/fixtures/native-upgrade/README.md`](../tests/fixtures/native-upgrade/README.md)",
+            "[JSON](mirrors/tests/fixtures/native-upgrade/README.agent.json)"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

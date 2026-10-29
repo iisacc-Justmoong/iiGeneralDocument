@@ -2,19 +2,20 @@
 
 PDF·XML·HTML·Word 계열 문서 편집과 변환을 제공하는 Qt 비의존 C++23 SDK이다.
 
-검증 기록 갱신: `2026-10-20T02:45:37+09:00`. 변경 전 소스 기준 commit: `f9b7f7419cd9152696be61d65e7f7065249cf0bb`. 아래 결과는 이번 변경을 포함한 작업 트리의 검증이다.
+검증 기록 갱신: `2026-10-20T02:45:37+09:00`. 변경 전 소스 기준 commit: `f9b7f7419cd9152696be61d65e7f7065249cf0bb`. 아래 결과는 당시의 기록이며, 현재 작업 트리의 검증을 뜻하지 않는다.
 
 ## 현재 검증 상태
 
-Release 빌드·실행 검사·설치를 완료하였다. 등록 검사 30개 중 30개 통과, 0개 실패, 0개 skip이다.
+2026-10-20 기록에서는 Release 빌드·실행 검사·설치와 등록 검사 30개를 통과했다. 이후 변경에 대한 Windows 실행은 별도로 검증해야 한다.
 
 ## 이 프로젝트의 의존성과 실행 범위
 
 선행 workspace SDK는 다음과 같다. 각각의 Windows 지침에 따라 실행 검증과 설치를 완료한 뒤 진행한다.
 
-- [iiFileProvider](../../../SDK/iiFileProvider/docs/WindowsBuildAndRun.md)
+- [iiFileProvider](../../../SDK/iiFileProvider/docs/WindowsBuildAndRun.md)의 Qt 없는 Native 구성요소
+- [iiXml](../../../SDK/iiXml/README.md)의 Qt 없는 `iiXmlMarkup` 구성요소
 
-- iiFileProvider Native, 시스템 libzip 및 zlib을 사용한다. PDF 전용 내부 의존성은 프로젝트가 고정한 버전으로 준비한다.
+- iiFileProvider Native, iiXmlMarkup, 시스템 libzip 및 zlib을 사용한다. PDF 전용 내부 의존성은 프로젝트가 고정한 버전으로 준비한다.
 - legacy DOC 검증에는 `Tools/LibreOffice/SourceDir/LibreOffice/program/soffice.com`이 필요하다. 개발 환경은 LibreOffice 경로를 PATH의 뒤쪽에 둔다.
 
 프로젝트별 Windows 조건은 다음과 같다.
@@ -27,22 +28,37 @@ Release 빌드·실행 검사·설치를 완료하였다. 등록 검사 30개 �
 
 PowerShell에서 이 프로젝트 루트로 이동한 뒤 순서대로 실행한다. workspace 배치는 `Workspace/SDK/<이름>`을 전제로 한다.
 
-검증 도구는 MSVC 19.51 x64, Windows SDK 10.0.28000, CMake 4.4.4, Ninja 1.13.2이다. 개발 shell은 빌드 재현을 위해 Python 3.14.8을 선택하며 시스템 기본 Python 3.15.0과 구분한다.
+2026-10-20 당시 도구 기록은 MSVC 19.51 x64, Windows SDK 10.0.28000, CMake 4.4.4, Ninja 1.13.2이다. 개발 shell은 빌드 재현을 위해 Python 3.14.8을 선택하며 시스템 기본 Python 3.15.0과 구분한다.
 
 ```powershell
 $ErrorActionPreference = 'Stop'
 $project = (Get-Location).Path
 $workspace = (Resolve-Path -LiteralPath '../..').Path
-. (Join-Path $workspace 'SDK/Windows/Enter-DevEnvironment.ps1')
+$tools = Join-Path $workspace 'Tools'
+$vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
+$vs = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+if (-not $vs) { throw 'MSVC C++ Build Tools를 찾을 수 없다.' }
+Import-Module (Join-Path $vs 'Common7/Tools/Microsoft.VisualStudio.DevShell.dll')
+Enter-VsDevShell -VsInstallPath $vs -SkipAutomaticLocation -DevCmdArguments '-arch=x64 -host_arch=x64'
 Set-Location -LiteralPath $project
-$python = (Join-Path $workspace 'Tools/Python314/tools/python.exe').Replace('\', '/')
+$cmakeBin = Get-ChildItem (Join-Path $tools 'CMake') -Directory | Sort-Object Name -Descending | Select-Object -First 1 | ForEach-Object { Join-Path $_.FullName 'bin' }
+$pythonBin = Join-Path $tools 'Python314/tools'
+$vcpkg = Join-Path $tools 'vcpkg'
+$sdkRoot = Join-Path $env:USERPROFILE '.local/SDK'
+$env:PATH = (@($cmakeBin, (Join-Path $tools 'Ninja'), $pythonBin, (Join-Path $vcpkg 'installed/x64-windows/bin'), (Join-Path $sdkRoot 'iiFileProvider/bin')) + @($env:PATH)) -join ';'
+$env:CMAKE_PREFIX_PATH = (@((Join-Path $sdkRoot 'iiFileProvider'), (Join-Path $sdkRoot 'iiXml'), (Join-Path $vcpkg 'installed/x64-windows')) -join ';').Replace('\', '/')
+$officeBin = Join-Path $tools 'LibreOffice/SourceDir/LibreOffice/program'
+if (Test-Path -LiteralPath $officeBin) { $env:PATH += ';' + $officeBin }
+$env:CL = '/utf-8 /Zc:__cplusplus /bigobj /DNOMINMAX'
+$env:VSLANG = '1033'
+$python = (Join-Path $pythonBin 'python.exe').Replace('\', '/')
 $compiler = (Get-Command cl.exe -ErrorAction Stop).Source.Replace('\', '/')
-$toolchain = (Join-Path $workspace 'Tools/vcpkg/scripts/buildsystems/vcpkg.cmake').Replace('\', '/')
+$toolchain = (Join-Path $vcpkg 'scripts/buildsystems/vcpkg.cmake').Replace('\', '/')
 $msvcInclude = (Join-Path $workspace 'SDK/Windows/WindowsMsvcPrefix.cmake').Replace('\', '/')
-$prefix = (Join-Path $env:USERPROFILE '.local/SDK/iiGeneralDocument').Replace('\', '/')
+$prefix = (Join-Path $sdkRoot 'iiGeneralDocument').Replace('\', '/')
 ```
 
-`Enter-DevEnvironment.ps1`은 Qt MSVC kit, vcpkg, 설치된 SDK의 검색 경로와 UTF-8 설정을 준비한다. `CMAKE_PREFIX_PATH`의 디렉터리 존재만으로 의존성 검증을 대신하지 않는다. 선행 SDK의 실행 검사와 설치를 먼저 완료해야 한다.
+이 절차는 공통 Qt 개발 환경 스크립트 대신 MSVC 개발 셸과 필요한 SDK·vcpkg 경로만 준비한다. Qt 키트는 필요하지 않다. `CMAKE_PREFIX_PATH`의 디렉터리 존재만으로 의존성 검증을 대신하지 않는다.
 
 ## 구성과 빌드
 
@@ -59,7 +75,9 @@ $configure = @(
     "-DCMAKE_PROJECT_INCLUDE=$msvcInclude"
     "-DPython3_EXECUTABLE=$python"
     "-DPython_EXECUTABLE=$python"
-    '-DQt6_DIR=C:/Qt/6.8.3/msvc2022_64/lib/cmake/Qt6'
+    '-DCMAKE_DISABLE_FIND_PACKAGE_Qt6=TRUE'
+    '-DCMAKE_DISABLE_FIND_PACKAGE_Qt5=TRUE'
+    '-DCMAKE_DISABLE_FIND_PACKAGE_Qt=TRUE'
     '-DBUILD_TESTING=ON'
     '-DIIGENERALDOCUMENT_USE_SYSTEM_LIBZIP=ON'
     '-DIIGENERALDOCUMENT_PDF_ONLY=OFF'
@@ -88,7 +106,6 @@ PDF 편집·왕복 저장, Word/XML/HTML, 실제 LibreOffice DOC 변환 및 설�
 $dllDirectories = @(Get-ChildItem -LiteralPath build -Recurse -Filter '*.dll' -File |
     Select-Object -ExpandProperty DirectoryName | Sort-Object -Unique)
 $env:PATH = (@($dllDirectories) + @($env:PATH)) -join ';'
-$env:QSG_RENDER_LOOP = 'basic'
 ctest --test-dir build -C Release --output-on-failure --parallel 1 --no-tests=error
 if ($LASTEXITCODE -ne 0) { throw '전체 실행 검사 실패' }
 ```

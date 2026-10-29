@@ -2,6 +2,8 @@
 
 # The Pdf component has only standard C++23 types and embeds its pinned OSS backend.
 include("${CMAKE_CURRENT_LIST_DIR}/iiGeneralDocumentPdfTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/QtBoundary.cmake")
+iigeneraldocument_require_qt_free(iiGeneralDocument::Pdf)
 set(iiGeneralDocument_Pdf_FOUND TRUE)
 # Restore the package runtime path when LIBRARY_PATH makes it implicit to CMake.
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
@@ -26,12 +28,15 @@ endif()
 include(CMakeFindDependencyMacro)
 
 if(DEFINED IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT AND NOT IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT STREQUAL "")
-    list(PREPEND CMAKE_PREFIX_PATH "${IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT}/iiFileProvider")
+    list(PREPEND CMAKE_PREFIX_PATH "${IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT}/iiFileProvider" "${IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT}/iiXml")
 endif()
-list(APPEND CMAKE_PREFIX_PATH "${PACKAGE_PREFIX_DIR}/../iiFileProvider" "$ENV{HOME}/.local/SDK/iiFileProvider")
+list(APPEND CMAKE_PREFIX_PATH "${PACKAGE_PREFIX_DIR}/../iiFileProvider" "${PACKAGE_PREFIX_DIR}/../iiXml" "$ENV{HOME}/.local/SDK/iiFileProvider" "$ENV{HOME}/.local/SDK/iiXml")
 find_dependency(iiFileProviderNative 0.5.0 CONFIG REQUIRED)
+find_dependency(iiXmlMarkup 0.1 CONFIG REQUIRED)
+iigeneraldocument_require_qt_free(iiXml::Markup)
 
 include("${CMAKE_CURRENT_LIST_DIR}/iiGeneralDocumentTargets.cmake")
+iigeneraldocument_require_qt_free(iiGeneralDocument::iiGeneralDocument)
 
 # Preserve runtime lookup when a shell's LIBRARY_PATH causes CMake to omit the
 # package directory from the consumer's generated RPATH.

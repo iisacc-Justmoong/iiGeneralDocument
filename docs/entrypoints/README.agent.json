@@ -1,0 +1,732 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:339984f309a7625586e78c2be41528d4130e132a836101fa2f2fedd93efc4c3f",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiGeneralDocument",
+    "name": "iiGeneralDocument",
+    "root": "SDK/iiGeneralDocument",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "README.md",
+    "sha256": "0d199760661e0a1b5871e1aaf4973e849a2a2a4c960d0605e6d6d0306ff0e405",
+    "bytes": 8022,
+    "line_count": 155,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "iiGeneralDocument",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# iiGeneralDocument\n",
+      "level": 1,
+      "title": "iiGeneralDocument"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 8,
+      "raw": "XML and HTML source ranges use the Qt-free `iiXml::Markup` component; the\ndocument package retains its own public document models and metadata contracts.\nThe standalone PDF component remains independent of iiXml.\nThe build and installed CMake package reject Qt in the document dependency graph;\napplications can still use Qt separately. Native binary audits inspect the PDF\nand file-provider dependencies as well as the document library.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "[Windows build and execution](docs/WindowsBuildAndRun.md)\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 12,
+      "end_line": 15,
+      "raw": "The Windows legacy DOC integration test allows two minutes per cold, isolated\nLibreOffice profile. Applications retain control of `conversionTimeout`; its\ndefault is unchanged. The console launcher is preferred for captured conversion\nresults on Windows.\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 16,
+      "end_line": 16,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 17,
+      "end_line": 19,
+      "raw": "Package release: **0.4.1** (2026-10-19). This patch packages the current\nsource snapshot; build, test and installation evidence is recorded in the SDK\npatch-release report. Earlier versioned feature notes remain historical.\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 20,
+      "end_line": 21,
+      "raw": "\n\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 22,
+      "end_line": 25,
+      "raw": "`iiGeneralDocument` is a native C++23 document library with standard public types\nand open-source format backends. Version 0.4 removes Qt from the entire library,\nincluding file access, author metadata, Word XML, JSON persistence, conversion\nprocesses, tests and installed consumers.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "It provides:\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 28,
+      "end_line": 28,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "list",
+      "start_line": 29,
+      "end_line": 46,
+      "raw": "- editable PDF documents, pages, stable element IDs, content instructions,\n  annotations, existing AcroForm fields and attachment summaries;\n- ordered/repeated page extraction, selected-document merging, batch rotation,\n  Unicode notes, metadata editing and existing text-field value editing;\n- a standalone `iiGeneralDocument::Pdf` byte/object component with transactional\n  edits, copied input bytes and C++23 standard types;\n- source-preserving XML tree CRUD with typed attributes, parent/child navigation,\n  subtree replacement and stable IDs;\n- source-preserving HTML block CRUD with ordered roots, nested creation, display\n  overrides, atomic updates and overlap-safe ranges;\n- native DOCX, ODT and FODT read/write through one editable `WordDocument` flow\n  model, including paragraphs, run styles, tables, numbering, metadata and geometry;\n- optional legacy `.doc` read/write through an isolated, timeout-bounded\n  LibreOffice process, with validation before atomic publication;\n- standard author snapshots/ledgers with synchronous revision updates and embedded\n  metadata in PDF, Word, HTML, XML and Thinking Space files;\n- a `.tsdoc` aggregate with SHA-256 snapshots, parent links, byte diffs, integrity\n  checks and newest-100 version retention; existing schema-1 files remain readable.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "editable PDF documents, pages, stable element IDs, content instructions,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "ordered/repeated page extraction, selected-document merging, batch rotation,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "a standalone `iiGeneralDocument::Pdf` byte/object component with transactional",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "source-preserving XML tree CRUD with typed attributes, parent/child navigation,",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "source-preserving HTML block CRUD with ordered roots, nested creation, display",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "native DOCX, ODT and FODT read/write through one editable `WordDocument` flow",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "optional legacy `.doc` read/write through an isolated, timeout-bounded",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "standard author snapshots/ledgers with synchronous revision updates and embedded",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "a `.tsdoc` aggregate with SHA-256 snapshots, parent links, byte diffs, integrity",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "heading",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "## Build and install\n",
+      "level": 2,
+      "title": "Build and install"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "paragraph",
+      "start_line": 50,
+      "end_line": 55,
+      "raw": "Install iiXml with its Qt-free `iiXmlMarkup` package first. From\n`Workspace/SDK/iiGeneralDocument`, run `./install.sh`. It builds the\nstandard-only `iiFileProvider::Native` component, configures and tests the full\nlibrary in `build/`, installs to `~/.local/SDK/iiGeneralDocument`, and compiles/runs\nan actual installed consumer with Qt and the legacy provider packages disabled.\nNo Qt kit is required. All generated files stay inside each repository's `build/`.\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 57,
+      "end_line": 59,
+      "raw": "Direct configuration requires the Native provider and the Qt-free `iiXmlMarkup`\npackage. Install iiXml first (or supply its package path through CMake); the\ninstaller supplies the provider from `Workspace/SDK/iiFileProvider/Native`:\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "fenced_code",
+      "start_line": 61,
+      "end_line": 71,
+      "raw": "```sh\ncmake -S ../iiFileProvider/Native -B ../iiFileProvider/build/native -G Ninja \\\n  -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=\"$HOME/.local/SDK/iiFileProvider\"\ncmake --build ../iiFileProvider/build/native --parallel 4\nctest --test-dir ../iiFileProvider/build/native --output-on-failure\ncmake --install ../iiFileProvider/build/native\ncmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \\\n  -DCMAKE_DISABLE_FIND_PACKAGE_Qt6=TRUE\ncmake --build build --parallel 4\nctest --test-dir build --output-on-failure\n```\n",
+      "language": "sh",
+      "code": "cmake -S ../iiFileProvider/Native -B ../iiFileProvider/build/native -G Ninja \\\n  -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=\"$HOME/.local/SDK/iiFileProvider\"\ncmake --build ../iiFileProvider/build/native --parallel 4\nctest --test-dir ../iiFileProvider/build/native --output-on-failure\ncmake --install ../iiFileProvider/build/native\ncmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \\\n  -DCMAKE_DISABLE_FIND_PACKAGE_Qt6=TRUE\ncmake --build build --parallel 4\nctest --test-dir build --output-on-failure\n",
+      "closed": true
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 73,
+      "end_line": 78,
+      "raw": "The default top-level install prefix is `~/.local/SDK/iiGeneralDocument`; an\nexplicit `CMAKE_INSTALL_PREFIX` is respected. The installer accepts\n`IIGENERALDOCUMENT_INSTALL_PREFIX` and `IIGENERALDOCUMENT_LOCAL_LIBRARY_ROOT`.\nInstalled packages discover the Native provider alongside the SDK or under that\nSDK root. Imported targets also handle macOS runtime lookup when `LIBRARY_PATH`\nmakes package directories implicit to the linker.\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "heading",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "## Consume the SDK\n",
+      "level": 2,
+      "title": "Consume the SDK"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 81,
+      "end_line": 81,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "fenced_code",
+      "start_line": 82,
+      "end_line": 85,
+      "raw": "```cmake\nfind_package(iiGeneralDocument 0.4 CONFIG REQUIRED)\ntarget_link_libraries(application PRIVATE iiGeneralDocument::iiGeneralDocument)\n```\n",
+      "language": "cmake",
+      "code": "find_package(iiGeneralDocument 0.4 CONFIG REQUIRED)\ntarget_link_libraries(application PRIVATE iiGeneralDocument::iiGeneralDocument)\n",
+      "closed": true
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 86,
+      "end_line": 86,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "paragraph",
+      "start_line": 87,
+      "end_line": 91,
+      "raw": "Include `<iiGeneralDocument/iiGeneralDocument.h>`. The full target publicly links\nonly `iiFileProvider::Native` and `iiGeneralDocument::Pdf`. Public author APIs use\n`iiFileProvider::native`; HTML/XML/Thinking Space file bytes are `std::string` and\n`std::string_view`. Version 0.4 is a new full-module ABI; existing clients rebuild.\nSee [migration and dependency boundaries](docs/QT_REMOVAL.md).\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 92,
+      "end_line": 92,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "paragraph",
+      "start_line": 93,
+      "end_line": 93,
+      "raw": "For the independent PDF byte/object component:\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 94,
+      "end_line": 94,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "fenced_code",
+      "start_line": 95,
+      "end_line": 98,
+      "raw": "```cmake\nfind_package(iiGeneralDocument 0.4 CONFIG REQUIRED COMPONENTS Pdf)\ntarget_link_libraries(application PRIVATE iiGeneralDocument::Pdf)\n```\n",
+      "language": "cmake",
+      "code": "find_package(iiGeneralDocument 0.4 CONFIG REQUIRED COMPONENTS Pdf)\ntarget_link_libraries(application PRIVATE iiGeneralDocument::Pdf)\n",
+      "closed": true
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 99,
+      "end_line": 99,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 100,
+      "end_line": 102,
+      "raw": "Include `<iiGeneralDocument/Pdf/Objects.h>`. A PDF-only build uses\n`-DIIGENERALDOCUMENT_PDF_ONLY=ON` with a build directory such as\n`build/pdf-native`. This component has no provider dependency.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 103,
+      "end_line": 103,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "heading",
+      "start_line": 104,
+      "end_line": 104,
+      "raw": "## Backends and tests\n",
+      "level": 2,
+      "title": "Backends and tests"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 105,
+      "end_line": 105,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "paragraph",
+      "start_line": 106,
+      "end_line": 112,
+      "raw": "Private backends are QPDF 12.3.2, zlib 1.3.1, libjpeg-turbo 3.2.0, libzip 1.11.4,\npugixml 1.16 and nlohmann/json 3.12.0. Native author normalization uses utf8proc\n2.11.3. Release sources/licenses are pinned; local vendored files and archives are\nSHA-256 checked during configuration. Upstream C libraries keep their own language;\nauthored library and test code is C++23 without compiler extensions. Optional\n`IIGENERALDOCUMENT_USE_SYSTEM_LIBZIP=ON` uses an installed libzip package.\nLibreOffice is needed only for legacy `.doc` conversion and interoperability tests.\n"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 113,
+      "end_line": 113,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 114,
+      "end_line": 120,
+      "raw": "The tests cover document mutation, format round trips, authorship, malformed input,\natomic writes/permissions, symbol isolation, installed package use, actual\nLibreOffice interoperability, prior-file migration and absence of Qt dependencies.\nUse `-DIIGENERALDOCUMENT_SANITIZERS=ON` for full AddressSanitizer/UndefinedBehaviorSanitizer\nvalidation, or `IIGENERALDOCUMENT_PDF_SANITIZERS=ON` for the PDF component alone.\nBuild output and platform execution establish different guarantees: each target\nplatform still needs native execution before it is considered verified.\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 121,
+      "end_line": 121,
+      "raw": "\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "paragraph",
+      "start_line": 122,
+      "end_line": 126,
+      "raw": "See [API](docs/API.md), [architecture](docs/ARCHITECTURE.md),\n[PDF](docs/PDF_SUPPORT.md), [Word](docs/WORD_SUPPORT.md), [ODF](docs/ODF_SUPPORT.md),\n[HTML](docs/HTML_BLOCK_CRUD.md), [XML](docs/XML_TREE_CRUD.md),\n[Thinking Space](docs/THINKING_SPACE_DOCUMENT.md) and\n[Acrobat feature absorption](docs/ACROBAT_ABSORPTION.md).\n"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 127,
+      "end_line": 127,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "paragraph",
+      "start_line": 128,
+      "end_line": 130,
+      "raw": "The enclosing SDK keeps its existing MIT license. Full dependency\nlicenses are shipped with the installation; see [notices](THIRD_PARTY_NOTICES.md).\nNo Adobe proprietary source, extracted resources or runtime is included.\n"
+    },
+    {
+      "id": "b000048",
+      "kind": "blank",
+      "start_line": 131,
+      "end_line": 131,
+      "raw": "\n"
+    },
+    {
+      "id": "b000049",
+      "kind": "paragraph",
+      "start_line": 132,
+      "end_line": 138,
+      "raw": "MSVC builds link the bundled libjpeg-turbo archive as `jpeg-static.lib`, matching\nthe upstream Windows target name. The installed consumer test puts the package's\nown `bin/` first on Windows to exercise the installed DLLs.\nBoth full-module and PDF-only installed consumers inherit the SDK build\nconfiguration so MSVC runtime and standard-library layouts match the DLLs.\nWindows legacy Word conversion prefers LibreOffice's console launcher\n`soffice.com` so the native process boundary can capture completion and errors.\n"
+    },
+    {
+      "id": "b000050",
+      "kind": "blank",
+      "start_line": 139,
+      "end_line": 139,
+      "raw": "\n"
+    },
+    {
+      "id": "b000051",
+      "kind": "heading",
+      "start_line": 140,
+      "end_line": 140,
+      "raw": "## License\n",
+      "level": 2,
+      "title": "License"
+    },
+    {
+      "id": "b000052",
+      "kind": "blank",
+      "start_line": 141,
+      "end_line": 141,
+      "raw": "\n"
+    },
+    {
+      "id": "b000053",
+      "kind": "paragraph",
+      "start_line": 142,
+      "end_line": 142,
+      "raw": "SPDX-License-Identifier: MIT\n"
+    },
+    {
+      "id": "b000054",
+      "kind": "blank",
+      "start_line": 143,
+      "end_line": 143,
+      "raw": "\n"
+    },
+    {
+      "id": "b000055",
+      "kind": "paragraph",
+      "start_line": 144,
+      "end_line": 146,
+      "raw": "The original code and documentation in this repository are licensed under the\n[MIT License](LICENSE). Third-party code, libraries, fonts, tools, and model\nweights retain their respective licenses.\n"
+    },
+    {
+      "id": "b000056",
+      "kind": "blank",
+      "start_line": 147,
+      "end_line": 147,
+      "raw": "\n"
+    },
+    {
+      "id": "b000057",
+      "kind": "html",
+      "start_line": 148,
+      "end_line": 148,
+      "raw": "<!-- workspace-docs:readme:start -->\n"
+    },
+    {
+      "id": "b000058",
+      "kind": "heading",
+      "start_line": 149,
+      "end_line": 149,
+      "raw": "## Documentation entry points\n",
+      "level": 2,
+      "title": "Documentation entry points"
+    },
+    {
+      "id": "b000059",
+      "kind": "blank",
+      "start_line": 150,
+      "end_line": 150,
+      "raw": "\n"
+    },
+    {
+      "id": "b000060",
+      "kind": "list",
+      "start_line": 151,
+      "end_line": 154,
+      "raw": "- Human overview: this English `README.md`.\n- Agent instructions: [AGENT.md](AGENT.md).\n- Human documentation: [documentation index](docs/README.md).\n- Structured agent documentation: [agent index](docs/agent-index.json).\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "Human overview: this English `README.md`.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Agent instructions: [AGENT.md](AGENT.md).",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Human documentation: [documentation index](docs/README.md).",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Structured agent documentation: [agent index](docs/agent-index.json).",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000061",
+      "kind": "html",
+      "start_line": 155,
+      "end_line": 155,
+      "raw": "<!-- workspace-docs:readme:end -->\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "iiGeneralDocument",
+      "anchor": "iigeneraldocument",
+      "start_line": 1
+    },
+    {
+      "block_id": "b000017",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Build and install",
+      "anchor": "build-and-install",
+      "start_line": 48
+    },
+    {
+      "block_id": "b000027",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Consume the SDK",
+      "anchor": "consume-the-sdk",
+      "start_line": 80
+    },
+    {
+      "block_id": "b000039",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Backends and tests",
+      "anchor": "backends-and-tests",
+      "start_line": 104
+    },
+    {
+      "block_id": "b000051",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "License",
+      "anchor": "license",
+      "start_line": 140
+    },
+    {
+      "block_id": "b000058",
+      "parent_id": "b000001",
+      "level": 2,
+      "title": "Documentation entry points",
+      "anchor": "documentation-entry-points",
+      "start_line": 149
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000019",
+        "line": 55,
+        "text": "No Qt kit is required. All generated files stay inside each repository's `build/`.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [
+      {
+        "block_id": "b000023",
+        "language": "sh",
+        "code": "cmake -S ../iiFileProvider/Native -B ../iiFileProvider/build/native -G Ninja \\\n  -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=\"$HOME/.local/SDK/iiFileProvider\"\ncmake --build ../iiFileProvider/build/native --parallel 4\nctest --test-dir ../iiFileProvider/build/native --output-on-failure\ncmake --install ../iiFileProvider/build/native\ncmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \\\n  -DCMAKE_DISABLE_FIND_PACKAGE_Qt6=TRUE\ncmake --build build --parallel 4\nctest --test-dir build --output-on-failure\n"
+      }
+    ],
+    "links": [
+      {
+        "block_id": "b000005",
+        "label": "Windows build and execution",
+        "target": "docs/WindowsBuildAndRun.md",
+        "kind": "relative",
+        "line": 10
+      },
+      {
+        "block_id": "b000031",
+        "label": "migration and dependency boundaries",
+        "target": "docs/QT_REMOVAL.md",
+        "kind": "relative",
+        "line": 91
+      },
+      {
+        "block_id": "b000045",
+        "label": "API",
+        "target": "docs/API.md",
+        "kind": "relative",
+        "line": 122
+      },
+      {
+        "block_id": "b000045",
+        "label": "architecture",
+        "target": "docs/ARCHITECTURE.md",
+        "kind": "relative",
+        "line": 122
+      },
+      {
+        "block_id": "b000045",
+        "label": "PDF",
+        "target": "docs/PDF_SUPPORT.md",
+        "kind": "relative",
+        "line": 123
+      },
+      {
+        "block_id": "b000045",
+        "label": "Word",
+        "target": "docs/WORD_SUPPORT.md",
+        "kind": "relative",
+        "line": 123
+      },
+      {
+        "block_id": "b000045",
+        "label": "ODF",
+        "target": "docs/ODF_SUPPORT.md",
+        "kind": "relative",
+        "line": 123
+      },
+      {
+        "block_id": "b000045",
+        "label": "HTML",
+        "target": "docs/HTML_BLOCK_CRUD.md",
+        "kind": "relative",
+        "line": 124
+      },
+      {
+        "block_id": "b000045",
+        "label": "XML",
+        "target": "docs/XML_TREE_CRUD.md",
+        "kind": "relative",
+        "line": 124
+      },
+      {
+        "block_id": "b000045",
+        "label": "Thinking Space",
+        "target": "docs/THINKING_SPACE_DOCUMENT.md",
+        "kind": "relative",
+        "line": 125
+      },
+      {
+        "block_id": "b000045",
+        "label": "Acrobat feature absorption",
+        "target": "docs/ACROBAT_ABSORPTION.md",
+        "kind": "relative",
+        "line": 126
+      },
+      {
+        "block_id": "b000047",
+        "label": "notices",
+        "target": "THIRD_PARTY_NOTICES.md",
+        "kind": "relative",
+        "line": 129
+      },
+      {
+        "block_id": "b000055",
+        "label": "MIT License",
+        "target": "LICENSE",
+        "kind": "relative",
+        "line": 145
+      },
+      {
+        "block_id": "b000060",
+        "label": "AGENT.md",
+        "target": "AGENT.md",
+        "kind": "relative",
+        "line": 152
+      },
+      {
+        "block_id": "b000060",
+        "label": "documentation index",
+        "target": "docs/README.md",
+        "kind": "relative",
+        "line": 153
+      },
+      {
+        "block_id": "b000060",
+        "label": "agent index",
+        "target": "docs/agent-index.json",
+        "kind": "relative",
+        "line": 154
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

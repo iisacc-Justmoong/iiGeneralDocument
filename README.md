@@ -1,6 +1,13 @@
 # iiGeneralDocument
 
-[Windows 빌드 및 실행](docs/WindowsBuildAndRun.md)
+XML and HTML source ranges use the Qt-free `iiXml::Markup` component; the
+document package retains its own public document models and metadata contracts.
+The standalone PDF component remains independent of iiXml.
+The build and installed CMake package reject Qt in the document dependency graph;
+applications can still use Qt separately. Native binary audits inspect the PDF
+and file-provider dependencies as well as the document library.
+
+[Windows build and execution](docs/WindowsBuildAndRun.md)
 
 The Windows legacy DOC integration test allows two minutes per cold, isolated
 LibreOffice profile. Applications retain control of `conversionTimeout`; its
@@ -40,14 +47,16 @@ It provides:
 
 ## Build and install
 
-From `Workspace/SDK/iiGeneralDocument`, run `./install.sh`. It builds the
+Install iiXml with its Qt-free `iiXmlMarkup` package first. From
+`Workspace/SDK/iiGeneralDocument`, run `./install.sh`. It builds the
 standard-only `iiFileProvider::Native` component, configures and tests the full
 library in `build/`, installs to `~/.local/SDK/iiGeneralDocument`, and compiles/runs
 an actual installed consumer with Qt and the legacy provider packages disabled.
 No Qt kit is required. All generated files stay inside each repository's `build/`.
 
-Direct configuration requires the Native provider package. The installer supplies
-it from `Workspace/SDK/iiFileProvider/Native`; manual builds can install it first:
+Direct configuration requires the Native provider and the Qt-free `iiXmlMarkup`
+package. Install iiXml first (or supply its package path through CMake); the
+installer supplies the provider from `Workspace/SDK/iiFileProvider/Native`:
 
 ```sh
 cmake -S ../iiFileProvider/Native -B ../iiFileProvider/build/native -G Ninja \
@@ -135,3 +144,12 @@ SPDX-License-Identifier: MIT
 The original code and documentation in this repository are licensed under the
 [MIT License](LICENSE). Third-party code, libraries, fonts, tools, and model
 weights retain their respective licenses.
+
+<!-- workspace-docs:readme:start -->
+## Documentation entry points
+
+- Human overview: this English `README.md`.
+- Agent instructions: [AGENT.md](AGENT.md).
+- Human documentation: [documentation index](docs/README.md).
+- Structured agent documentation: [agent index](docs/agent-index.json).
+<!-- workspace-docs:readme:end -->

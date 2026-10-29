@@ -24,7 +24,7 @@ Flow text model <- Word reader/writer <- DOCX/ODT/FODT codecs <- libzip + pugixm
                               |
                       legacy DOC converter <- isolated LibreOffice process
 
-XML tree document <- XML tree editor <- private standard C++ range parser
+XML tree document <- XML tree editor <- iiXml::Markup source-range parser
 
 HTML block document <- HTML block editor <- private standard C++ block ranges
 
@@ -36,7 +36,7 @@ Thinking Space Document -> header metadata + HTML block body + version object st
 
 `Core` 는 진단, PDF 스칼라/컨테이너 값, 및 콘텐츠 지시를 소유합니다. `Model` 는 문서와 독립적으로 주소 지정 가능한 요소를 소유합니다. `Editing` 는 사용 사례 작업을 수행합니다. `IO` 는 추상 PDF -모델 리더 및 작성자 계약을 포함합니다. `Pdf` 는 QPDF 를 포함하는 유일한 레이어입니다. `Validation` 는 코덱 책임이 없습니다. `Xml` 는 엄격한 소스 보존 트리 모델과 원자적 CRUD 조정기를 소유하며, 오직 그 구현 파일만이 iiXml 노드, 범위, 선언, 및 속성 유형을 번역합니다. `Html` 는 독립적인 소스 보존 블록 모델과 원자적 CRUD 조정기를 소유하며, 오직 그 구현 파일만이 iiHtmlBlock 범위 유형을 번역합니다. HTML 재건 경계는 정렬된 루트, 가장 가까운 완전히 포함하는 부모, 직접 자식, 및 일치한 여는/닫는 범위에서 파생된 깊이를 도출하기 전에 최종 안정 ID 를 할당하므로 관계 메타데이터가 소스와 원자적으로 커밋됩니다. `ThinkingSpace` 는 기존 HTML 모델에 별도의 헤더 메타데이터와 콘텐츠 주소 기반 버전 저장소를 함께 구성합니다. 그의 히스토리 레이어는 헤더/바디 블롭을 스냅샷 트리로 해시하고, 불변 버전 커밋을 부모 ID 를 통해 연결하며, 각 커밋에 대해 가역적인 동반 디프를 유지하고, 살아남은 객체 ID 를 변경하지 않으면서 유지된 참조를 가지릅니다. `Word` 는 별도의 흐름 지향 모델과 공개 포맷 디스패처를 소유합니다. 단 `Word/Private` 만 libzip 를 포함하거나 LibreOffice 를 시작하며, 이러한 구현 유형은 설치되지 않았습니다.
 
-패키지 경계에서 `iiGeneralDocument`는 `iiFileProvider::Native`와 `iiGeneralDocument::Pdf`에 공개적으로 연결한다. 작성자 정보와 파일 처리는 표준 C++ Native 구성요소가 소유한다. XML·HTML 범위 알고리즘은 비공개 표준 C++ 코드로 이전되어 iiXml·iiHtmlBlock 바이너리 의존성을 제거하였다. QPDF, libzip, pugixml, nlohmann/json은 비공개 오픈소스 구현이며 공개 타입에는 노출되지 않는다. LibreOffice는 레거시 `.doc`에만 사용하는 선택적인 외부 프로세스이다. 전체 타깃과 PDF 구성요소 모두 Qt에 의존하지 않는다.
+패키지 경계에서 `iiGeneralDocument`는 `iiFileProvider::Native`와 `iiGeneralDocument::Pdf`에 공개적으로 연결한다. 작성자 정보와 파일 처리는 표준 C++ Native 구성요소가 소유한다. XML·HTML 범위 알고리즘은 Qt 없는 정적 `iiXml::Markup` 구성요소가 소유한다. 문서 모델의 공개 타입에는 그 구현 타입이 노출되지 않는다. QPDF, libzip, pugixml, nlohmann/json은 비공개 오픈소스 구현이며 공개 타입에는 노출되지 않는다. LibreOffice는 레거시 `.doc`에만 사용하는 선택적인 외부 프로세스이다. 전체 타깃과 PDF 구성요소 모두 Qt에 의존하지 않는다.
 
 비공개 ODF 코덱은 ODT ZIP 전송과 공유 OpenDocument XML 의미론을 분리하며, FODT 는 ZIP 를 우회하고 동일한 스타일, 메타데이터, 바디, 및 페이지 매핑을 사용합니다. 두 어댑터는 모두 `WordDocument` 에 내향적으로 의존하지만, 모델은 ODF, OOXML, libzip, 또는 LibreOffice 의존성이 없습니다. 스타일 식별자는 ODF 패밀리로 범위가 지정되며, 폰트 별명은 대체 경로 이전에 패키지 부분 내에서 해결되고, 목록 인스턴스 식별자는 목록 프레젠테이션 스타일에서 독립적입니다.
 
@@ -111,8 +111,7 @@ and supplies Word/XML/HTML/Thinking Space models without Qt. See [the complete o
 ## Native dependency migration (0.4)
 
 The complete module now uses C++23 standard types and open-source backends.
-Qt and the installed iiXml/iiHtmlBlock packages are not runtime or public-package
-dependencies. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml
+The full document package requires the Qt-free `iiXmlMarkup` package; the PDF-only component does not. Qt and the legacy iiXml/iiHtmlBlock packages are not required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml
 and persistence uses nlohmann/json. The markup algorithms retain the first-party
 range/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)
 for byte-string API changes, ABI compatibility, prior-file verification and the

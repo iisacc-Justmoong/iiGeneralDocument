@@ -6,7 +6,7 @@
 
 ## 범위
 
-`HtmlBlockDocument` 는 `iiHtmlBlock 0.1.0` 위에 구축된 편집 가능한 HTML / iiXml 소스 모델입니다. 원래 소스 바이트 문자열은 문서의 기준 원본 입니다. `the private standard C++ block tracker` 은 블록 요소와 그 소스 범위를 인식하며, 공개 iiGeneralDocument API 는 이러한 의존성 타입을 안정된 `HtmlBlockId` 객체로 변환합니다.
+`HtmlBlockDocument` 는 `iiHtmlBlock 0.1.0` 위에 구축된 편집 가능한 HTML / iiXml 소스 모델입니다. 원래 소스 바이트 문자열은 문서의 기준 원본 입니다. `iiXml::Markup 블록 추적기` 은 블록 요소와 그 소스 범위를 인식하며, 공개 iiGeneralDocument API 는 이러한 의존성 타입을 안정된 `HtmlBlockId` 객체로 변환합니다.
 
 이 모듈은 의도적으로 PDF 페이지 모델, Word 흐름 모델 및 애플리케이션 지속성 레이어와 분리되어 있습니다. 메모리 내 블록 CRUD를 수행합니다. 파일이나 데이터베이스가 관련되어 있는 경우 호출자는 `HtmlBlockDocument::html()`를 로드하고 유지하는 책임을 집니다.
 
@@ -81,8 +81,7 @@ iiXml는 엄격한 트리를 형성하는 대신 서로 겹칠 수 있는 독립
 ## Native dependency migration (0.4)
 
 The complete module now uses C++23 standard types and open-source backends.
-Qt and the installed iiXml/iiHtmlBlock packages are not runtime or public-package
-dependencies. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml
+The full document package requires the Qt-free `iiXmlMarkup` package; the PDF-only component does not. Qt and the legacy iiXml/iiHtmlBlock packages are not required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml
 and persistence uses nlohmann/json. The markup algorithms retain the first-party
 range/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)
 for byte-string API changes, ABI compatibility, prior-file verification and the

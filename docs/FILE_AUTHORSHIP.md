@@ -60,9 +60,13 @@ auto result = ii::document::WordDocumentWriter{}.write(word, "revised.docx");
 ## Native dependency migration (0.4)
 
 The complete module now uses C++23 standard types and open-source backends.
-Qt and the installed iiXml/iiHtmlBlock packages are not runtime or public-package
-dependencies. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml
+The full document package requires the Qt-free `iiXmlMarkup` component; the standalone PDF component does not. Neither Qt nor the legacy Qt-based iiXml/iiHtmlBlock packages are required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml
 and persistence uses nlohmann/json. The markup algorithms retain the first-party
 range/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)
 for byte-string API changes, ABI compatibility, prior-file verification and the
 Thinking Space schema-2 byte-diff encoding.
+
+
+## 검증 리소스
+
+작성자 메타데이터 자동 테스트의 임시 문서는 `resources/` 아래 고유 디렉터리에 만들고 테스트 종료 시 정리한다. 기존 자산이나 빌드 캐시를 삭제하지 않는다.

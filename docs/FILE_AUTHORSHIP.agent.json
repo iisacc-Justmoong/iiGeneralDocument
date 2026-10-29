@@ -1,0 +1,548 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:6de867232f70a1c3fe677e325359c7df50d3d67ae6fd8a008421280a97a88978",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiGeneralDocument",
+    "name": "iiGeneralDocument",
+    "root": "SDK/iiGeneralDocument",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/FILE_AUTHORSHIP.md",
+    "sha256": "1f3353665710c3ed21bff9a0d2e8e53e0af5d973921e2f3602e9317b93589a2a",
+    "bytes": 8488,
+    "line_count": 72,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "파일 저작자",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"file-authorship\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# 파일 저작자\n",
+      "level": 1,
+      "title": "파일 저작자"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "iiGeneralDocument 0.4는 표준 C++23 `iiFileProviderNative 0.5` 구성요소를 사용한다. 그것은 공유 `Authorship` 장부를 저장합니다: 검증된 iisacc 계정/프로필/장치/기여 정보, 기여자 식별자, 첫/최신 변경 시간, 최신 작성자 참조, 및 정확한 서명되지 않은 십진법 버전입니다. 활성 편집 정체성은 런타임 컨텍스트이며 파일에서 결코 복원되지 않습니다. 토큰, 로그인 자격 증명 및 토큰 갱신은 결코 이 장부에 입력되지 않습니다. 메타데이터는 귀속 데이터이며 검증된 소유권이나 로그인이 아닙니다.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "html",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "<a id=\"mutation-boundaries\"></a>\n"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "heading",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "## 돌연변이 경계\n",
+      "level": 2,
+      "title": "돌연변이 경계"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "paragraph",
+      "start_line": 11,
+      "end_line": 11,
+      "raw": "위 `setFileAuthor(iiFileProvider::native::FileAuthor)` 를 `Document`, `WordDocument`, `HtmlBlockDocument`, `XmlTreeDocument` 또는 `ThinkingSpaceDocument` 에 호출합니다. 선택된 프로필은 즉시 기록됩니다. 동일한 프로필을 선택하는 것은 런타임 편집 컨텍스트만 변경합니다. 성공적인 변경은 변형이 반환되기 전에 JSON 덤프를 재생성하며 타이머나 게터 없이 수행됩니다. 저자가 선택되기 전의 변경사항은 명시적으로 귀속되지 않은 상태로 유지됩니다.\n"
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "list",
+      "start_line": 13,
+      "end_line": 16,
+      "raw": "- PDF : `DocumentEditor` 작업 및 `Document` 페이지/필드/버전/메타데이터 세터 스탬프 편집. 동일한 텍스트/이미지 교체 및 누락된 제거는 전혀 할 수 없습니다. 캐시된 JSON는 `metadata()[\"iisacc:authorship\"]`에도 존재합니다.\n- Word: 단락/표 삽입 및 `setMetadata` 스탬프 직접 중첩 실행/스타일/테이블/섹션 변경을 위해 `WordDocument::edit(callback)`를 사용하십시오. 복사된 초안을 커밋하고 실제 값 변경을 감지하며 false/throw 콜백을 폐기합니다. 이미 스탬프가 찍힌 초안은 두 번 스탬프가 찍혀 있지 않습니다.\n- HTML / XML : 성공적인 서브트리 CRUD가 기존 원자 소스/ ID 커밋 경계에 스탬프됩니다. 잘못된 입력과 동일한 소스는 메타데이터를 변경하지 않습니다.\n- Thinking Space : `edit(callback)`는 헤더와 본문 변경을 포함하고 헤더의 예약된 메타데이터 키를 즉시 동기화합니다. Body HTML 편집기들은 동일한 원장을 사용합니다. `recordVersion`는 현재 원장을 스냅샷에 캡처합니다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "PDF : `DocumentEditor` 작업 및 `Document` 페이지/필드/버전/메타데이터 세터 스탬프 편집. 동일한 텍스트/이미지 교체 및 누락된 제거는 전혀 할 수 없습니다. 캐시된 JSON는 `metadata()[\"iisacc:authorship\"]`에도 존재합니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Word: 단락/표 삽입 및 `setMetadata` 스탬프 직접 중첩 실행/스타일/테이블/섹션 변경을 위해 `WordDocument::edit(callback)`를 사용하십시오. 복사된 초안을 커밋하고 실제 값 변경을 감지하며 false/throw 콜백을 폐기합니다. 이미 스탬프가 찍힌 초안은 두 번 스탬프가 찍혀 있지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "HTML / XML : 성공적인 서브트리 CRUD가 기존 원자 소스/ ID 커밋 경계에 스탬프됩니다. 잘못된 입력과 동일한 소스는 메타데이터를 변경하지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Thinking Space : `edit(callback)`는 헤더와 본문 변경을 포함하고 헤더의 예약된 메타데이터 키를 즉시 동기화합니다. Body HTML 편집기들은 동일한 원장을 사용합니다. `recordVersion`는 현재 원장을 스냅샷에 캡처합니다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "기존 가변 벡터/맵과 공개 Thinking Space 집계는 소스 호환성과 분리된 구성을 위해 유지됩니다. C++ 은 보유된 원시 참조를 통한 할당을 관찰할 수 없습니다. 위 방법을 통해 라우트 작성을 수행하며, 구식 직접 PDF /Word 변형은 `recordChange()` 로 끝나야 합니다. 애플리케이션 편집에는 `ThinkingSpaceDocument::edit` 를 사용하므로 헤더와 본문이 동기화되어 있습니다. 이 문서 값은 파일 핸들이나 숨겨진 쓰기 소유자가 없습니다. PDF /Word 작성기는 호출될 때 이미 업데이트된 메타데이터를 영속화하며 새 백그라운드 자동 저장 서비스가 아닙니다.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "fenced_code",
+      "start_line": 20,
+      "end_line": 28,
+      "raw": "```cpp\nword.setFileAuthor(author);\nword.edit([](ii::document::WordDocument &draft) {\n    std::get<ii::document::WordParagraph>(draft.blocks().at(0)).runs.at(0).text = \"Revised\";\n    return true;\n});\n// word.authorship().dump()에는 이미 새 리비전과 기여 정보가 포함되어 있다.\nauto result = ii::document::WordDocumentWriter{}.write(word, \"revised.docx\");\n```\n",
+      "language": "cpp",
+      "code": "word.setFileAuthor(author);\nword.edit([](ii::document::WordDocument &draft) {\n    std::get<ii::document::WordParagraph>(draft.blocks().at(0)).runs.at(0).text = \"Revised\";\n    return true;\n});\n// word.authorship().dump()에는 이미 새 리비전과 기여 정보가 포함되어 있다.\nauto result = ii::document::WordDocumentWriter{}.write(word, \"revised.docx\");\n",
+      "closed": true
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 29,
+      "end_line": 29,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "html",
+      "start_line": 30,
+      "end_line": 30,
+      "raw": "<a id=\"embedded-formats\"></a>\n"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 31,
+      "end_line": 31,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "heading",
+      "start_line": 32,
+      "end_line": 32,
+      "raw": "## 내장된 형식\n",
+      "level": 2,
+      "title": "내장된 형식"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "table",
+      "start_line": 34,
+      "end_line": 41,
+      "raw": "|형식|내부 표현|\n| --- | --- |\n| PDF |문서 정보 사전의 Unicode 하위의 `/iisacc:authorship` 문자열|\n| DOCX |`docProps/custom.xml`, `iisacc:authorship` 라는 사용자 정의 문자열 속성으로, 패키지 관계와 콘텐츠 타입을 포함합니다.|\n| ODT/FODT |문서 메타데이터의 `meta:user-defined` 문자열 속성|\n| DOC |기존 LibreOffice 브릿지는 변환을 통해 사용자 정의 속성을 유지합니다|\n| HTML/XML |`toFileBytes()` 는 기본64   UTF-8   JSON 주석을 추가하며;  `fromFileBytes()` 는 소스 파싱 전에 해당 엔벨로프를 검증하고 제거합니다|\n| `.tsdoc` |스키마 2 JSON 컨테이너(스키마 1 읽기 지원)는 헤더 메타데이터, 정확한 본문 HTML 및 완전한 유지 버전/스냅샷/차이점 저장소를 포함합니다|\n",
+      "columns": [
+        "형식",
+        "내부 표현"
+      ],
+      "rows": [
+        [
+          "PDF",
+          "문서 정보 사전의 Unicode 하위의 `/iisacc:authorship` 문자열"
+        ],
+        [
+          "DOCX",
+          "`docProps/custom.xml`, `iisacc:authorship` 라는 사용자 정의 문자열 속성으로, 패키지 관계와 콘텐츠 타입을 포함합니다."
+        ],
+        [
+          "ODT/FODT",
+          "문서 메타데이터의 `meta:user-defined` 문자열 속성"
+        ],
+        [
+          "DOC",
+          "기존 LibreOffice 브릿지는 변환을 통해 사용자 정의 속성을 유지합니다"
+        ],
+        [
+          "HTML/XML",
+          "`toFileBytes()` 는 기본64   UTF-8   JSON 주석을 추가하며;  `fromFileBytes()` 는 소스 파싱 전에 해당 엔벨로프를 검증하고 제거합니다"
+        ],
+        [
+          "`.tsdoc`",
+          "스키마 2 JSON 컨테이너(스키마 1 읽기 지원)는 헤더 메타데이터, 정확한 본문 HTML 및 완전한 유지 버전/스냅샷/차이점 저장소를 포함합니다"
+        ]
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 42,
+      "end_line": 42,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 43,
+      "end_line": 43,
+      "raw": "[OpenDocument   1.3, 섹션 19.338](https://docs.oasis-open.org/office/OpenDocument/v1.3/os/part3-schema/OpenDocument-v1.3-os-part3-schema.html) 은 `meta:value-type` 가 생략될 때 string 을 기본값으로 정의합니다. 리더는 LibreOffice 형식과 명시적인 string 타입을 허용합니다. 다른 작성된 값 타입, 중복 속성 및 잘못된 형식 장부는 읽기 오류를 발생시킵니다. PDF /Word 작성자는 정제된 장부를 사용하므로 예약된 원시 맵 값을 변경하면 작성된 출력에 임의의 인증 필드를 주입하지 않습니다\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 44,
+      "end_line": 44,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "paragraph",
+      "start_line": 45,
+      "end_line": 45,
+      "raw": "마크업 엔벨로프는 파일의 끝에서 `\\n<!--iisacc:authorship:v1:BASE64-->` 입니다. 표준 기본64 는 `--` 를 XML 주석에 도입할 수 없습니다. 원시 `html()` 와 `xml()` 는 변경되지 않는 오프셋을 가진 정확한 편집 가능한 본문으로 남아 있습니다. 파일 사용자는 귀속을 유지하려면 `toFileBytes` / `fromFileBytes` 를 사용해야 합니다. 잘못된 형식, 중복 또는 미래 버전 작성된 주석은 안전하게 거부한다 합니다. 외부 편집자는 사용자 정의 속성/주석을 제거할 수 있으므로 이러한 테스트된 경로 밖의 보존은 가정하지 않습니다\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 46,
+      "end_line": 46,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "paragraph",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "`.tsdoc` 파일은 `format: \"iiGeneralDocument.ThinkingSpace\"` , `schemaVersion: 1` , `header` , `bodyHtml` , 및 `history` 를 가집니다 역사는 버전, 스냅샷, 차이점, 가지치기된 개수 및 얕은 경계를 저장합니다 모든 버전 ID 및 가역적 차이점은 읽을 때 검증되며, 유지/가지치기된 역사는 보존됩니다 컨테이너는 64   MiB 로 제한되며, 최대 100 개의 유지 버전, 스냅샷 및 차이점을 가집니다 각 저자 장부는 iiFileProvider 로 1 MiB 로 제한됩니다. 이전 디스크 컨테이너는 없었으며, 알 수 없는 컨테이너 버전은 암시적으로 마이그레이션되는 대신 거부됩니다.\n"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "html",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "<a id=\"dependency-and-validation\"></a>\n"
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "heading",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "## 종속성 및 유효성 검사\n",
+      "level": 2,
+      "title": "종속성 및 유효성 검사"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 52,
+      "end_line": 52,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "paragraph",
+      "start_line": 53,
+      "end_line": 53,
+      "raw": "작성자와 파일 처리는 동일한 MIT의 형제 프로젝트 `iiFileProvider::Native`가 소유한다. JSON은 nlohmann/json, Unicode 정규화는 utf8proc, 시간·문자열·파일 인터페이스는 C++23 표준 타입을 사용한다. 공개 모델의 ABI 버전은 0.4이므로 기존 전체 모듈 소비자는 재빌드한다. 이전 프로필 및 장부의 형식과 내용은 유지되며 Qt 의존성은 없다.\n"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 54,
+      "end_line": 54,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "paragraph",
+      "start_line": 55,
+      "end_line": 55,
+      "raw": "테스트는 즉시 덤프, 무작위/거부된 편집, PDF / DOCX / DOC / ODT / FODT 및 마크업 라운드 트립, LibreOffice 의 기본 문자열 타입, 잘못된 형식/미래 메타데이터 및 완전/가려진 `.tsdoc` 이력을 다룹니다. 독립적으로 설치된 패키지 테스트는 내보낸 CMake 타겟과 헤더를 통해 동일한 계약을 연습합니다.\n"
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 56,
+      "end_line": 56,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "paragraph",
+      "start_line": 57,
+      "end_line": 57,
+      "raw": "설치된 타깃은 비시스템 include 디렉터리를 내보내므로 선택한 SDK 접두사가 오래된 전역 `CPATH` 헤더보다 우선한다. 설치된 소비자 회귀 테스트는 충돌하는 레거시 umbrella 헤더를 의도적으로 제공한다. Thinking Space의 직렬화는 JSON을 작성하기 전에 UTF-8이 아닌 문자열을 거부한다.\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 58,
+      "end_line": 59,
+      "raw": "\n\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 60,
+      "end_line": 60,
+      "raw": "## Native dependency migration (0.4)\n",
+      "level": 2,
+      "title": "Native dependency migration (0.4)"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 61,
+      "end_line": 61,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 62,
+      "end_line": 67,
+      "raw": "The complete module now uses C++23 standard types and open-source backends.\nThe full document package requires the Qt-free `iiXmlMarkup` component; the standalone PDF component does not. Neither Qt nor the legacy Qt-based iiXml/iiHtmlBlock packages are required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml\nand persistence uses nlohmann/json. The markup algorithms retain the first-party\nrange/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)\nfor byte-string API changes, ABI compatibility, prior-file verification and the\nThinking Space schema-2 byte-diff encoding.\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 68,
+      "end_line": 69,
+      "raw": "\n\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "heading",
+      "start_line": 70,
+      "end_line": 70,
+      "raw": "## 검증 리소스\n",
+      "level": 2,
+      "title": "검증 리소스"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 71,
+      "end_line": 71,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "paragraph",
+      "start_line": 72,
+      "end_line": 72,
+      "raw": "작성자 메타데이터 자동 테스트의 임시 문서는 `resources/` 아래 고유 디렉터리에 만들고 테스트 종료 시 정리한다. 기존 자산이나 빌드 캐시를 삭제하지 않는다.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "파일 저작자",
+      "anchor": "파일-저작자",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000009",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "돌연변이 경계",
+      "anchor": "돌연변이-경계",
+      "start_line": 9
+    },
+    {
+      "block_id": "b000021",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "내장된 형식",
+      "anchor": "내장된-형식",
+      "start_line": 32
+    },
+    {
+      "block_id": "b000033",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "종속성 및 유효성 검사",
+      "anchor": "종속성-및-유효성-검사",
+      "start_line": 51
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "Native dependency migration (0.4)",
+      "anchor": "native-dependency-migration-04",
+      "start_line": 60
+    },
+    {
+      "block_id": "b000045",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "검증 리소스",
+      "anchor": "검증-리소스",
+      "start_line": 70
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000043",
+        "line": 63,
+        "text": "The full document package requires the Qt-free `iiXmlMarkup` component; the standalone PDF component does not. Neither Qt nor the legacy Qt-based iiXml/iiHtmlBlock packages are required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      },
+      {
+        "block_id": "b000047",
+        "line": 72,
+        "text": "작성자 메타데이터 자동 테스트의 임시 문서는 `resources/` 아래 고유 디렉터리에 만들고 테스트 종료 시 정리한다. 기존 자산이나 빌드 캐시를 삭제하지 않는다.",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000025",
+        "label": "OpenDocument   1.3, 섹션 19.338",
+        "target": "https://docs.oasis-open.org/office/OpenDocument/v1.3/os/part3-schema/OpenDocument-v1.3-os-part3-schema.html",
+        "kind": "external",
+        "line": 43
+      },
+      {
+        "block_id": "b000043",
+        "label": "migration details",
+        "target": "QT_REMOVAL.md",
+        "kind": "relative",
+        "line": 65
+      }
+    ],
+    "tables": [
+      {
+        "block_id": "b000023",
+        "columns": [
+          "형식",
+          "내부 표현"
+        ],
+        "rows": [
+          [
+            "PDF",
+            "문서 정보 사전의 Unicode 하위의 `/iisacc:authorship` 문자열"
+          ],
+          [
+            "DOCX",
+            "`docProps/custom.xml`, `iisacc:authorship` 라는 사용자 정의 문자열 속성으로, 패키지 관계와 콘텐츠 타입을 포함합니다."
+          ],
+          [
+            "ODT/FODT",
+            "문서 메타데이터의 `meta:user-defined` 문자열 속성"
+          ],
+          [
+            "DOC",
+            "기존 LibreOffice 브릿지는 변환을 통해 사용자 정의 속성을 유지합니다"
+          ],
+          [
+            "HTML/XML",
+            "`toFileBytes()` 는 기본64   UTF-8   JSON 주석을 추가하며;  `fromFileBytes()` 는 소스 파싱 전에 해당 엔벨로프를 검증하고 제거합니다"
+          ],
+          [
+            "`.tsdoc`",
+            "스키마 2 JSON 컨테이너(스키마 1 읽기 지원)는 헤더 메타데이터, 정확한 본문 HTML 및 완전한 유지 버전/스냅샷/차이점 저장소를 포함합니다"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

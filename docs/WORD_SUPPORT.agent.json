@@ -1,0 +1,597 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:d0821e111732a359bddd04283adf80a9b43dfb4791640db374608f2da84a1f75",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiGeneralDocument",
+    "name": "iiGeneralDocument",
+    "root": "SDK/iiGeneralDocument",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/WORD_SUPPORT.md",
+    "sha256": "25c3e5bbcbab8b756cddd912ff661f88228c24ce1cd943c5ba611cfc2031e235",
+    "bytes": 6776,
+    "line_count": 90,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "워드 지원 계약",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "html",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "<a id=\"word-support-contract\"></a>\n"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "heading",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "# 워드 지원 계약\n",
+      "level": 1,
+      "title": "워드 지원 계약"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "html",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "<a id=\"formats-and-backends\"></a>\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "heading",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "## 형식 및 백엔드\n",
+      "level": 2,
+      "title": "형식 및 백엔드"
+    },
+    {
+      "id": "b000008",
+      "kind": "blank",
+      "start_line": 8,
+      "end_line": 8,
+      "raw": "\n"
+    },
+    {
+      "id": "b000009",
+      "kind": "paragraph",
+      "start_line": 9,
+      "end_line": 9,
+      "raw": "대상 또는 소스 확장에 의한 `WordDocumentReader` 및 `WordDocumentWriter` 디스패치:\n"
+    },
+    {
+      "id": "b000010",
+      "kind": "blank",
+      "start_line": 10,
+      "end_line": 10,
+      "raw": "\n"
+    },
+    {
+      "id": "b000011",
+      "kind": "table",
+      "start_line": 11,
+      "end_line": 16,
+      "raw": "|형식|읽기|쓰기|백엔드|\n| --- | --- | --- | --- |\n| `.docx` |예|예|네이티브 OOXML/OPC 구현(pugixml XML 및 비공개 사용) 링크된 libzip|\n| `.doc` |예|예|고립된 LibreOffice 를 네이티브 DOCX 코덱으로 변환하거나 그로부터 변환하는 것|\n| `.odt` |예|예|네이티브 OpenDocument ZIP pugixml XML 및 비공개를 사용하여 구현 libzip|\n| `.fodt` |예|예|pugixml XML를 사용한 네이티브 플랫 OpenDocument XML 구현|\n",
+      "columns": [
+        "형식",
+        "읽기",
+        "쓰기",
+        "백엔드"
+      ],
+      "rows": [
+        [
+          "`.docx`",
+          "예",
+          "예",
+          "네이티브 OOXML/OPC 구현(pugixml XML 및 비공개 사용) 링크된 libzip"
+        ],
+        [
+          "`.doc`",
+          "예",
+          "예",
+          "고립된 LibreOffice 를 네이티브 DOCX 코덱으로 변환하거나 그로부터 변환하는 것"
+        ],
+        [
+          "`.odt`",
+          "예",
+          "예",
+          "네이티브 OpenDocument ZIP pugixml XML 및 비공개를 사용하여 구현 libzip"
+        ],
+        [
+          "`.fodt`",
+          "예",
+          "예",
+          "pugixml XML를 사용한 네이티브 플랫 OpenDocument XML 구현"
+        ]
+      ]
+    },
+    {
+      "id": "b000012",
+      "kind": "blank",
+      "start_line": 17,
+      "end_line": 17,
+      "raw": "\n"
+    },
+    {
+      "id": "b000013",
+      "kind": "paragraph",
+      "start_line": 18,
+      "end_line": 18,
+      "raw": "DOCX 는 ZIP 패키지로, 고정된 경로로 가정되는 대신 OPC 패키지 관계를 통해 주요 문서 부분이 발견됩니다. 레거시 DOC 는 Word 97-2003 바이너리 컴파운드 파일 형식입니다. 라이브러리는 해당 바이너리 사양을 재구현한다고 주장하지 않으며, `.doc` 를 위해 로컬에 설치된 `soffice` / `libreoffice` 실행 가능 파일을 요구합니다. `PATH` 에 있지 않을 때 `libreOfficeExecutable` 를 `WordReadOptions` 또는 `WordWriteOptions` 에 설정합니다.\n"
+    },
+    {
+      "id": "b000014",
+      "kind": "blank",
+      "start_line": 19,
+      "end_line": 19,
+      "raw": "\n"
+    },
+    {
+      "id": "b000015",
+      "kind": "paragraph",
+      "start_line": 20,
+      "end_line": 20,
+      "raw": "ODT 와 FODT 는 LibreOffice 런타임 없이 동일한 편집 가능한 흐름 모델을 사용합니다. 그들의 상세한 ODF 버전, 패키지, 의미 매핑, 보안, 및 손실 계약은 `ODF_SUPPORT.md` 에 있습니다. 두 작성자는 원자적 교체 전에 같은 디렉토리의 임시 결과를 검증하며, 문서를 덮어쓸 때 기존 POSIX 모드를 유지합니다. 새로운 네이티브 문서는 같은 디렉토리의 POSIX `0666` 생성 탐지기에 의해 생성된 모드를 사용하므로, 읽거나 변경하지 않고 프로세스 umask 가 존중됩니다.\n"
+    },
+    {
+      "id": "b000016",
+      "kind": "blank",
+      "start_line": 21,
+      "end_line": 21,
+      "raw": "\n"
+    },
+    {
+      "id": "b000017",
+      "kind": "html",
+      "start_line": 22,
+      "end_line": 22,
+      "raw": "<a id=\"editable-word-model\"></a>\n"
+    },
+    {
+      "id": "b000018",
+      "kind": "blank",
+      "start_line": 23,
+      "end_line": 23,
+      "raw": "\n"
+    },
+    {
+      "id": "b000019",
+      "kind": "heading",
+      "start_line": 24,
+      "end_line": 24,
+      "raw": "## 편집 가능한 Word 모델\n",
+      "level": 2,
+      "title": "편집 가능한 Word 모델"
+    },
+    {
+      "id": "b000020",
+      "kind": "blank",
+      "start_line": 25,
+      "end_line": 25,
+      "raw": "\n"
+    },
+    {
+      "id": "b000021",
+      "kind": "paragraph",
+      "start_line": 26,
+      "end_line": 26,
+      "raw": "`WordDocument`는 흐름 지향적이며 페이지 좌표 PDF 모델과 독립적입니다. 순서가 지정된 본문 블록을 유지하고 다음을 노출합니다.\n"
+    },
+    {
+      "id": "b000022",
+      "kind": "blank",
+      "start_line": 27,
+      "end_line": 27,
+      "raw": "\n"
+    },
+    {
+      "id": "b000023",
+      "kind": "list",
+      "start_line": 28,
+      "end_line": 32,
+      "raw": "- 핵심 제목, 저자, 주제, 설명, 키워드, 제작자 및 수정 메타데이터;\n- 스타일 식별자, 정렬, 번호 식별/레벨 및 ODF 동일 목록 항목 연속 플래그가 포함된 단락;\n- 탭, 줄 바꿈, 굵게, 이탤릭, 밑줄, 라틴 및 동아시아 글꼴 패밀리, 포인트 크기, 그리고 RGB 색상을 포함한 독립적으로 편집 가능한 텍스트가 제공됩니다;\n- 정렬된 행, 셀 및 셀 단락이 있는 테이블;\n- Word 트윕의 페이지 너비, 높이 및 여백.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "핵심 제목, 저자, 주제, 설명, 키워드, 제작자 및 수정 메타데이터;",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "스타일 식별자, 정렬, 번호 식별/레벨 및 ODF 동일 목록 항목 연속 플래그가 포함된 단락;",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "탭, 줄 바꿈, 굵게, 이탤릭, 밑줄, 라틴 및 동아시아 글꼴 패밀리, 포인트 크기, 그리고 RGB 색상을 포함한 독립적으로 편집 가능한 텍스트가 제공됩니다;",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "정렬된 행, 셀 및 셀 단락이 있는 테이블;",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "Word 트윕의 페이지 너비, 높이 및 여백.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000024",
+      "kind": "blank",
+      "start_line": 33,
+      "end_line": 33,
+      "raw": "\n"
+    },
+    {
+      "id": "b000025",
+      "kind": "paragraph",
+      "start_line": 34,
+      "end_line": 34,
+      "raw": "새로운 DOCX 파일에는 명시적인 Normal, Title, Subtitle, 및 Heading 1-3 스타일, 정확한 섹션 기하학, 실제 번호 정의, 및 고정된 DXA 테이블 기하학이 포함되어 있습니다. 작성자는 ZIP 를 libzip 를 통해 원자적으로 커밋한 후 성공을 보고하기 전에 결과를 다시 엽니다. 레거시 DOC 출력은 성공이 보고되기 전에 DOCX 로 다시 변환되어 다시 파싱됩니다.\n"
+    },
+    {
+      "id": "b000026",
+      "kind": "blank",
+      "start_line": 35,
+      "end_line": 35,
+      "raw": "\n"
+    },
+    {
+      "id": "b000027",
+      "kind": "html",
+      "start_line": 36,
+      "end_line": 36,
+      "raw": "<a id=\"explicit-limits\"></a>\n"
+    },
+    {
+      "id": "b000028",
+      "kind": "blank",
+      "start_line": 37,
+      "end_line": 37,
+      "raw": "\n"
+    },
+    {
+      "id": "b000029",
+      "kind": "heading",
+      "start_line": 38,
+      "end_line": 38,
+      "raw": "## 명시적 제한\n",
+      "level": 2,
+      "title": "명시적 제한"
+    },
+    {
+      "id": "b000030",
+      "kind": "blank",
+      "start_line": 39,
+      "end_line": 39,
+      "raw": "\n"
+    },
+    {
+      "id": "b000031",
+      "kind": "list",
+      "start_line": 40,
+      "end_line": 46,
+      "raw": "- 이미지, 도면, 내장 객체, 헤더, 푸터, 주석, 주석, 끝주석, 필드, 콘텐츠 컨트롤 및 중첩된 표는 버전 0.1에서 1 급 모델 항목이 아닙니다.\n- 하이퍼링크 표시 텍스트는 읽히지만, 하이퍼링크 관계는 평탄화되어 경고로 보고됩니다.\n- 삽입된 추적 텍스트는 현재 콘텐츠로 읽히게 됩니다. 추적된 삭제는 제외되며 경고로 보고됩니다.\n- 지원되지 않는 본문 블록과 비텍스트 실행 콘텐츠는 조용한 전체 충실도 주장보다 진단을 생성합니다. 해당 항목들을 포함하는 소스를 다시 작성하면 해당 항목을 생략할 수 있습니다.\n- 비밀번호로 보호되거나 암호화된 패키지는 지원되지 않습니다.\n- 각 XML 부품은 기본적으로 64 MiB로 제한됩니다. `WordReadOptions`는 읽는 동안 값을 적용합니다. 아카이브 커밋 전에, `WordWriteOptions`는 제한을 초과한 모든 생성된 DOCX `.xml` 및 `.rels` 부품을 거부하고, 동일한 제한을 필수 재개 검증에 적용합니다. 신뢰할 수 있는 문서에 대해서만 `maximumXmlPartBytes`를 재정의하십시오.\n- LibreOffice 변환 충실도는 설치된 LibreOffice 빌드와 해당 Microsoft Word 필터에 따라 달라집니다. 변환기 누락, 시간 초과, 변환 오류 또는 읽을 수 없는 변환 출력 안전하게 거부한다.\n",
+      "items": [
+        {
+          "marker": "-",
+          "text": "이미지, 도면, 내장 객체, 헤더, 푸터, 주석, 주석, 끝주석, 필드, 콘텐츠 컨트롤 및 중첩된 표는 버전 0.1에서 1 급 모델 항목이 아닙니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "하이퍼링크 표시 텍스트는 읽히지만, 하이퍼링크 관계는 평탄화되어 경고로 보고됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "삽입된 추적 텍스트는 현재 콘텐츠로 읽히게 됩니다. 추적된 삭제는 제외되며 경고로 보고됩니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "지원되지 않는 본문 블록과 비텍스트 실행 콘텐츠는 조용한 전체 충실도 주장보다 진단을 생성합니다. 해당 항목들을 포함하는 소스를 다시 작성하면 해당 항목을 생략할 수 있습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "비밀번호로 보호되거나 암호화된 패키지는 지원되지 않습니다.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "각 XML 부품은 기본적으로 64 MiB로 제한됩니다. `WordReadOptions`는 읽는 동안 값을 적용합니다. 아카이브 커밋 전에, `WordWriteOptions`는 제한을 초과한 모든 생성된 DOCX `.xml` 및 `.rels` 부품을 거부하고, 동일한 제한을 필수 재개 검증에 적용합니다. 신뢰할 수 있는 문서에 대해서만 `maximumXmlPartBytes`를 재정의하십시오.",
+          "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "LibreOffice 변환 충실도는 설치된 LibreOffice 빌드와 해당 Microsoft Word 필터에 따라 달라집니다. 변환기 누락, 시간 초과, 변환 오류 또는 읽을 수 없는 변환 출력 안전하게 거부한다.",
+          "checked": null
+        }
+      ]
+    },
+    {
+      "id": "b000032",
+      "kind": "blank",
+      "start_line": 47,
+      "end_line": 47,
+      "raw": "\n"
+    },
+    {
+      "id": "b000033",
+      "kind": "html",
+      "start_line": 48,
+      "end_line": 48,
+      "raw": "<a id=\"example\"></a>\n"
+    },
+    {
+      "id": "b000034",
+      "kind": "blank",
+      "start_line": 49,
+      "end_line": 49,
+      "raw": "\n"
+    },
+    {
+      "id": "b000035",
+      "kind": "heading",
+      "start_line": 50,
+      "end_line": 50,
+      "raw": "## 예\n",
+      "level": 2,
+      "title": "예"
+    },
+    {
+      "id": "b000036",
+      "kind": "blank",
+      "start_line": 51,
+      "end_line": 51,
+      "raw": "\n"
+    },
+    {
+      "id": "b000037",
+      "kind": "fenced_code",
+      "start_line": 52,
+      "end_line": 74,
+      "raw": "```cpp\n#include <iiGeneralDocument/iiGeneralDocument.h>\n\nusing namespace ii::document;\n\nWordDocument document;\ndocument.metadata()[\"Title\"] = \"Word example\";\n\nWordParagraph paragraph;\nparagraph.properties.styleId = \"Heading1\";\nparagraph.runs.push_back({\"Editable heading\", {.bold = true}});\ndocument.appendParagraph(std::move(paragraph));\n\nauto written = WordDocumentWriter{}.write(document, \"example.docx\");\nif (written.hasErrors()) {\n    return 1;\n}\n\nauto read = WordDocumentReader{}.read(\"example.docx\");\nstd::get<WordParagraph>(read.document.blocks().front()).runs.front().text =\n    \"Revised heading\";\nreturn WordDocumentWriter{}.write(read.document, \"revised.docx\").hasErrors();\n```\n",
+      "language": "cpp",
+      "code": "#include <iiGeneralDocument/iiGeneralDocument.h>\n\nusing namespace ii::document;\n\nWordDocument document;\ndocument.metadata()[\"Title\"] = \"Word example\";\n\nWordParagraph paragraph;\nparagraph.properties.styleId = \"Heading1\";\nparagraph.runs.push_back({\"Editable heading\", {.bold = true}});\ndocument.appendParagraph(std::move(paragraph));\n\nauto written = WordDocumentWriter{}.write(document, \"example.docx\");\nif (written.hasErrors()) {\n    return 1;\n}\n\nauto read = WordDocumentReader{}.read(\"example.docx\");\nstd::get<WordParagraph>(read.document.blocks().front()).runs.front().text =\n    \"Revised heading\";\nreturn WordDocumentWriter{}.write(read.document, \"revised.docx\").hasErrors();\n",
+      "closed": true
+    },
+    {
+      "id": "b000038",
+      "kind": "blank",
+      "start_line": 75,
+      "end_line": 75,
+      "raw": "\n"
+    },
+    {
+      "id": "b000039",
+      "kind": "html",
+      "start_line": 76,
+      "end_line": 76,
+      "raw": "<a id=\"verification\"></a>\n"
+    },
+    {
+      "id": "b000040",
+      "kind": "blank",
+      "start_line": 77,
+      "end_line": 77,
+      "raw": "\n"
+    },
+    {
+      "id": "b000041",
+      "kind": "heading",
+      "start_line": 78,
+      "end_line": 78,
+      "raw": "## 검증\n",
+      "level": 2,
+      "title": "검증"
+    },
+    {
+      "id": "b000042",
+      "kind": "blank",
+      "start_line": 79,
+      "end_line": 79,
+      "raw": "\n"
+    },
+    {
+      "id": "b000043",
+      "kind": "paragraph",
+      "start_line": 80,
+      "end_line": 80,
+      "raw": "`iiGeneralDocument.WordModel` 는 편집 가능한 객체 계약을 수정합니다. `iiGeneralDocument.WordRoundTrip` 는 DOCX 에 포함된 Unicode 텍스트, 서식화된 런, 탭, 줄바꿈, 메타데이터, 및 테이블을 작성, 다시 엽니다, 편집하며, 다시 씁니다. `iiGeneralDocument.OdfRoundTrip`, `.OdfStyleCompatibility`, 및 `.OdfRobustness` 는 네이티브 ODT / FODT CRUD, 외부 스타일/레이아웃 매핑, 패키지 무결성, 리소스 제한, 및 원자적 덮어쓰기 행동을 포함합니다. `iiGeneralDocument.LegacyDocRoundTrip` 는 OLE 컴파운드 파일 서명을 확인하고 `soffice` 가 존재할 때 실제 LibreOffice DOC 쓰기/읽기 주기를 수행합니다. 릴리스 확인은 추가로 생성된 DOCX 를 페이지 PNG 로 렌더링하고 모든 페이지를 시각적으로 검사합니다.\n"
+    },
+    {
+      "id": "b000044",
+      "kind": "blank",
+      "start_line": 81,
+      "end_line": 82,
+      "raw": "\n\n"
+    },
+    {
+      "id": "b000045",
+      "kind": "heading",
+      "start_line": 83,
+      "end_line": 83,
+      "raw": "## Native dependency migration (0.4)\n",
+      "level": 2,
+      "title": "Native dependency migration (0.4)"
+    },
+    {
+      "id": "b000046",
+      "kind": "blank",
+      "start_line": 84,
+      "end_line": 84,
+      "raw": "\n"
+    },
+    {
+      "id": "b000047",
+      "kind": "paragraph",
+      "start_line": 85,
+      "end_line": 90,
+      "raw": "The complete module now uses C++23 standard types and open-source backends.\nThe full document package requires the Qt-free `iiXmlMarkup` component; the standalone PDF component does not. Neither Qt nor the legacy Qt-based iiXml/iiHtmlBlock packages are required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml\nand persistence uses nlohmann/json. The markup algorithms retain the first-party\nrange/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)\nfor byte-string API changes, ABI compatibility, prior-file verification and the\nThinking Space schema-2 byte-diff encoding.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000003",
+      "parent_id": null,
+      "level": 1,
+      "title": "워드 지원 계약",
+      "anchor": "워드-지원-계약",
+      "start_line": 3
+    },
+    {
+      "block_id": "b000007",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "형식 및 백엔드",
+      "anchor": "형식-및-백엔드",
+      "start_line": 7
+    },
+    {
+      "block_id": "b000019",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "편집 가능한 Word 모델",
+      "anchor": "편집-가능한-word-모델",
+      "start_line": 24
+    },
+    {
+      "block_id": "b000029",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "명시적 제한",
+      "anchor": "명시적-제한",
+      "start_line": 38
+    },
+    {
+      "block_id": "b000035",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "예",
+      "anchor": "예",
+      "start_line": 50
+    },
+    {
+      "block_id": "b000041",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "검증",
+      "anchor": "검증",
+      "start_line": 78
+    },
+    {
+      "block_id": "b000045",
+      "parent_id": "b000003",
+      "level": 2,
+      "title": "Native dependency migration (0.4)",
+      "anchor": "native-dependency-migration-04",
+      "start_line": 83
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [
+      {
+        "block_id": "b000031",
+        "line": 45,
+        "text": "- 각 XML 부품은 기본적으로 64 MiB로 제한됩니다. `WordReadOptions`는 읽는 동안 값을 적용합니다. 아카이브 커밋 전에, `WordWriteOptions`는 제한을 초과한 모든 생성된 DOCX `.xml` 및 `.rels` 부품을 거부하고, 동일한 제한을 필수 재개 검증에 적용합니다. 신뢰할 수 있는 문서에 대해서만 `maximumXmlPartBytes`를 재정의하십시오.",
+        "basis": "lexical_match",
+        "context": "list"
+      },
+      {
+        "block_id": "b000047",
+        "line": 86,
+        "text": "The full document package requires the Qt-free `iiXmlMarkup` component; the standalone PDF component does not. Neither Qt nor the legacy Qt-based iiXml/iiHtmlBlock packages are required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml",
+        "basis": "lexical_match",
+        "context": "paragraph"
+      }
+    ],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000047",
+        "label": "migration details",
+        "target": "QT_REMOVAL.md",
+        "kind": "relative",
+        "line": 88
+      }
+    ],
+    "tables": [
+      {
+        "block_id": "b000011",
+        "columns": [
+          "형식",
+          "읽기",
+          "쓰기",
+          "백엔드"
+        ],
+        "rows": [
+          [
+            "`.docx`",
+            "예",
+            "예",
+            "네이티브 OOXML/OPC 구현(pugixml XML 및 비공개 사용) 링크된 libzip"
+          ],
+          [
+            "`.doc`",
+            "예",
+            "예",
+            "고립된 LibreOffice 를 네이티브 DOCX 코덱으로 변환하거나 그로부터 변환하는 것"
+          ],
+          [
+            "`.odt`",
+            "예",
+            "예",
+            "네이티브 OpenDocument ZIP pugixml XML 및 비공개를 사용하여 구현 libzip"
+          ],
+          [
+            "`.fodt`",
+            "예",
+            "예",
+            "pugixml XML를 사용한 네이티브 플랫 OpenDocument XML 구현"
+          ]
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

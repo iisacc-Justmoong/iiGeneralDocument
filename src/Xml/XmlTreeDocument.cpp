@@ -3,8 +3,8 @@
 
 #include "Core/Diagnostic.h"
 
-#include "Codec/Private/Markup/TagParser.h"
-#include "Codec/Private/Markup/Doctype.h"
+#include <iiXml/Markup/TagParser.h>
+#include <iiXml/Markup/Doctype.h>
 
 #include <algorithm>
 #include <limits>
@@ -59,7 +59,7 @@ std::size_t requireTokenEnd(
 
 std::size_t declarationLength(
     std::string_view declaration,
-    detail::markup::Elements::DoctypeKind expectedKind,
+    ii::xml::markup::Elements::DoctypeKind expectedKind,
     bool standardDoctype)
 {
     std::string normalized;
@@ -70,9 +70,9 @@ std::size_t declarationLength(
         parsedDeclaration = normalized;
     }
 
-    const detail::markup::Elements::Doctype matcher;
-    const detail::markup::Elements::DoctypeResult result = matcher.MatchTopResult(parsedDeclaration);
-    if (result.Status != detail::markup::Elements::DoctypeStatus::Matched
+    const ii::xml::markup::Elements::Doctype matcher;
+    const ii::xml::markup::Elements::DoctypeResult result = matcher.MatchTopResult(parsedDeclaration);
+    if (result.Status != ii::xml::markup::Elements::DoctypeStatus::Matched
         || !result.Match.has_value()
         || result.Match->Kind != expectedKind) {
         std::string reason = result.Reason;
@@ -103,21 +103,21 @@ std::size_t documentBodyBegin(std::string_view source)
                 throw DocumentError("XML declaration must occur once before the doctype");
             }
             offset += declarationLength(
-                source.substr(offset), detail::markup::Elements::DoctypeKind::XmlDeclaration, false);
+                source.substr(offset), ii::xml::markup::Elements::DoctypeKind::XmlDeclaration, false);
             hasXmlDeclaration = true;
         } else if (startsWithAt(source, offset, "<!Doctype")) {
             if (hasDoctype) {
                 throw DocumentError("XML document contains more than one doctype");
             }
             offset += declarationLength(
-                source.substr(offset), detail::markup::Elements::DoctypeKind::DoctypeDeclaration, false);
+                source.substr(offset), ii::xml::markup::Elements::DoctypeKind::DoctypeDeclaration, false);
             hasDoctype = true;
         } else if (startsWithAt(source, offset, "<!DOCTYPE")) {
             if (hasDoctype) {
                 throw DocumentError("XML document contains more than one doctype");
             }
             offset += declarationLength(
-                source.substr(offset), detail::markup::Elements::DoctypeKind::DoctypeDeclaration, true);
+                source.substr(offset), ii::xml::markup::Elements::DoctypeKind::DoctypeDeclaration, true);
             hasDoctype = true;
         } else if (startsWithAt(source, offset, "<!--")) {
             offset = requireTokenEnd(source, offset + 4, "-->", "comment");
@@ -165,7 +165,7 @@ bool containsOnlyXmlMisc(std::string_view source) noexcept
 }
 
 void validateNodeHierarchy(
-    const detail::markup::Parser::TagNode& node,
+    const ii::xml::markup::Parser::TagNode& node,
     std::size_t sourceSize)
 {
     const auto& range = node.Range;
@@ -191,16 +191,16 @@ void validateNodeHierarchy(
     }
 }
 
-XmlAttributeValueType publicValueType(detail::markup::Elements::InlinePropertyType valueType) noexcept
+XmlAttributeValueType publicValueType(ii::xml::markup::Elements::InlinePropertyType valueType) noexcept
 {
     switch (valueType) {
-    case detail::markup::Elements::InlinePropertyType::IntType:
+    case ii::xml::markup::Elements::InlinePropertyType::IntType:
         return XmlAttributeValueType::integer;
-    case detail::markup::Elements::InlinePropertyType::FloatType:
+    case ii::xml::markup::Elements::InlinePropertyType::FloatType:
         return XmlAttributeValueType::real;
-    case detail::markup::Elements::InlinePropertyType::BoolType:
+    case ii::xml::markup::Elements::InlinePropertyType::BoolType:
         return XmlAttributeValueType::boolean;
-    case detail::markup::Elements::InlinePropertyType::StringType:
+    case ii::xml::markup::Elements::InlinePropertyType::StringType:
         return XmlAttributeValueType::string;
     }
     return XmlAttributeValueType::string;
@@ -413,9 +413,9 @@ std::vector<XmlNode> XmlTreeDocument::parseNodes(
         throw DocumentError("XML document must contain exactly one root element");
     }
 
-    const detail::markup::Parser::TagParser parser;
-    const detail::markup::Parser::TagDocumentResult result = parser.ParseAllDocumentResult(body);
-    if (result.Status != detail::markup::Parser::TagTreeParseStatus::Parsed
+    const ii::xml::markup::Parser::TagParser parser;
+    const ii::xml::markup::Parser::TagDocumentResult result = parser.ParseAllDocumentResult(body);
+    if (result.Status != ii::xml::markup::Parser::TagTreeParseStatus::Parsed
         || !result.Document.has_value()) {
         std::string reason = result.Diagnostic.Reason;
         if (reason.empty()) {
@@ -424,12 +424,12 @@ std::vector<XmlNode> XmlTreeDocument::parseNodes(
         throw DocumentError("XML tree parse failed: " + reason);
     }
 
-    const detail::markup::Parser::TagDocument& parsed = *result.Document;
+    const ii::xml::markup::Parser::TagDocument& parsed = *result.Document;
     if (parsed.Nodes.size() != 1) {
         throw DocumentError("XML document must contain exactly one root element");
     }
 
-    const detail::markup::Parser::TagNode& root = parsed.Nodes.front();
+    const ii::xml::markup::Parser::TagNode& root = parsed.Nodes.front();
     if (root.Range.RawBegin != 0
         || !containsOnlyXmlMisc(body.substr(root.Range.RawEnd))) {
         throw DocumentError("XML document contains content outside its root element");
@@ -438,7 +438,7 @@ std::vector<XmlNode> XmlTreeDocument::parseNodes(
 
     std::vector<XmlNode> nodes;
     const auto appendNode = [&](const auto& self,
-                                const detail::markup::Parser::TagNode& parsedNode,
+                                const ii::xml::markup::Parser::TagNode& parsedNode,
                                 std::optional<XmlNodeId> parentId,
                                 std::size_t depth) -> XmlNodeId {
         if (nodes.size() >= std::numeric_limits<std::uint64_t>::max()) {

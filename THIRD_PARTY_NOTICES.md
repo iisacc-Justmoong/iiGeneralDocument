@@ -25,11 +25,11 @@ licenses live under `iiFileProvider/Native/third_party` and are installed with
 `iiFileProviderNative`. All private archive symbols are hidden from the SDK ABI.
 
 First-party iiXml/iiHtmlBlock range, declaration, attribute and block-classification
-algorithms were adapted into standard C++ private sources. Their original QObject
-bindings/signals/debug logging are excluded. The source paths and original hashes
+algorithms are provided by the Qt-free iiXmlMarkup component. Their original QObject
+bindings/signals/debug logging are excluded. Their historical source paths and original hashes
 are recorded in `third_party/first-party-markup-provenance.json`; their MIT
 license is included in `third_party/licenses/first-party-markup/LICENSE`.
-Neither installed binary package is needed by iiGeneralDocument.
+The full iiGeneralDocument build requires iiXmlMarkup; the standalone PDF component does not.
 
 The PDF object codec and fixture adapt the iisacc-authored MIT engineering
 counterpart; its full notice is preserved in

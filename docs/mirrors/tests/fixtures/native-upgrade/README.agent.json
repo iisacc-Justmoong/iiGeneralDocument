@@ -1,0 +1,46 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:d78107b2498f2d0cdbc6e49d8799004999859796849b8260041ad06b7a19008c",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiGeneralDocument",
+    "name": "iiGeneralDocument",
+    "root": "SDK/iiGeneralDocument",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "tests/fixtures/native-upgrade/README.md",
+    "sha256": "dafd4981dd51c70ec17e63e6b88087cea35407feb9cdc55043cdcfd0cd2989b2",
+    "bytes": 490,
+    "line_count": 6,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "README.md",
+    "role": "overview",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "paragraph",
+      "start_line": 1,
+      "end_line": 6,
+      "raw": "These synthetic, credential-free fixtures were written by the installed Qt-backed\n0.3.0 SDK before the full-module migration. They contain schema-1 Thinking Space\nhistory and schema-3 author metadata with a Korean name, emoji, full-name detail,\nroles and a document identifier. NativeMigration verifies exact history object\nidentities and complete JSON profile/ledger equivalence, then upgrades the file\nwithout changing those object IDs. No Adobe source or real user document is included.\n"
+    }
+  ],
+  "outline": [],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:4b4f4e3cf2c4714d63e2c363b1b82dbfcd5520bd511e2598baa34c84c31dc0a7",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiGeneralDocument",
+    "name": "iiGeneralDocument",
+    "root": "SDK/iiGeneralDocument",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/PERFORMANCE.md",
+    "sha256": "24c0ed3392814289be534be898306b4fe47842751e9ae6dd3e0a7f912dc489a6",
+    "bytes": 876,
+    "line_count": 15,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Form field identity lookup",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Form field identity lookup\n",
+      "level": 1,
+      "title": "Form field identity lookup"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 6,
+      "raw": "PDF writing builds a local ordered index of source object-number/generation\npairs once, then resolves each existing form field through that index. Reordered\nfields retain their original object identities without rescanning every PDF\nfield for every document field. Duplicate references retain first-match behavior.\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 8,
+      "end_line": 11,
+      "raw": "The original-name fallback remains a live search because renaming a field or a\nparent can change fully-qualified names during the same write. It is not cached\nusing stale names. The index is private to one write and does not survive a PDF\nmutation or hold references across documents.\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 12,
+      "end_line": 12,
+      "raw": "\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 13,
+      "end_line": 15,
+      "raw": "`PdfFormLookupTest` creates an independent xref-table PDF with 256 fields, reverses\nthe document field order, exercises missing-source name fallback, renames all\nfields and verifies that all original values and identities survive a round trip.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Form field identity lookup",
+      "anchor": "form-field-identity-lookup",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}

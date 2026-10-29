@@ -4,7 +4,7 @@ Version 0.4 removes Qt from the entire document library, its public headers,
 CMake packages, file access, author metadata, text/XML/JSON codecs, conversion
 processes, tests and installed consumers. Both exported targets
 `iiGeneralDocument::iiGeneralDocument` and `iiGeneralDocument::Pdf` are native
-C++23 libraries. No Qt, iiXml or iiHtmlBlock binary is needed by either target.
+C++23 libraries. The full target consumes the Qt-free `iiXmlMarkup` package; the PDF-only target remains independent of iiXml. Neither target requires the Qt or iiHtmlBlock binaries.
 
 ## Dependency and ownership boundaries
 
@@ -15,7 +15,7 @@ C++23 libraries. No Qt, iiXml or iiHtmlBlock binary is needed by either target.
 | PDF interpretation/transformation | Private QPDF 12.3.2 with zlib 1.3.1 and libjpeg-turbo 3.2.0 | SDK document/page/element objects or `pdf::Document` |
 | DOCX/ODT packages | Private libzip 1.11.4 | `WordDocument` |
 | OOXML and OpenDocument XML | Private pugixml 1.16, standard Unicode/namespace validation | `WordDocument` |
-| HTML and typed XML source ranges | Standard C++ parser logic adapted from first-party iiXml/iiHtmlBlock | Stable SDK block/node IDs |
+| HTML and typed XML source ranges | `iiXml::Markup` source-preserving C++23 tag parser and block range tracker | Stable SDK block/node IDs |
 | Thinking Space persistence | Private nlohmann/json 3.12.0; SHA-256 supplied by Native provider | Standard byte strings and SDK history objects |
 | Legacy `.doc` conversion | Optional installed LibreOffice, isolated native process/profile with a timeout | `WordDocumentReader`/`WordDocumentWriter` |
 
@@ -89,14 +89,33 @@ contract; it is not a W3C schema or browser DOM engine.
 
 `NativeDependencies` scans authored source/tests for Qt types and checks the full
 macOS library's load commands. Staged and actual installed consumer builds disable
-Qt, iiXml, iiHtmlBlock and the legacy iiFileProvider package, check exported target
-interfaces, then execute document operations. Existing PDF, Word, ODF, HTML, XML,
+Qt, the legacy iiXml/iiHtmlBlock packages and the legacy iiFileProvider package while requiring the Qt-free iiXmlMarkup component. Consumer compilation and execution are distinct checks. Existing PDF, Word, ODF, HTML, XML,
 authorship and history tests remain active. `NativeMigration` uses files generated
 by the installed 0.3 library and compares full profile/ledger JSON and every history
 ID. `CodecValidation` covers malformed entities/namespaces, Unicode byte diffs,
 UTF-16 surrogates and canonical Base64. Permission tests require new Word files to
 use ordinary `0666 & umask` modes and replacements to preserve existing modes.
 
-Generated files are confined to `build/` and its subdirectories. macOS execution
-is verified on the current host; Windows/Linux branches require their own native
-toolchains and execution before platform-completion claims.
+Test fixtures belong in `resources/`; build and staging output belongs in `build/`.
+Earlier macOS execution evidence is historical; this change does not imply a new
+application execution. Windows/Linux branches require their own native toolchains
+and execution before platform-completion claims.
+
+
+## Dependency boundary enforcement
+
+The build and installed package inspect the document target graph, including
+transitive interfaces, link options, imported binary paths, include paths and
+Qt module definitions. An application may use Qt separately; only a Qt
+dependency of the document target is rejected. The `QtBoundary` test exercises
+indirect links, generator expressions, opaque imported libraries and definitions.
+`QtInstalledBoundary` stages the package and verifies an unrelated Qt application
+target is allowed, a transitive Qt provider is rejected, and PDF remains independent.
+Its temporary staging preserves the main build's install manifest and is removed after the check.
+`QtBinaryAudit` covers Mach-O, ELF and PE import text, including misleading parent
+paths. `NativeDependencies` inspects the document, PDF and provider binaries on
+native macOS, Linux or Windows, and examines the static markup archive on Unix.
+Cross-compiled binaries are not treated as host runtime evidence.
+
+The document SDK already has native file, markup and PDF components, so no
+additional replacement SDK is required for the current Qt-free contract.

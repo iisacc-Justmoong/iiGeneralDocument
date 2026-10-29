@@ -1,0 +1,107 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:921c58f4f9b9dbaed99fb7902b7310039ac1bcb3b5a6a5e9f9b15cf008d69ad5",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiGeneralDocument",
+    "name": "iiGeneralDocument",
+    "root": "SDK/iiGeneralDocument",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/Windows.md",
+    "sha256": "ab531f633647a78d864c04752047a4ea8a7d1927a4a030d1b02c82339c935def",
+    "bytes": 870,
+    "line_count": 7,
+    "encoding": "utf-8",
+    "language": "ko"
+  },
+  "document": {
+    "title": "Windows 빌드와 실행",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Windows 빌드와 실행\r\n",
+      "level": 1,
+      "title": "Windows 빌드와 실행"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\r\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 3,
+      "raw": "Windows 구성은 C++23, MSVC x64, Windows SDK, CMake와 Ninja 및 같은 컴파일러의 vcpkg 의존성을 사용한다. Qt 키트는 필요하지 않다. iiFileProvider Native와 iiXmlMarkup을 먼저 준비한다. 생성물은 `build/`에 둔다. 시스템 qpdf 패키지가 zlib와 JPEG를 일반 라이브러리 이름으로 내보내는 경우, qpdf의 실제 라이브러리 디렉터리를 사용하여 링크한다.\r\n"
+    },
+    {
+      "id": "b000004",
+      "kind": "blank",
+      "start_line": 4,
+      "end_line": 4,
+      "raw": "\r\n"
+    },
+    {
+      "id": "b000005",
+      "kind": "paragraph",
+      "start_line": 5,
+      "end_line": 5,
+      "raw": "`ctest --test-dir build --output-on-failure`에서 문서 편집, XML/HTML CRUD, PDF 및 Word 파일의 저장·재열기를 실제로 실행한다. 고정 입력은 `resources/`에 두며 빌드 결과는 `build/`에 둔다. 실행 범위는 실제 검증한 플랫폼별로 기록한다.\r\n"
+    },
+    {
+      "id": "b000006",
+      "kind": "blank",
+      "start_line": 6,
+      "end_line": 6,
+      "raw": "\r\n"
+    },
+    {
+      "id": "b000007",
+      "kind": "paragraph",
+      "start_line": 7,
+      "end_line": 7,
+      "raw": "최신 구성·실행 결과와 복구 조치는 [Windows 빌드 및 실행](WindowsBuildAndRun.md)에 기록한다.\r\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Windows 빌드와 실행",
+      "anchor": "windows-빌드와-실행",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [
+      {
+        "block_id": "b000007",
+        "label": "Windows 빌드 및 실행",
+        "target": "WindowsBuildAndRun.md",
+        "kind": "relative",
+        "line": 7
+      }
+    ],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}
