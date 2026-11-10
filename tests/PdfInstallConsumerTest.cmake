@@ -1,9 +1,12 @@
-set(test_root "${IIGENERALDOCUMENT_BINARY_DIR}/pdf-install-consumer")
+string(RANDOM LENGTH 16 ALPHABET 0123456789abcdef nonce)
+set(work "${IIGENERALDOCUMENT_BINARY_DIR}/pdf-consumer-${nonce}")
+set(test_root "${work}")
 set(stage "${test_root}/stage")
-file(REMOVE_RECURSE "${test_root}")
+file(MAKE_DIRECTORY "${work}")
 execute_process(COMMAND "${CMAKE_COMMAND}" --install "${IIGENERALDOCUMENT_BINARY_DIR}" --config "${IIGENERALDOCUMENT_CONFIG}" --prefix "${stage}"
     RESULT_VARIABLE _result OUTPUT_VARIABLE _output ERROR_VARIABLE _error)
 if(NOT _result EQUAL 0)
+    file(REMOVE_RECURSE "${work}")
     message(FATAL_ERROR "PDF package staging failed: ${_output}\n${_error}")
 endif()
 set(_environment "${CMAKE_COMMAND}" -E env "CPATH=${IIGENERALDOCUMENT_SOURCE_DIR}/tests/foreign-headers" --unset=CPLUS_INCLUDE_PATH
@@ -20,11 +23,13 @@ foreach(_case IN ITEMS staged relocated)
         -G Ninja "-DCMAKE_PREFIX_PATH=${_prefix}" "-DCMAKE_BUILD_TYPE=${IIGENERALDOCUMENT_CONFIG}"
         RESULT_VARIABLE _result OUTPUT_VARIABLE _output ERROR_VARIABLE _error)
     if(NOT _result EQUAL 0)
+        file(REMOVE_RECURSE "${work}")
         message(FATAL_ERROR "${_case} PDF consumer configuration failed: ${_output}\n${_error}")
     endif()
     execute_process(COMMAND ${_environment} "${CMAKE_COMMAND}" --build "${test_root}/${_case}-build" --config "${IIGENERALDOCUMENT_CONFIG}"
         RESULT_VARIABLE _result OUTPUT_VARIABLE _output ERROR_VARIABLE _error)
     if(NOT _result EQUAL 0)
+        file(REMOVE_RECURSE "${work}")
         message(FATAL_ERROR "${_case} PDF consumer compilation failed: ${_output}\n${_error}")
     endif()
     if(WIN32)
@@ -33,6 +38,9 @@ foreach(_case IN ITEMS staged relocated)
     execute_process(COMMAND ${_environment} "${test_root}/${_case}-build/iiGeneralDocumentPdfConsumer"
         RESULT_VARIABLE _result OUTPUT_VARIABLE _output ERROR_VARIABLE _error)
     if(NOT _result EQUAL 0)
+        file(REMOVE_RECURSE "${work}")
         message(FATAL_ERROR "${_case} PDF consumer execution failed: ${_output}\n${_error}")
     endif()
 endforeach()
+
+file(REMOVE_RECURSE "${work}")

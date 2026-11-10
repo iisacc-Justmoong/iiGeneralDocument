@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "docs/ARCHITECTURE.md",
-    "sha256": "de1bebf26f762c3900d6e34cd063a15567584e50db77b7357fb10723e18cf295",
-    "bytes": 11820,
-    "line_count": 118,
+    "sha256": "681a1a43940575f0d21984edcda932bb2c1426f465d70b6cbb7c9ae85e557043",
+    "bytes": 12267,
+    "line_count": 122,
     "encoding": "utf-8",
     "language": "ko"
   },
@@ -584,6 +584,34 @@
       "start_line": 113,
       "end_line": 118,
       "raw": "The complete module now uses C++23 standard types and open-source backends.\nThe full document package requires the Qt-free `iiXmlMarkup` package; the PDF-only component does not. Qt and the legacy iiXml/iiHtmlBlock packages are not required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml\nand persistence uses nlohmann/json. The markup algorithms retain the first-party\nrange/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)\nfor byte-string API changes, ABI compatibility, prior-file verification and the\nThinking Space schema-2 byte-diff encoding.\n"
+    },
+    {
+      "id": "b000070",
+      "kind": "blank",
+      "start_line": 119,
+      "end_line": 119,
+      "raw": "\n"
+    },
+    {
+      "id": "b000071",
+      "kind": "paragraph",
+      "start_line": 120,
+      "end_line": 120,
+      "raw": "Document contract tests write temporary files under a per-configuration `resources/.state/` directory. CTest removes that directory after dependent tests; installed-consumer checks also remove their unique temporary build and staging directories.\n"
+    },
+    {
+      "id": "b000072",
+      "kind": "blank",
+      "start_line": 121,
+      "end_line": 121,
+      "raw": "\n"
+    },
+    {
+      "id": "b000073",
+      "kind": "paragraph",
+      "start_line": 122,
+      "end_line": 122,
+      "raw": "고정 libzip 헤더는 비시스템 포함 경로로 전달한다. `CPATH`의 다른 `zip.h`보다 우선하며, 의도적으로 충돌하는 헤더를 둔 컴파일 검사로 이를 확인한다.\n"
     }
   ],
   "outline": [

@@ -46,10 +46,10 @@ struct Matrix {
         double minimumY = points.front().y;
         double maximumY = points.front().y;
         for (const auto& point : points) {
-            minimumX = std::min(minimumX, point.x);
-            maximumX = std::max(maximumX, point.x);
-            minimumY = std::min(minimumY, point.y);
-            maximumY = std::max(maximumY, point.y);
+            minimumX = (std::min)(minimumX, point.x);
+            maximumX = (std::max)(maximumX, point.x);
+            minimumY = (std::min)(minimumY, point.y);
+            maximumY = (std::max)(maximumY, point.y);
         }
         return Rect{minimumX, minimumY, maximumX - minimumX, maximumY - minimumY};
     }

@@ -1,8 +1,10 @@
 #include "Word/Private/ConversionProcess.h"
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cerrno>
 #include <cstring>
+#include <limits>
 #include <thread>
 #ifdef _WIN32
 #define NOMINMAX
@@ -238,42 +240,128 @@ ConversionProcessResult runConversionProcess(const std::filesystem::path &execut
         return result;
     }
     result.started = true;
-    auto drain = [](int pipe, std::string &text) {
+    auto drain = [](Descriptor &pipe, std::string &text) {
         std::array<char, 4096> buffer;
-        while (true) {
-            auto count = ::read(pipe, buffer.data(), buffer.size());
-            if (count <= 0)
+        while (pipe.value >= 0) {
+            auto count = ::read(pipe.value, buffer.data(), buffer.size());
+            if (count < 0 && errno == EINTR)
+                continue;
+            if (count < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
                 break;
+            if (count <= 0) {
+                pipe.close();
+                break;
+            }
             if (text.size() < captureLimit)
                 text.append(buffer.data(), std::min<std::size_t>(static_cast<std::size_t>(count),
                                                                  captureLimit - text.size()));
         }
     };
+    int finished[2];
+    if (::pipe(finished) != 0) {
+        result.error += " Unable to observe converter exit";
+        kill(-pid, SIGKILL);
+        int status{};
+        while (waitpid(pid, &status, 0) < 0 && errno == EINTR) {}
+        return result;
+    }
+    Descriptor finishedRead{finished[0]}, finishedWrite{finished[1]};
+    fcntl(finished[0], F_SETFD, FD_CLOEXEC);
+    fcntl(finished[1], F_SETFD, FD_CLOEXEC);
+    std::atomic<int> waiterError{0};
+    std::thread waiter;
+    try {
+        waiter = std::thread([pid, descriptor = finished[1], &waiterError] {
+            siginfo_t information{};
+            int observed;
+            do {
+                // Leave the child waitable until the owner has finished its
+                // deadline decision, so the PID cannot be reused meanwhile.
+                observed = waitid(P_PID, static_cast<id_t>(pid), &information, WEXITED | WNOWAIT);
+            } while (observed < 0 && errno == EINTR);
+            if (observed < 0)
+                waiterError.store(errno, std::memory_order_release);
+            const char byte = 1;
+            ssize_t written;
+            do { written = ::write(descriptor, &byte, 1); } while (written < 0 && errno == EINTR);
+        });
+    } catch (const std::system_error &) {
+        result.error += " Unable to start converter exit waiter";
+        kill(-pid, SIGKILL);
+        int status{};
+        while (waitpid(pid, &status, 0) < 0 && errno == EINTR) {}
+        return result;
+    }
+    struct WaitCleanup {
+        pid_t pid;
+        std::thread &waiter;
+        bool armed = true;
+        ~WaitCleanup() {
+            if (!armed) return;
+            kill(-pid, SIGKILL);
+            if (waiter.joinable()) waiter.join();
+            int status{};
+            while (waitpid(pid, &status, 0) < 0 && errno == EINTR) {}
+        }
+    } cleanup{pid, waiter};
     auto deadline = std::chrono::steady_clock::now() + timeout;
     int status{};
+    bool waitFailed = false;
     while (true) {
-        drain(out[0], result.output);
-        drain(err[0], result.error);
-        auto state = waitpid(pid, &status, WNOHANG);
-        if (state == pid)
-            break;
-        if (state < 0 && errno != EINTR) {
-            result.error += " Converter wait failed";
-            break;
-        }
-        if (std::chrono::steady_clock::now() >= deadline) {
-            result.timedOut = true;
-            kill(-pid, SIGKILL);
-            while (waitpid(pid, &status, 0) < 0 && errno == EINTR) {
-            }
+        drain(outRead, result.output);
+        drain(errRead, result.error);
+        const auto remaining = std::chrono::ceil<std::chrono::milliseconds>(deadline - std::chrono::steady_clock::now());
+        if (remaining <= std::chrono::milliseconds::zero()) {
+            // Prefer an already exited child even if its waiter has not yet
+            // delivered the wake to this thread.
+            siginfo_t information{};
+            int observed;
+            do { observed = waitid(P_PID, static_cast<id_t>(pid), &information, WEXITED | WNOWAIT | WNOHANG); }
+            while (observed < 0 && errno == EINTR);
+            result.timedOut = observed == 0 && information.si_pid == 0;
             break;
         }
-        pollfd pipes[2]{{out[0], POLLIN, 0}, {err[0], POLLIN, 0}};
-        ::poll(pipes, 2, 20);
+        const auto delay = std::min<std::int64_t>(remaining.count(), (std::numeric_limits<int>::max)());
+        pollfd pipes[3]{{outRead.value, POLLIN, 0}, {errRead.value, POLLIN, 0},
+                        {finishedRead.value, POLLIN, 0}};
+        const auto ready = ::poll(pipes, 3, static_cast<int>(delay));
+        if (ready < 0 && errno == EINTR)
+            continue;
+        if (ready < 0) {
+            result.error += " Converter readiness wait failed";
+            waitFailed = true;
+            break;
+        }
+        if (pipes[2].revents)
+            break;
     }
-    drain(out[0], result.output);
-    drain(err[0], result.error);
-    result.exitCode = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+    if (result.timedOut || waitFailed)
+        kill(-pid, SIGKILL);
+    waiter.join();
+    const auto observerError = waiterError.load(std::memory_order_acquire);
+    if (observerError) {
+        // Another owner may already have reaped the child. Otherwise a failed
+        // exit observer cannot prove it finished, so terminate and reap it.
+        if (observerError != ECHILD) {
+            kill(-pid, SIGKILL);
+            while (waitpid(pid, &status, 0) < 0 && errno == EINTR) {}
+        }
+        cleanup.armed = false;
+        result.error += " Converter wait failed: ";
+        result.error += std::strerror(observerError);
+        result.exitCode = -1;
+    } else {
+        pid_t waited;
+        do { waited = waitpid(pid, &status, 0); } while (waited < 0 && errno == EINTR);
+        cleanup.armed = false;
+        if (waited != pid) {
+            result.error += " Converter wait failed";
+            result.exitCode = -1;
+        } else
+            result.exitCode = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+    }
+    drain(outRead, result.output);
+    drain(errRead, result.error);
 #endif
     return result;
 }

@@ -1,6 +1,8 @@
-set(install_prefix "${IIGENERALDOCUMENT_BINARY_DIR}/install-consumer-prefix")
-set(consumer_build "${IIGENERALDOCUMENT_BINARY_DIR}/install-consumer-build")
-file(REMOVE_RECURSE "${install_prefix}" "${consumer_build}")
+string(RANDOM LENGTH 16 ALPHABET 0123456789abcdef nonce)
+set(work "${IIGENERALDOCUMENT_BINARY_DIR}/document-consumer-${nonce}")
+set(install_prefix "${work}/prefix")
+set(consumer_build "${work}/build")
+file(MAKE_DIRECTORY "${work}")
 
 execute_process(
     COMMAND "${IIGENERALDOCUMENT_CMAKE_COMMAND}" --install "${IIGENERALDOCUMENT_BINARY_DIR}"
@@ -10,12 +12,14 @@ execute_process(
     OUTPUT_VARIABLE install_output
     ERROR_VARIABLE install_error)
 if(NOT install_result EQUAL 0)
+    file(REMOVE_RECURSE "${work}")
     message(FATAL_ERROR "Install failed:\n${install_output}\n${install_error}")
 endif()
 
 foreach(license_path "LICENSE" "first-party-markup/LICENSE")
     file(READ "${install_prefix}/share/licenses/iiGeneralDocument/${license_path}" license_text)
     if(NOT license_text MATCHES "MIT License")
+        file(REMOVE_RECURSE "${work}")
         message(FATAL_ERROR "Installed first-party MIT license is missing: ${license_path}")
     endif()
 endforeach()
@@ -47,6 +51,7 @@ execute_process(
     OUTPUT_VARIABLE configure_output
     ERROR_VARIABLE configure_error)
 if(NOT configure_result EQUAL 0)
+    file(REMOVE_RECURSE "${work}")
     message(FATAL_ERROR "Consumer configure failed:\n${configure_output}\n${configure_error}")
 endif()
 
@@ -58,6 +63,7 @@ execute_process(
     OUTPUT_VARIABLE build_output
     ERROR_VARIABLE build_error)
 if(NOT build_result EQUAL 0)
+    file(REMOVE_RECURSE "${work}")
     message(FATAL_ERROR "Consumer build failed:\n${build_output}\n${build_error}")
 endif()
 
@@ -73,5 +79,8 @@ execute_process(
     OUTPUT_VARIABLE run_output
     ERROR_VARIABLE run_error)
 if(NOT run_result EQUAL 0)
+    file(REMOVE_RECURSE "${work}")
     message(FATAL_ERROR "Consumer run failed:\n${run_output}\n${run_error}")
 endif()
+
+file(REMOVE_RECURSE "${work}")

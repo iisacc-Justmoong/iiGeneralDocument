@@ -116,3 +116,7 @@ and persistence uses nlohmann/json. The markup algorithms retain the first-party
 range/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)
 for byte-string API changes, ABI compatibility, prior-file verification and the
 Thinking Space schema-2 byte-diff encoding.
+
+Document contract tests write temporary files under a per-configuration `resources/.state/` directory. CTest removes that directory after dependent tests; installed-consumer checks also remove their unique temporary build and staging directories.
+
+고정 libzip 헤더는 비시스템 포함 경로로 전달한다. `CPATH`의 다른 `zip.h`보다 우선하며, 의도적으로 충돌하는 헤더를 둔 컴파일 검사로 이를 확인한다.

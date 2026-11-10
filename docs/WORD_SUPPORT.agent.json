@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "docs/WORD_SUPPORT.md",
-    "sha256": "25c3e5bbcbab8b756cddd912ff661f88228c24ce1cd943c5ba611cfc2031e235",
-    "bytes": 6776,
-    "line_count": 90,
+    "sha256": "a7b2b72321ee2e415289a7acfdde529877f04aa77751d9c71cc814f4f4dea408",
+    "bytes": 7138,
+    "line_count": 91,
     "encoding": "utf-8",
     "language": "ko"
   },
@@ -303,8 +303,8 @@
       "id": "b000031",
       "kind": "list",
       "start_line": 40,
-      "end_line": 46,
-      "raw": "- 이미지, 도면, 내장 객체, 헤더, 푸터, 주석, 주석, 끝주석, 필드, 콘텐츠 컨트롤 및 중첩된 표는 버전 0.1에서 1 급 모델 항목이 아닙니다.\n- 하이퍼링크 표시 텍스트는 읽히지만, 하이퍼링크 관계는 평탄화되어 경고로 보고됩니다.\n- 삽입된 추적 텍스트는 현재 콘텐츠로 읽히게 됩니다. 추적된 삭제는 제외되며 경고로 보고됩니다.\n- 지원되지 않는 본문 블록과 비텍스트 실행 콘텐츠는 조용한 전체 충실도 주장보다 진단을 생성합니다. 해당 항목들을 포함하는 소스를 다시 작성하면 해당 항목을 생략할 수 있습니다.\n- 비밀번호로 보호되거나 암호화된 패키지는 지원되지 않습니다.\n- 각 XML 부품은 기본적으로 64 MiB로 제한됩니다. `WordReadOptions`는 읽는 동안 값을 적용합니다. 아카이브 커밋 전에, `WordWriteOptions`는 제한을 초과한 모든 생성된 DOCX `.xml` 및 `.rels` 부품을 거부하고, 동일한 제한을 필수 재개 검증에 적용합니다. 신뢰할 수 있는 문서에 대해서만 `maximumXmlPartBytes`를 재정의하십시오.\n- LibreOffice 변환 충실도는 설치된 LibreOffice 빌드와 해당 Microsoft Word 필터에 따라 달라집니다. 변환기 누락, 시간 초과, 변환 오류 또는 읽을 수 없는 변환 출력 안전하게 거부한다.\n",
+      "end_line": 47,
+      "raw": "- 이미지, 도면, 내장 객체, 헤더, 푸터, 주석, 주석, 끝주석, 필드, 콘텐츠 컨트롤 및 중첩된 표는 버전 0.1에서 1 급 모델 항목이 아닙니다.\n- 하이퍼링크 표시 텍스트는 읽히지만, 하이퍼링크 관계는 평탄화되어 경고로 보고됩니다.\n- 삽입된 추적 텍스트는 현재 콘텐츠로 읽히게 됩니다. 추적된 삭제는 제외되며 경고로 보고됩니다.\n- 지원되지 않는 본문 블록과 비텍스트 실행 콘텐츠는 조용한 전체 충실도 주장보다 진단을 생성합니다. 해당 항목들을 포함하는 소스를 다시 작성하면 해당 항목을 생략할 수 있습니다.\n- 비밀번호로 보호되거나 암호화된 패키지는 지원되지 않습니다.\n- 각 XML 부품은 기본적으로 64 MiB로 제한됩니다. `WordReadOptions`는 읽는 동안 값을 적용합니다. 아카이브 커밋 전에, `WordWriteOptions`는 제한을 초과한 모든 생성된 DOCX `.xml` 및 `.rels` 부품을 거부하고, 동일한 제한을 필수 재개 검증에 적용합니다. 신뢰할 수 있는 문서에 대해서만 `maximumXmlPartBytes`를 재정의하십시오.\n- LibreOffice 변환 충실도는 설치된 LibreOffice 빌드와 해당 Microsoft Word 필터에 따라 달라집니다. 변환기 누락, 시간 초과, 변환 오류 또는 읽을 수 없는 변환 출력 안전하게 거부한다.\n- POSIX 변환기는 표준 출력·오류의 준비와 자식 종료 신호를 함께 기다리며, 실제 제한 시간에만 프로세스 그룹을 종료한다. 자식이 출력을 먼저 닫아도 반복 조회하지 않는다. 종료 신호 관찰 후 자식을 회수하므로 시간 제한 처리 중 프로세스 식별자가 재사용되지 않는다.\n",
       "items": [
         {
           "marker": "-",
@@ -340,35 +340,40 @@
           "marker": "-",
           "text": "LibreOffice 변환 충실도는 설치된 LibreOffice 빌드와 해당 Microsoft Word 필터에 따라 달라집니다. 변환기 누락, 시간 초과, 변환 오류 또는 읽을 수 없는 변환 출력 안전하게 거부한다.",
           "checked": null
+        },
+        {
+          "marker": "-",
+          "text": "POSIX 변환기는 표준 출력·오류의 준비와 자식 종료 신호를 함께 기다리며, 실제 제한 시간에만 프로세스 그룹을 종료한다. 자식이 출력을 먼저 닫아도 반복 조회하지 않는다. 종료 신호 관찰 후 자식을 회수하므로 시간 제한 처리 중 프로세스 식별자가 재사용되지 않는다.",
+          "checked": null
         }
       ]
     },
     {
       "id": "b000032",
       "kind": "blank",
-      "start_line": 47,
-      "end_line": 47,
+      "start_line": 48,
+      "end_line": 48,
       "raw": "\n"
     },
     {
       "id": "b000033",
       "kind": "html",
-      "start_line": 48,
-      "end_line": 48,
+      "start_line": 49,
+      "end_line": 49,
       "raw": "<a id=\"example\"></a>\n"
     },
     {
       "id": "b000034",
       "kind": "blank",
-      "start_line": 49,
-      "end_line": 49,
+      "start_line": 50,
+      "end_line": 50,
       "raw": "\n"
     },
     {
       "id": "b000035",
       "kind": "heading",
-      "start_line": 50,
-      "end_line": 50,
+      "start_line": 51,
+      "end_line": 51,
       "raw": "## 예\n",
       "level": 2,
       "title": "예"
@@ -376,15 +381,15 @@
     {
       "id": "b000036",
       "kind": "blank",
-      "start_line": 51,
-      "end_line": 51,
+      "start_line": 52,
+      "end_line": 52,
       "raw": "\n"
     },
     {
       "id": "b000037",
       "kind": "fenced_code",
-      "start_line": 52,
-      "end_line": 74,
+      "start_line": 53,
+      "end_line": 75,
       "raw": "```cpp\n#include <iiGeneralDocument/iiGeneralDocument.h>\n\nusing namespace ii::document;\n\nWordDocument document;\ndocument.metadata()[\"Title\"] = \"Word example\";\n\nWordParagraph paragraph;\nparagraph.properties.styleId = \"Heading1\";\nparagraph.runs.push_back({\"Editable heading\", {.bold = true}});\ndocument.appendParagraph(std::move(paragraph));\n\nauto written = WordDocumentWriter{}.write(document, \"example.docx\");\nif (written.hasErrors()) {\n    return 1;\n}\n\nauto read = WordDocumentReader{}.read(\"example.docx\");\nstd::get<WordParagraph>(read.document.blocks().front()).runs.front().text =\n    \"Revised heading\";\nreturn WordDocumentWriter{}.write(read.document, \"revised.docx\").hasErrors();\n```\n",
       "language": "cpp",
       "code": "#include <iiGeneralDocument/iiGeneralDocument.h>\n\nusing namespace ii::document;\n\nWordDocument document;\ndocument.metadata()[\"Title\"] = \"Word example\";\n\nWordParagraph paragraph;\nparagraph.properties.styleId = \"Heading1\";\nparagraph.runs.push_back({\"Editable heading\", {.bold = true}});\ndocument.appendParagraph(std::move(paragraph));\n\nauto written = WordDocumentWriter{}.write(document, \"example.docx\");\nif (written.hasErrors()) {\n    return 1;\n}\n\nauto read = WordDocumentReader{}.read(\"example.docx\");\nstd::get<WordParagraph>(read.document.blocks().front()).runs.front().text =\n    \"Revised heading\";\nreturn WordDocumentWriter{}.write(read.document, \"revised.docx\").hasErrors();\n",
@@ -393,29 +398,29 @@
     {
       "id": "b000038",
       "kind": "blank",
-      "start_line": 75,
-      "end_line": 75,
+      "start_line": 76,
+      "end_line": 76,
       "raw": "\n"
     },
     {
       "id": "b000039",
       "kind": "html",
-      "start_line": 76,
-      "end_line": 76,
+      "start_line": 77,
+      "end_line": 77,
       "raw": "<a id=\"verification\"></a>\n"
     },
     {
       "id": "b000040",
       "kind": "blank",
-      "start_line": 77,
-      "end_line": 77,
+      "start_line": 78,
+      "end_line": 78,
       "raw": "\n"
     },
     {
       "id": "b000041",
       "kind": "heading",
-      "start_line": 78,
-      "end_line": 78,
+      "start_line": 79,
+      "end_line": 79,
       "raw": "## 검증\n",
       "level": 2,
       "title": "검증"
@@ -423,29 +428,29 @@
     {
       "id": "b000042",
       "kind": "blank",
-      "start_line": 79,
-      "end_line": 79,
+      "start_line": 80,
+      "end_line": 80,
       "raw": "\n"
     },
     {
       "id": "b000043",
       "kind": "paragraph",
-      "start_line": 80,
-      "end_line": 80,
+      "start_line": 81,
+      "end_line": 81,
       "raw": "`iiGeneralDocument.WordModel` 는 편집 가능한 객체 계약을 수정합니다. `iiGeneralDocument.WordRoundTrip` 는 DOCX 에 포함된 Unicode 텍스트, 서식화된 런, 탭, 줄바꿈, 메타데이터, 및 테이블을 작성, 다시 엽니다, 편집하며, 다시 씁니다. `iiGeneralDocument.OdfRoundTrip`, `.OdfStyleCompatibility`, 및 `.OdfRobustness` 는 네이티브 ODT / FODT CRUD, 외부 스타일/레이아웃 매핑, 패키지 무결성, 리소스 제한, 및 원자적 덮어쓰기 행동을 포함합니다. `iiGeneralDocument.LegacyDocRoundTrip` 는 OLE 컴파운드 파일 서명을 확인하고 `soffice` 가 존재할 때 실제 LibreOffice DOC 쓰기/읽기 주기를 수행합니다. 릴리스 확인은 추가로 생성된 DOCX 를 페이지 PNG 로 렌더링하고 모든 페이지를 시각적으로 검사합니다.\n"
     },
     {
       "id": "b000044",
       "kind": "blank",
-      "start_line": 81,
-      "end_line": 82,
+      "start_line": 82,
+      "end_line": 83,
       "raw": "\n\n"
     },
     {
       "id": "b000045",
       "kind": "heading",
-      "start_line": 83,
-      "end_line": 83,
+      "start_line": 84,
+      "end_line": 84,
       "raw": "## Native dependency migration (0.4)\n",
       "level": 2,
       "title": "Native dependency migration (0.4)"
@@ -453,15 +458,15 @@
     {
       "id": "b000046",
       "kind": "blank",
-      "start_line": 84,
-      "end_line": 84,
+      "start_line": 85,
+      "end_line": 85,
       "raw": "\n"
     },
     {
       "id": "b000047",
       "kind": "paragraph",
-      "start_line": 85,
-      "end_line": 90,
+      "start_line": 86,
+      "end_line": 91,
       "raw": "The complete module now uses C++23 standard types and open-source backends.\nThe full document package requires the Qt-free `iiXmlMarkup` component; the standalone PDF component does not. Neither Qt nor the legacy Qt-based iiXml/iiHtmlBlock packages are required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml\nand persistence uses nlohmann/json. The markup algorithms retain the first-party\nrange/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)\nfor byte-string API changes, ABI compatibility, prior-file verification and the\nThinking Space schema-2 byte-diff encoding.\n"
     }
   ],
@@ -504,7 +509,7 @@
       "level": 2,
       "title": "예",
       "anchor": "예",
-      "start_line": 50
+      "start_line": 51
     },
     {
       "block_id": "b000041",
@@ -512,7 +517,7 @@
       "level": 2,
       "title": "검증",
       "anchor": "검증",
-      "start_line": 78
+      "start_line": 79
     },
     {
       "block_id": "b000045",
@@ -520,7 +525,7 @@
       "level": 2,
       "title": "Native dependency migration (0.4)",
       "anchor": "native-dependency-migration-04",
-      "start_line": 83
+      "start_line": 84
     }
   ],
   "indexes": {
@@ -533,8 +538,15 @@
         "context": "list"
       },
       {
+        "block_id": "b000031",
+        "line": 47,
+        "text": "- POSIX 변환기는 표준 출력·오류의 준비와 자식 종료 신호를 함께 기다리며, 실제 제한 시간에만 프로세스 그룹을 종료한다. 자식이 출력을 먼저 닫아도 반복 조회하지 않는다. 종료 신호 관찰 후 자식을 회수하므로 시간 제한 처리 중 프로세스 식별자가 재사용되지 않는다.",
+        "basis": "lexical_match",
+        "context": "list"
+      },
+      {
         "block_id": "b000047",
-        "line": 86,
+        "line": 87,
         "text": "The full document package requires the Qt-free `iiXmlMarkup` component; the standalone PDF component does not. Neither Qt nor the legacy Qt-based iiXml/iiHtmlBlock packages are required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml",
         "basis": "lexical_match",
         "context": "paragraph"
@@ -547,7 +559,7 @@
         "label": "migration details",
         "target": "QT_REMOVAL.md",
         "kind": "relative",
-        "line": 88
+        "line": 89
       }
     ],
     "tables": [

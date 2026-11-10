@@ -1,5 +1,10 @@
 # API
 
+Windows SDK의 `min`·`max` 매크로가 이미 활성화된 상태에서도 공개 기하학
+헤더를 포함할 수 있도록 좌표 경계 계산의 표준 함수 호출을 보호한다. 호출자의
+매크로 설정은 변경하지 않으며 Windows 테스트 빌드에 컴파일 전용 검사를 둔다.
+이번 변경의 Windows 빌드는 아직 수행하지 않았다.
+
 <a id="hierarchical-xml-documents"></a>
 
 ## 계층적 XML 문서

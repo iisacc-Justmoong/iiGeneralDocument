@@ -3,9 +3,21 @@
 #include <future>
 #include <iiFileProviderNative.h>
 #include <thread>
+#ifndef _WIN32
+#include <sys/resource.h>
+#include <unistd.h>
+#endif
 using namespace ii::document::detail;
 int main(int argc, char **argv) {
     if (argc > 1 && std::string_view(argv[1]) == "--child") {
+#ifndef _WIN32
+        if (argc > 2 && std::string_view(argv[2]) == "closed-streams") {
+            ::close(STDOUT_FILENO);
+            ::close(STDERR_FILENO);
+            std::this_thread::sleep_for(std::chrono::milliseconds(400));
+            return 0;
+        }
+#endif
         if (argc > 2 && std::string_view(argv[2]) == "wait")
             std::this_thread::sleep_for(std::chrono::seconds(2));
         if (argc > 2 && std::string_view(argv[2]) == "brief")
@@ -24,6 +36,21 @@ int main(int argc, char **argv) {
            "native process starts and exits normally");
     expect(result.output == text && result.error == "isolated stderr",
            "native arguments and separate output channels are exact");
+#ifndef _WIN32
+    rusage before{}, after{};
+    expect(getrusage(RUSAGE_SELF, &before) == 0, "read initial process CPU usage");
+    auto closed = runConversionProcess(executable, {"--child", "closed-streams"},
+                                       directory.path(), std::chrono::seconds(3));
+    expect(getrusage(RUSAGE_SELF, &after) == 0, "read final process CPU usage");
+    const auto micros = [](const timeval &value) {
+        return value.tv_sec * 1000000LL + value.tv_usec;
+    };
+    const auto cpu = micros(after.ru_utime) + micros(after.ru_stime) -
+                     micros(before.ru_utime) - micros(before.ru_stime);
+    expect(closed.started && !closed.timedOut && closed.exitCode == 0,
+           "converter exit remains observable after both streams close");
+    expect(cpu < 150000, "closed converter pipes do not cause a busy wait");
+#endif
     auto independent = std::async(std::launch::async, [&] {
         return runConversionProcess(executable, {"--child", "brief", "independent"},
                                     directory.path(), std::chrono::seconds(3));

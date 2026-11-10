@@ -42,15 +42,22 @@
       "document_id": "urn:iisacc:document:7908aebdc0939a2e75b2dc7f64a6e98cb7e86355ea35dcc16e06b0ffed93f963",
       "source": "docs/API.md",
       "agent_json": "docs/API.agent.json",
-      "source_sha256": "f738965b04538c480e63976b5d907ed5a4d112c62ecac1d8dd7c23027b4fd882",
+      "source_sha256": "23bb57565c727f580af6dd46e569063911059d6525fe86479dc8255a71d4aa7c",
       "role": "reference"
     },
     {
       "document_id": "urn:iisacc:document:a215ee9c4d7ab530c748e469455f3a6d63892c471640855e8fc1d727d0458922",
       "source": "docs/ARCHITECTURE.md",
       "agent_json": "docs/ARCHITECTURE.agent.json",
-      "source_sha256": "de1bebf26f762c3900d6e34cd063a15567584e50db77b7357fb10723e18cf295",
+      "source_sha256": "681a1a43940575f0d21984edcda932bb2c1426f465d70b6cbb7c9ae85e557043",
       "role": "reference"
+    },
+    {
+      "document_id": "urn:iisacc:document:fc0236e7e610ed103060cbc8f6cd87c459df71d5955b24b659944c9060cee1d3",
+      "source": "docs/DynamicLinking.md",
+      "agent_json": "docs/DynamicLinking.agent.json",
+      "source_sha256": "bb8a1723a9b42931373e017bf921061d83ffd639d708abd663f886237cef4d96",
+      "role": "guide"
     },
     {
       "document_id": "urn:iisacc:document:6de867232f70a1c3fe677e325359c7df50d3d67ae6fd8a008421280a97a88978",
@@ -98,7 +105,7 @@
       "document_id": "urn:iisacc:document:aa06b34291d1eaa821dca9f3469251ec5e37191a3f41399cec47beb752af7abc",
       "source": "docs/README.md",
       "agent_json": "docs/README.agent.json",
-      "source_sha256": "73d551694b6b0a7117d264283b1040b4a09e7ae2f47bab246a3372f84bd125f0",
+      "source_sha256": "156c0ac59d69a4932c5985ce82a829f5795b8a1505f2ab68122dc3530d53fe93",
       "role": "overview"
     },
     {
@@ -112,7 +119,7 @@
       "document_id": "urn:iisacc:document:d0821e111732a359bddd04283adf80a9b43dfb4791640db374608f2da84a1f75",
       "source": "docs/WORD_SUPPORT.md",
       "agent_json": "docs/WORD_SUPPORT.agent.json",
-      "source_sha256": "25c3e5bbcbab8b756cddd912ff661f88228c24ce1cd943c5ba611cfc2031e235",
+      "source_sha256": "a7b2b72321ee2e415289a7acfdde529877f04aa77751d9c71cc814f4f4dea408",
       "role": "guide"
     },
     {

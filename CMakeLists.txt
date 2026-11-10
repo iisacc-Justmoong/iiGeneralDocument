@@ -21,6 +21,9 @@ include(CMakePackageConfigHelpers)
 include(GenerateExportHeader)
 
 option(IIGENERALDOCUMENT_BUILD_SHARED "Build iiGeneralDocument as a shared library." ON)
+if(EMSCRIPTEN AND IIGENERALDOCUMENT_BUILD_SHARED)
+    set_property(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
+endif()
 option(IIGENERALDOCUMENT_USE_SYSTEM_LIBZIP "Use an installed libzip package instead of the pinned build dependency." OFF)
 
 option(IIGENERALDOCUMENT_SANITIZERS "Instrument the full document module and tests" OFF)
@@ -105,7 +108,7 @@ else()
 
     if(APPLE)
         add_library(iiGeneralDocumentLibzipLibrary INTERFACE)
-        target_include_directories(iiGeneralDocumentLibzipLibrary SYSTEM INTERFACE
+        target_include_directories(iiGeneralDocumentLibzipLibrary INTERFACE
             "${IIGENERALDOCUMENT_LIBZIP_INSTALL}/${CMAKE_INSTALL_INCLUDEDIR}")
         target_link_directories(iiGeneralDocumentLibzipLibrary INTERFACE
             "${IIGENERALDOCUMENT_LIBZIP_INSTALL}/${CMAKE_INSTALL_LIBDIR}")
@@ -114,6 +117,7 @@ else()
     else()
         add_library(iiGeneralDocumentLibzipLibrary STATIC IMPORTED GLOBAL)
         set_target_properties(iiGeneralDocumentLibzipLibrary PROPERTIES
+            IMPORTED_NO_SYSTEM TRUE
             IMPORTED_LOCATION
                 "${IIGENERALDOCUMENT_LIBZIP_INSTALL}/${CMAKE_INSTALL_LIBDIR}/${CMAKE_STATIC_LIBRARY_PREFIX}zip${CMAKE_STATIC_LIBRARY_SUFFIX}"
             INTERFACE_INCLUDE_DIRECTORIES
@@ -128,7 +132,7 @@ else()
 endif()
 
 set(IIGENERALDOCUMENT_LIBRARY_TYPE STATIC)
-if(IIGENERALDOCUMENT_BUILD_SHARED AND NOT EMSCRIPTEN)
+if(IIGENERALDOCUMENT_BUILD_SHARED)
     set(IIGENERALDOCUMENT_LIBRARY_TYPE SHARED)
 endif()
 
@@ -235,12 +239,25 @@ set_target_properties(iiGeneralDocument PROPERTIES
     WINDOWS_EXPORT_ALL_SYMBOLS YES
     VERSION ${PROJECT_VERSION}
     SOVERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+if(IIGENERALDOCUMENT_BUILD_SHARED)
+    if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        set_target_properties(iiGeneralDocument PROPERTIES FRAMEWORK TRUE)
+    elseif(EMSCRIPTEN)
+        target_compile_options(iiGeneralDocument PRIVATE -fPIC)
+        target_link_options(iiGeneralDocument PRIVATE -sSIDE_MODULE=1)
+    elseif(APPLE)
+        set_target_properties(iiGeneralDocument PROPERTIES INSTALL_RPATH "@loader_path")
+    elseif(UNIX)
+        set_target_properties(iiGeneralDocument PROPERTIES INSTALL_RPATH "$ORIGIN")
+    endif()
+endif()
 
 install(TARGETS iiGeneralDocument
     EXPORT iiGeneralDocumentTargets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY src/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/iiGeneralDocument
     FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
@@ -277,10 +294,37 @@ if(NOT IIGENERALDOCUMENT_USE_SYSTEM_LIBZIP)
 endif()
 
 if(BUILD_TESTING)
+    if(NOT IIGENERALDOCUMENT_USE_SYSTEM_LIBZIP AND NOT MSVC AND NOT CMAKE_CROSSCOMPILING)
+        add_library(iiGeneralDocumentPinnedZipHeader OBJECT EXCLUDE_FROM_ALL tests/PinnedZipHeader.cpp)
+        target_link_libraries(iiGeneralDocumentPinnedZipHeader PRIVATE iiGeneralDocumentLibzipLibrary)
+        add_test(NAME iiGeneralDocument.PinnedZipHeader
+            COMMAND "${CMAKE_COMMAND}" -E env
+                --unset=C_INCLUDE_PATH --unset=CPLUS_INCLUDE_PATH --unset=LIBRARY_PATH
+                "CPATH=${CMAKE_CURRENT_SOURCE_DIR}/tests/foreign-headers"
+                "${CMAKE_COMMAND}" --build "${CMAKE_CURRENT_BINARY_DIR}"
+                --config $<CONFIG> --target iiGeneralDocumentPinnedZipHeader)
+    endif()
+    if(WIN32)
+        add_library(iiGeneralDocumentWindowsHeaderMacros OBJECT tests/WindowsHeaderMacrosTest.cpp)
+        target_link_libraries(iiGeneralDocumentWindowsHeaderMacros PRIVATE iiGeneralDocument::iiGeneralDocument)
+    endif()
+    string(RANDOM LENGTH 16 ALPHABET 0123456789abcdef _doc_test_nonce)
+    set(_doc_state_root "${CMAKE_CURRENT_SOURCE_DIR}/resources/.state")
+    set(_doc_test_output "${_doc_state_root}/document-tests-${_doc_test_nonce}")
+    add_test(NAME iiGeneralDocument.OutputLayout COMMAND ${CMAKE_COMMAND}
+        "-DRESOURCE_ROOT=${_doc_state_root}" "-DOUTPUT_DIR=${_doc_test_output}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/OutputLayoutTest.cmake")
+    foreach(_action IN ITEMS setup cleanup)
+        add_test(NAME iiGeneralDocument.Output_${_action} COMMAND ${CMAKE_COMMAND}
+            "-DRESOURCE_ROOT=${_doc_state_root}" "-DOUTPUT_DIR=${_doc_test_output}"
+            "-DACTION=${_action}" -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/OutputFixture.cmake")
+    endforeach()
+    set_tests_properties(iiGeneralDocument.Output_setup PROPERTIES FIXTURES_SETUP iiDocumentOutput)
+    set_tests_properties(iiGeneralDocument.Output_cleanup PROPERTIES FIXTURES_CLEANUP iiDocumentOutput)
     add_executable(iiGeneralDocumentPdfAbsorptionTest tests/PdfAbsorptionTest.cpp)
     target_link_libraries(iiGeneralDocumentPdfAbsorptionTest PRIVATE iiGeneralDocument::iiGeneralDocument)
     target_compile_definitions(iiGeneralDocumentPdfAbsorptionTest PRIVATE
-        IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output/acrobat-absorption")
+        IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${_doc_test_output}/acrobat-absorption")
     add_test(NAME iiGeneralDocument.PdfAbsorption COMMAND iiGeneralDocumentPdfAbsorptionTest)
     add_executable(iiGeneralDocumentXmlTreeCrudTest tests/XmlTreeCrudTest.cpp)
     target_link_libraries(iiGeneralDocumentXmlTreeCrudTest PRIVATE
@@ -308,14 +352,14 @@ if(BUILD_TESTING)
     add_executable(iiGeneralDocumentWordRoundTripTest tests/WordRoundTripTest.cpp)
     target_link_libraries(iiGeneralDocumentWordRoundTripTest PRIVATE iiGeneralDocument::iiGeneralDocument)
     target_compile_definitions(iiGeneralDocumentWordRoundTripTest PRIVATE
-        IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output")
+        IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${_doc_test_output}")
     add_test(NAME iiGeneralDocument.WordRoundTrip COMMAND iiGeneralDocumentWordRoundTripTest)
 
     add_executable(iiGeneralDocumentOdfRoundTripTest tests/OdfRoundTripTest.cpp)
     target_link_libraries(iiGeneralDocumentOdfRoundTripTest PRIVATE
         iiGeneralDocument::iiGeneralDocument)
     target_compile_definitions(iiGeneralDocumentOdfRoundTripTest PRIVATE
-        IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output")
+        IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${_doc_test_output}")
     add_test(NAME iiGeneralDocument.OdfRoundTrip COMMAND iiGeneralDocumentOdfRoundTripTest)
 
     add_executable(iiGeneralDocumentOdfStyleCompatibilityTest
@@ -325,7 +369,7 @@ if(BUILD_TESTING)
         ${IIGENERALDOCUMENT_LIBZIP_TARGET}
         iiGeneralDocumentPdfZlib)
     target_compile_definitions(iiGeneralDocumentOdfStyleCompatibilityTest PRIVATE
-        IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output")
+        IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${_doc_test_output}")
     add_test(NAME iiGeneralDocument.OdfStyleCompatibility
         COMMAND iiGeneralDocumentOdfStyleCompatibilityTest)
 
@@ -334,7 +378,7 @@ if(BUILD_TESTING)
     target_link_libraries(iiGeneralDocumentOdfRobustnessTest PRIVATE
         iiGeneralDocument::iiGeneralDocument)
     target_compile_definitions(iiGeneralDocumentOdfRobustnessTest PRIVATE
-        IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output")
+        IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${_doc_test_output}")
     add_test(NAME iiGeneralDocument.OdfRobustness
         COMMAND iiGeneralDocumentOdfRobustnessTest)
 
@@ -345,7 +389,7 @@ if(BUILD_TESTING)
         target_link_libraries(iiGeneralDocumentLegacyDocRoundTripTest PRIVATE
             iiGeneralDocument::iiGeneralDocument)
         target_compile_definitions(iiGeneralDocumentLegacyDocRoundTripTest PRIVATE
-            IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output"
+            IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${_doc_test_output}"
             IIGENERALDOCUMENT_TEST_SOFFICE="${IIGENERALDOCUMENT_TEST_SOFFICE_EXECUTABLE}")
         add_test(NAME iiGeneralDocument.LegacyDocRoundTrip
             COMMAND iiGeneralDocumentLegacyDocRoundTripTest)
@@ -355,7 +399,7 @@ if(BUILD_TESTING)
         target_link_libraries(iiGeneralDocumentOdfLibreOfficeInteropTest PRIVATE
             iiGeneralDocument::iiGeneralDocument)
         target_compile_definitions(iiGeneralDocumentOdfLibreOfficeInteropTest PRIVATE
-            IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output"
+            IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${_doc_test_output}"
             IIGENERALDOCUMENT_TEST_SOFFICE="${IIGENERALDOCUMENT_TEST_SOFFICE_EXECUTABLE}")
         add_test(NAME iiGeneralDocument.OdfLibreOfficeInterop
             COMMAND iiGeneralDocumentOdfLibreOfficeInteropTest)
@@ -364,6 +408,14 @@ if(BUILD_TESTING)
     add_executable(iiGeneralDocumentModelTest tests/ModelTest.cpp)
     target_link_libraries(iiGeneralDocumentModelTest PRIVATE iiGeneralDocument::iiGeneralDocument)
     add_test(NAME iiGeneralDocument.Model COMMAND iiGeneralDocumentModelTest)
+    if(IIGENERALDOCUMENT_BUILD_SHARED AND NOT CMAKE_CROSSCOMPILING)
+        add_test(NAME iiGeneralDocument.SharedType COMMAND "${CMAKE_COMMAND}"
+            "-DTARGET_TYPE=$<TARGET_PROPERTY:iiGeneralDocument,TYPE>"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/shared_target_type.cmake")
+        add_test(NAME iiGeneralDocument.SharedLink COMMAND "${CMAKE_COMMAND}"
+            "-DIMAGE=$<TARGET_FILE:iiGeneralDocumentModelTest>" "-DEXPECTED=$<TARGET_FILE:iiGeneralDocument>"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/shared_link.cmake")
+    endif()
 
     add_executable(iiGeneralDocumentEditorTest tests/DocumentEditorTest.cpp)
     target_link_libraries(iiGeneralDocumentEditorTest PRIVATE iiGeneralDocument::iiGeneralDocument)
@@ -372,7 +424,7 @@ if(BUILD_TESTING)
     add_executable(iiGeneralDocumentPdfRoundTripTest tests/PdfRoundTripTest.cpp)
     target_link_libraries(iiGeneralDocumentPdfRoundTripTest PRIVATE iiGeneralDocument::iiGeneralDocument)
     target_compile_definitions(iiGeneralDocumentPdfRoundTripTest PRIVATE
-        IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test-output")
+        IIGENERALDOCUMENT_TEST_OUTPUT_DIR="${_doc_test_output}")
     add_test(NAME iiGeneralDocument.PdfRoundTrip COMMAND iiGeneralDocumentPdfRoundTripTest)
     add_executable(iiGeneralDocumentPdfFormLookupTest tests/PdfFormLookupTest.cpp)
     target_link_libraries(iiGeneralDocumentPdfFormLookupTest PRIVATE iiGeneralDocument::iiGeneralDocument)
@@ -399,6 +451,16 @@ if(BUILD_TESTING)
             "-DIIGENERALDOCUMENT_NATIVE_PROVIDER_LIBRARY_DIR=$<TARGET_FILE_DIR:iiFileProvider::Native>"
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/InstallConsumerTest.cmake)
     endif()
+
+    set(_doc_file_tests iiGeneralDocument.PdfAbsorption iiGeneralDocument.WordRoundTrip
+        iiGeneralDocument.OdfRoundTrip iiGeneralDocument.OdfStyleCompatibility
+        iiGeneralDocument.OdfRobustness iiGeneralDocument.PdfRoundTrip)
+    foreach(_optional IN ITEMS iiGeneralDocument.LegacyDocRoundTrip iiGeneralDocument.OdfLibreOfficeInterop)
+        if(TEST ${_optional})
+            list(APPEND _doc_file_tests ${_optional})
+        endif()
+    endforeach()
+    set_tests_properties(${_doc_file_tests} PROPERTIES FIXTURES_REQUIRED iiDocumentOutput)
 
     if(UNIX)
         add_test(NAME iiGeneralDocument.SymbolIsolation

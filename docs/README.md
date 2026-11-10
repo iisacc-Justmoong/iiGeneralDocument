@@ -13,6 +13,7 @@ Markdown is the maintained human source. Agent JSON is a structured, source-trac
 | [`docs/ACROBAT_ABSORPTION.md`](ACROBAT_ABSORPTION.md) | [JSON](ACROBAT_ABSORPTION.agent.json) |
 | [`docs/API.md`](API.md) | [JSON](API.agent.json) |
 | [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) | [JSON](ARCHITECTURE.agent.json) |
+| [`docs/DynamicLinking.md`](DynamicLinking.md) | [JSON](DynamicLinking.agent.json) |
 | [`docs/FILE_AUTHORSHIP.md`](FILE_AUTHORSHIP.md) | [JSON](FILE_AUTHORSHIP.agent.json) |
 | [`docs/HTML_BLOCK_CRUD.md`](HTML_BLOCK_CRUD.md) | [JSON](HTML_BLOCK_CRUD.agent.json) |
 | [`docs/ODF_SUPPORT.md`](ODF_SUPPORT.md) | [JSON](ODF_SUPPORT.agent.json) |

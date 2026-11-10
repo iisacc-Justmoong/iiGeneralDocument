@@ -1,0 +1,71 @@
+{
+  "format": "iisacc.agent-document",
+  "schema_version": 1,
+  "document_id": "urn:iisacc:document:fc0236e7e610ed103060cbc8f6cd87c459df71d5955b24b659944c9060cee1d3",
+  "project": {
+    "id": "urn:iisacc:project:SDK%2FiiGeneralDocument",
+    "name": "iiGeneralDocument",
+    "root": "SDK/iiGeneralDocument",
+    "kind": "sdk"
+  },
+  "source": {
+    "path": "docs/DynamicLinking.md",
+    "sha256": "bb8a1723a9b42931373e017bf921061d83ffd639d708abd663f886237cef4d96",
+    "bytes": 294,
+    "line_count": 6,
+    "encoding": "utf-8",
+    "language": "en"
+  },
+  "document": {
+    "title": "Dynamic linking",
+    "role": "guide",
+    "authority": "markdown_source"
+  },
+  "blocks": [
+    {
+      "id": "b000001",
+      "kind": "heading",
+      "start_line": 1,
+      "end_line": 1,
+      "raw": "# Dynamic linking\n",
+      "level": 1,
+      "title": "Dynamic linking"
+    },
+    {
+      "id": "b000002",
+      "kind": "blank",
+      "start_line": 2,
+      "end_line": 2,
+      "raw": "\n"
+    },
+    {
+      "id": "b000003",
+      "kind": "paragraph",
+      "start_line": 3,
+      "end_line": 6,
+      "raw": "The document library defaults to shared linking. Set\n`IIGENERALDOCUMENT_BUILD_SHARED=OFF` only for an explicit static build. Shared\niOS builds use frameworks and WebAssembly builds use side modules; the private\nthird-party archive dependencies remain implementation details.\n"
+    }
+  ],
+  "outline": [
+    {
+      "block_id": "b000001",
+      "parent_id": null,
+      "level": 1,
+      "title": "Dynamic linking",
+      "anchor": "dynamic-linking",
+      "start_line": 1
+    }
+  ],
+  "indexes": {
+    "directive_candidates": [],
+    "commands": [],
+    "links": [],
+    "tables": []
+  },
+  "provenance": {
+    "generator": "workspace-docs",
+    "version": "1.0.0",
+    "profile": "lossless-blocks-v1",
+    "derived": true
+  }
+}
