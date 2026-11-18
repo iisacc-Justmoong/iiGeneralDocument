@@ -2,6 +2,14 @@
 
 문서 대상과 그 전이 의존성에는 Qt를 연결하지 않는다. `cmake/QtBoundary.cmake`와 네이티브 바이너리 검사로 경계를 유지한다. XML·HTML 원본 범위는 iiXml의 Qt 없는 `iiXml::Markup`에서 제공한다. 문서 모델과 원자적 편집 계약은 iiGeneralDocument에 남기며 내부 파서 사본을 만들지 않는다. PDF 전용 구성요소는 이 의존성을 가져서는 안 된다.
 
+## 라이선스
+
+이 저장소의 iiGeneralDocument 모듈은 Apache License 2.0이다. 자사 코드, 문서, 도구, 테스트가 포함된다. 저작권 표시는 `Copyright (c) 2026 iisacc`이고 고지는 루트 `NOTICE`에 있다. 사람용 한국어 설명은 [docs/License.md](docs/License.md)이다.
+
+`Product` 아래의 iisacc 제품은 GNU Affero General Public License(AGPL)이다.
+
+제3자와 벤더 코드는 원래 라이선스를 유지한다. 문서 재편 중에도 그 라이선스와 외부 원본은 보존한다.
+
 <!-- workspace-docs:agent:start -->
 ## 문서 구조와 에이전트 탐색
 

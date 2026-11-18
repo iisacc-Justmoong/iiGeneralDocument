@@ -1,6 +1,6 @@
 # Dependency notices
 
-The enclosing iiGeneralDocument SDK is MIT. All format dependencies below
+The enclosing iiGeneralDocument module is Apache-2.0. All format dependencies below
 are open source; full license texts are installed under
 `share/licenses/iiGeneralDocument`. Qt is absent from the version-0.4 dependency
 graph, including the full document target and its Native provider.
@@ -27,15 +27,16 @@ licenses live under `iiFileProvider/Native/third_party` and are installed with
 First-party iiXml/iiHtmlBlock range, declaration, attribute and block-classification
 algorithms are provided by the Qt-free iiXmlMarkup component. Their original QObject
 bindings/signals/debug logging are excluded. Their historical source paths and original hashes
-are recorded in `third_party/first-party-markup-provenance.json`; their MIT
+are recorded in `third_party/first-party-markup-provenance.json`; their Apache-2.0
 license is included in `third_party/licenses/first-party-markup/LICENSE`.
 The full iiGeneralDocument build requires iiXmlMarkup; the standalone PDF component does not.
 
-The PDF object codec and fixture adapt the iisacc-authored MIT engineering
-counterpart; its full notice is preserved in
+The PDF object codec and fixture adapt the iisacc-authored engineering
+counterpart. This module's adaptation is Apache-2.0. The counterpart notice
+is retained unchanged under the MIT terms in
 `third_party/licenses/acrobat-counterpart/LICENSE`. Native SHA-256 adapts the same
-first-party standard implementation with its MIT notice in the provider's
-`iisacc-counterpart/LICENSE`. No Adobe proprietary source, binary or extracted
+first-party standard implementation; the provider module is Apache-2.0 and its
+notice remains in the provider's `iisacc-counterpart/LICENSE`. No Adobe proprietary source, binary or extracted
 resource is redistributed or required by these implementations.
 
 Legacy `.doc` optionally launches user-installed LibreOffice. LibreOffice is not

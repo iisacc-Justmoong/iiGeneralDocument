@@ -2,7 +2,7 @@
   "schema": 1,
   "pugixml": "1.16",
   "nlohmann-json": "3.12.0",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "files": [
     {
       "file": "pugixml/pugixml.cpp",
@@ -42,9 +42,9 @@
     },
     {
       "file": "licenses/first-party-markup/LICENSE",
-      "source": "first-party iiXml and iiHtmlBlock MIT",
-      "sha256": "e482fff586169cb69c9d3ac3aa30f47aa7922006a099ec90885642c9368c1398",
-      "bytes": 1063
+      "source": "first-party iiXml and iiHtmlBlock Apache-2.0",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "bytes": 11358
     }
   ]
 }

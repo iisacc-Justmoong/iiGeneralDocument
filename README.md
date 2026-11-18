@@ -125,7 +125,7 @@ See [API](docs/API.md), [architecture](docs/ARCHITECTURE.md),
 [Thinking Space](docs/THINKING_SPACE_DOCUMENT.md) and
 [Acrobat feature absorption](docs/ACROBAT_ABSORPTION.md).
 
-The enclosing SDK keeps its existing MIT license. Full dependency
+The enclosing SDK and this module are Apache-2.0. Full dependency
 licenses are shipped with the installation; see [notices](THIRD_PARTY_NOTICES.md).
 No Adobe proprietary source, extracted resources or runtime is included.
 
@@ -139,11 +139,19 @@ Windows legacy Word conversion prefers LibreOffice's console launcher
 
 ## License
 
-SPDX-License-Identifier: MIT
+SPDX-License-Identifier: Apache-2.0
 
-The original code and documentation in this repository are licensed under the
-[MIT License](LICENSE). Third-party code, libraries, fonts, tools, and model
-weights retain their respective licenses.
+This module is licensed under the
+[Apache License, Version 2.0](LICENSE) (SPDX `Apache-2.0`).
+The copyright notice is `Copyright (c) 2026 iisacc`. Attribution for this
+distribution is in [NOTICE](NOTICE). The Korean statement of the same policy
+is [docs/License.md](docs/License.md).
+
+iisacc products under Product are licensed under the GNU Affero General
+Public License (AGPL).
+
+Third-party and vendored code, libraries, fonts, tools, and model weights
+keep their original licenses.
 
 <!-- workspace-docs:readme:start -->
 ## Documentation entry points
