@@ -449,6 +449,7 @@ if(BUILD_TESTING)
             "-DIIGENERALDOCUMENT_NATIVE_PROVIDER_DIR=${iiFileProviderNative_DIR}"
             "-DIIGENERALDOCUMENT_XML_MARKUP_DIR=${iiXmlMarkup_DIR}"
             "-DIIGENERALDOCUMENT_NATIVE_PROVIDER_LIBRARY_DIR=$<TARGET_FILE_DIR:iiFileProvider::Native>"
+            "-DIIGENERALDOCUMENT_INSTALL_LIBDIR=${CMAKE_INSTALL_LIBDIR}"
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/InstallConsumerTest.cmake)
     endif()
 
