@@ -1,0 +1,14 @@
+#pragma once
+
+// C++ public entry for iiGeneralDocument; the linked components select the API.
+
+#if defined(IISDK_IMPORT_IIGENERALDOCUMENT_CORE)
+#include <iiGeneralDocument.h>
+#endif
+
+// The full document API already provides these declarations. The standalone
+// PDF target exposes its own copy for consumers that link only that target.
+#if defined(IISDK_IMPORT_IIGENERALDOCUMENT_PDF) && !defined(IISDK_IMPORT_IIGENERALDOCUMENT_CORE)
+#include <iiGeneralDocument/Pdf/Objects.h>
+#include <iiGeneralDocument/PdfExport.h>
+#endif
