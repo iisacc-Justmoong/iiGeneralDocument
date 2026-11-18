@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "THIRD_PARTY_NOTICES.md",
-    "sha256": "4f7d55c4f09e07e7e88b121122f6a4d5064dc4319a30d22613b7d0dc91236804",
-    "bytes": 2879,
-    "line_count": 52,
+    "sha256": "a3888a9f3e5f8869ba896748d3ccf96c9231ff5dd12dd235570e25f68fdcfd7f",
+    "bytes": 3006,
+    "line_count": 53,
     "encoding": "utf-8",
     "language": "en"
   },
@@ -43,7 +43,7 @@
       "kind": "paragraph",
       "start_line": 3,
       "end_line": 6,
-      "raw": "The enclosing iiGeneralDocument SDK is MIT. All format dependencies below\nare open source; full license texts are installed under\n`share/licenses/iiGeneralDocument`. Qt is absent from the version-0.4 dependency\ngraph, including the full document target and its Native provider.\n"
+      "raw": "The enclosing iiGeneralDocument module is Apache-2.0. All format dependencies below\nare open source; full license texts are installed under\n`share/licenses/iiGeneralDocument`. Qt is absent from the version-0.4 dependency\ngraph, including the full document target and its Native provider.\n"
     },
     {
       "id": "b000004",
@@ -135,7 +135,7 @@
       "kind": "paragraph",
       "start_line": 27,
       "end_line": 32,
-      "raw": "First-party iiXml/iiHtmlBlock range, declaration, attribute and block-classification\nalgorithms are provided by the Qt-free iiXmlMarkup component. Their original QObject\nbindings/signals/debug logging are excluded. Their historical source paths and original hashes\nare recorded in `third_party/first-party-markup-provenance.json`; their MIT\nlicense is included in `third_party/licenses/first-party-markup/LICENSE`.\nThe full iiGeneralDocument build requires iiXmlMarkup; the standalone PDF component does not.\n"
+      "raw": "First-party iiXml/iiHtmlBlock range, declaration, attribute and block-classification\nalgorithms are provided by the Qt-free iiXmlMarkup component. Their original QObject\nbindings/signals/debug logging are excluded. Their historical source paths and original hashes\nare recorded in `third_party/first-party-markup-provenance.json`; their Apache-2.0\nlicense is included in `third_party/licenses/first-party-markup/LICENSE`.\nThe full iiGeneralDocument build requires iiXmlMarkup; the standalone PDF component does not.\n"
     },
     {
       "id": "b000010",
@@ -148,35 +148,35 @@
       "id": "b000011",
       "kind": "paragraph",
       "start_line": 34,
-      "end_line": 39,
-      "raw": "The PDF object codec and fixture adapt the iisacc-authored MIT engineering\ncounterpart; its full notice is preserved in\n`third_party/licenses/acrobat-counterpart/LICENSE`. Native SHA-256 adapts the same\nfirst-party standard implementation with its MIT notice in the provider's\n`iisacc-counterpart/LICENSE`. No Adobe proprietary source, binary or extracted\nresource is redistributed or required by these implementations.\n"
+      "end_line": 40,
+      "raw": "The PDF object codec and fixture adapt the iisacc-authored engineering\ncounterpart. This module's adaptation is Apache-2.0. The counterpart notice\nis retained unchanged under the MIT terms in\n`third_party/licenses/acrobat-counterpart/LICENSE`. Native SHA-256 adapts the same\nfirst-party standard implementation; the provider module is Apache-2.0 and its\nnotice remains in the provider's `iisacc-counterpart/LICENSE`. No Adobe proprietary source, binary or extracted\nresource is redistributed or required by these implementations.\n"
     },
     {
       "id": "b000012",
       "kind": "blank",
-      "start_line": 40,
-      "end_line": 40,
+      "start_line": 41,
+      "end_line": 41,
       "raw": "\n"
     },
     {
       "id": "b000013",
       "kind": "paragraph",
-      "start_line": 41,
-      "end_line": 43,
+      "start_line": 42,
+      "end_line": 44,
       "raw": "Legacy `.doc` optionally launches user-installed LibreOffice. LibreOffice is not\nlinked or bundled with this SDK. Its distribution uses MPL-2.0/LGPL-3.0+ terms:\nhttps://www.libreoffice.org/about-us/licenses/\n"
     },
     {
       "id": "b000014",
       "kind": "blank",
-      "start_line": 44,
-      "end_line": 44,
+      "start_line": 45,
+      "end_line": 45,
       "raw": "\n"
     },
     {
       "id": "b000015",
       "kind": "paragraph",
-      "start_line": 45,
-      "end_line": 52,
+      "start_line": 46,
+      "end_line": 53,
       "raw": "Primary upstream projects:\nhttps://github.com/qpdf/qpdf,\nhttps://zlib.net/,\nhttps://github.com/libjpeg-turbo/libjpeg-turbo,\nhttps://libzip.org/,\nhttps://pugixml.org/,\nhttps://github.com/nlohmann/json,\nhttps://github.com/JuliaStrings/utf8proc.\n"
     }
   ],
@@ -194,7 +194,7 @@
     "directive_candidates": [
       {
         "block_id": "b000011",
-        "line": 39,
+        "line": 40,
         "text": "resource is redistributed or required by these implementations.",
         "basis": "lexical_match",
         "context": "paragraph"

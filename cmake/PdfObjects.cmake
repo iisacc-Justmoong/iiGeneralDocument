@@ -97,6 +97,8 @@ if(IIGENERALDOCUMENT_PDF_ONLY)
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/iiGeneralDocument)
     install(FILES README.md THIRD_PARTY_NOTICES.md docs/ACROBAT_ABSORPTION.md
         DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/iiGeneralDocument)
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE" "${CMAKE_CURRENT_SOURCE_DIR}/NOTICE"
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument)
 endif()
 if(BUILD_TESTING)
     add_executable(iiGeneralDocumentPdfObjectsTest tests/PdfObjectsTest.cpp)

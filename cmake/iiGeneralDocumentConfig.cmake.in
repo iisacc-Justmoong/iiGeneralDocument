@@ -1,5 +1,7 @@
 @PACKAGE_INIT@
 
+set(iiGeneralDocument_SPDX_LICENSE "Apache-2.0")
+
 # The Pdf component has only standard C++23 types and embeds its pinned OSS backend.
 include("${CMAKE_CURRENT_LIST_DIR}/iiGeneralDocumentPdfTargets.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/QtBoundary.cmake")

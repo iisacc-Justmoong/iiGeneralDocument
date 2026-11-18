@@ -1,14 +1,24 @@
 foreach(license_path "LICENSE" "third_party/licenses/first-party-markup/LICENSE")
     file(READ "${IIGENERALDOCUMENT_SOURCE_DIR}/${license_path}" license_text)
-    if(NOT license_text MATCHES "MIT License"
-            OR NOT license_text MATCHES "Permission is hereby granted, free of charge")
-        message(FATAL_ERROR "First-party code must ship its MIT license: ${license_path}")
+    if(NOT license_text MATCHES "Apache License"
+            OR NOT license_text MATCHES "Version 2.0, January 2004")
+        message(FATAL_ERROR "First-party code must ship the Apache-2.0 license: ${license_path}")
     endif()
 endforeach()
+file(READ "${IIGENERALDOCUMENT_SOURCE_DIR}/NOTICE" notice_text)
+if(NOT notice_text MATCHES "Copyright \\(c\\) 2026 iisacc")
+    message(FATAL_ERROR "NOTICE must carry Copyright (c) 2026 iisacc")
+endif()
+file(READ "${IIGENERALDOCUMENT_SOURCE_DIR}/cmake/iiGeneralDocumentConfig.cmake.in" package_config)
+if(NOT package_config MATCHES "set\\(iiGeneralDocument_SPDX_LICENSE \"Apache-2.0\"\\)")
+    message(FATAL_ERROR "Installed package config must export iiGeneralDocument_SPDX_LICENSE=Apache-2.0")
+endif()
 
 set(required_files
     "install.sh"
     "README.md"
+    "NOTICE"
+    "docs/License.md"
     "THIRD_PARTY_NOTICES.md"
     "docs/API.md"
     "docs/ARCHITECTURE.md"

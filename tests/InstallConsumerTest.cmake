@@ -18,11 +18,21 @@ endif()
 
 foreach(license_path "LICENSE" "first-party-markup/LICENSE")
     file(READ "${install_prefix}/share/licenses/iiGeneralDocument/${license_path}" license_text)
-    if(NOT license_text MATCHES "MIT License")
+    if(NOT license_text MATCHES "Apache License" OR NOT license_text MATCHES "Version 2.0, January 2004")
         file(REMOVE_RECURSE "${work}")
-        message(FATAL_ERROR "Installed first-party MIT license is missing: ${license_path}")
+        message(FATAL_ERROR "Installed first-party Apache-2.0 license is missing: ${license_path}")
     endif()
 endforeach()
+file(READ "${install_prefix}/share/licenses/iiGeneralDocument/NOTICE" notice_text)
+if(NOT notice_text MATCHES "Copyright \\(c\\) 2026 iisacc")
+    file(REMOVE_RECURSE "${work}")
+    message(FATAL_ERROR "Installed NOTICE is missing Copyright (c) 2026 iisacc")
+endif()
+file(READ "${install_prefix}/lib/cmake/iiGeneralDocument/iiGeneralDocumentConfig.cmake" package_config)
+if(NOT package_config MATCHES "set\\(iiGeneralDocument_SPDX_LICENSE \"Apache-2.0\"\\)")
+    file(REMOVE_RECURSE "${work}")
+    message(FATAL_ERROR "Installed package config does not export iiGeneralDocument_SPDX_LICENSE=Apache-2.0")
+endif()
 
 set(consumer_environment_command "${IIGENERALDOCUMENT_CMAKE_COMMAND}" -E env
     --unset=CPLUS_INCLUDE_PATH --unset=C_INCLUDE_PATH

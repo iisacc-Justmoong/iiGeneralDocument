@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: MIT
-// Adapted from the iisacc-authored Acrobat engineering counterpart (MIT).
+// SPDX-License-Identifier: Apache-2.0
+// Adapted from the iisacc-authored Acrobat engineering counterpart.
 // The preserved MIT notice is in third_party/licenses/acrobat-counterpart/LICENSE.
 #include "Pdf/Objects.h"
 #include "Pdf/Private/TextValidation.h"

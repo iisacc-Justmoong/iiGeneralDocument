@@ -132,7 +132,8 @@ objects to obtain a new assembled source graph.
 The engineering contracts are recorded in the adjacent Acrobat project's
 `src/PdfOperations.cpp`, `tests/pdf_operations.cpp`,
 `evidence/pdf-verification.json` and `evidence/pdf-independent-verification.json`.
-The iisacc-authored MIT counterpart notice is retained under
+This module's adaptation is Apache-2.0. The iisacc-authored counterpart
+notice is retained unchanged, still under the MIT terms, at
 `third_party/licenses/acrobat-counterpart/`. Adobe resources, binaries,
 decompiler output and proprietary source were not copied into this SDK.
 

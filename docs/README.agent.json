@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "docs/README.md",
-    "sha256": "156c0ac59d69a4932c5985ce82a829f5795b8a1505f2ab68122dc3530d53fe93",
-    "bytes": 2053,
-    "line_count": 30,
+    "sha256": "481543957589df4f42dc3e913763f7ba426fda5dd0e22149790b20b0f6f6255f",
+    "bytes": 2118,
+    "line_count": 31,
     "encoding": "utf-8",
     "language": "en"
   },
@@ -79,8 +79,8 @@
       "id": "b000008",
       "kind": "table",
       "start_line": 8,
-      "end_line": 29,
-      "raw": "| Document | Agent JSON |\n| --- | --- |\n| [`AGENT.md`](../AGENT.md) | [JSON](entrypoints/AGENT.agent.json) |\n| [`README.md`](../README.md) | [JSON](entrypoints/README.agent.json) |\n| [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md) | [JSON](entrypoints/THIRD_PARTY_NOTICES.agent.json) |\n| [`docs/ACROBAT_ABSORPTION.md`](ACROBAT_ABSORPTION.md) | [JSON](ACROBAT_ABSORPTION.agent.json) |\n| [`docs/API.md`](API.md) | [JSON](API.agent.json) |\n| [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) | [JSON](ARCHITECTURE.agent.json) |\n| [`docs/DynamicLinking.md`](DynamicLinking.md) | [JSON](DynamicLinking.agent.json) |\n| [`docs/FILE_AUTHORSHIP.md`](FILE_AUTHORSHIP.md) | [JSON](FILE_AUTHORSHIP.agent.json) |\n| [`docs/HTML_BLOCK_CRUD.md`](HTML_BLOCK_CRUD.md) | [JSON](HTML_BLOCK_CRUD.agent.json) |\n| [`docs/ODF_SUPPORT.md`](ODF_SUPPORT.md) | [JSON](ODF_SUPPORT.agent.json) |\n| [`docs/PDF_SUPPORT.md`](PDF_SUPPORT.md) | [JSON](PDF_SUPPORT.agent.json) |\n| [`docs/PERFORMANCE.md`](PERFORMANCE.md) | [JSON](PERFORMANCE.agent.json) |\n| [`docs/QT_REMOVAL.md`](QT_REMOVAL.md) | [JSON](QT_REMOVAL.agent.json) |\n| [`docs/THINKING_SPACE_DOCUMENT.md`](THINKING_SPACE_DOCUMENT.md) | [JSON](THINKING_SPACE_DOCUMENT.agent.json) |\n| [`docs/WORD_SUPPORT.md`](WORD_SUPPORT.md) | [JSON](WORD_SUPPORT.agent.json) |\n| [`docs/Windows.md`](Windows.md) | [JSON](Windows.agent.json) |\n| [`docs/WindowsBuildAndRun.md`](WindowsBuildAndRun.md) | [JSON](WindowsBuildAndRun.agent.json) |\n| [`docs/XML_TREE_CRUD.md`](XML_TREE_CRUD.md) | [JSON](XML_TREE_CRUD.agent.json) |\n| [`docs/documentation-structure.md`](documentation-structure.md) | [JSON](documentation-structure.agent.json) |\n| [`tests/fixtures/native-upgrade/README.md`](../tests/fixtures/native-upgrade/README.md) | [JSON](mirrors/tests/fixtures/native-upgrade/README.agent.json) |\n",
+      "end_line": 30,
+      "raw": "| Document | Agent JSON |\n| --- | --- |\n| [`AGENT.md`](../AGENT.md) | [JSON](entrypoints/AGENT.agent.json) |\n| [`README.md`](../README.md) | [JSON](entrypoints/README.agent.json) |\n| [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md) | [JSON](entrypoints/THIRD_PARTY_NOTICES.agent.json) |\n| [`docs/ACROBAT_ABSORPTION.md`](ACROBAT_ABSORPTION.md) | [JSON](ACROBAT_ABSORPTION.agent.json) |\n| [`docs/API.md`](API.md) | [JSON](API.agent.json) |\n| [`docs/ARCHITECTURE.md`](ARCHITECTURE.md) | [JSON](ARCHITECTURE.agent.json) |\n| [`docs/DynamicLinking.md`](DynamicLinking.md) | [JSON](DynamicLinking.agent.json) |\n| [`docs/FILE_AUTHORSHIP.md`](FILE_AUTHORSHIP.md) | [JSON](FILE_AUTHORSHIP.agent.json) |\n| [`docs/HTML_BLOCK_CRUD.md`](HTML_BLOCK_CRUD.md) | [JSON](HTML_BLOCK_CRUD.agent.json) |\n| [`docs/License.md`](License.md) | [JSON](License.agent.json) |\n| [`docs/ODF_SUPPORT.md`](ODF_SUPPORT.md) | [JSON](ODF_SUPPORT.agent.json) |\n| [`docs/PDF_SUPPORT.md`](PDF_SUPPORT.md) | [JSON](PDF_SUPPORT.agent.json) |\n| [`docs/PERFORMANCE.md`](PERFORMANCE.md) | [JSON](PERFORMANCE.agent.json) |\n| [`docs/QT_REMOVAL.md`](QT_REMOVAL.md) | [JSON](QT_REMOVAL.agent.json) |\n| [`docs/THINKING_SPACE_DOCUMENT.md`](THINKING_SPACE_DOCUMENT.md) | [JSON](THINKING_SPACE_DOCUMENT.agent.json) |\n| [`docs/WORD_SUPPORT.md`](WORD_SUPPORT.md) | [JSON](WORD_SUPPORT.agent.json) |\n| [`docs/Windows.md`](Windows.md) | [JSON](Windows.agent.json) |\n| [`docs/WindowsBuildAndRun.md`](WindowsBuildAndRun.md) | [JSON](WindowsBuildAndRun.agent.json) |\n| [`docs/XML_TREE_CRUD.md`](XML_TREE_CRUD.md) | [JSON](XML_TREE_CRUD.agent.json) |\n| [`docs/documentation-structure.md`](documentation-structure.md) | [JSON](documentation-structure.agent.json) |\n| [`tests/fixtures/native-upgrade/README.md`](../tests/fixtures/native-upgrade/README.md) | [JSON](mirrors/tests/fixtures/native-upgrade/README.agent.json) |\n",
       "columns": [
         "Document",
         "Agent JSON"
@@ -121,6 +121,10 @@
         [
           "[`docs/HTML_BLOCK_CRUD.md`](HTML_BLOCK_CRUD.md)",
           "[JSON](HTML_BLOCK_CRUD.agent.json)"
+        ],
+        [
+          "[`docs/License.md`](License.md)",
+          "[JSON](License.agent.json)"
         ],
         [
           "[`docs/ODF_SUPPORT.md`](ODF_SUPPORT.md)",
@@ -171,8 +175,8 @@
     {
       "id": "b000009",
       "kind": "html",
-      "start_line": 30,
-      "end_line": 30,
+      "start_line": 31,
+      "end_line": 31,
       "raw": "<!-- workspace-docs:document-map:end -->\n"
     }
   ],
@@ -326,157 +330,171 @@
       },
       {
         "block_id": "b000008",
+        "label": "`docs/License.md`",
+        "target": "License.md",
+        "kind": "relative",
+        "line": 19
+      },
+      {
+        "block_id": "b000008",
+        "label": "JSON",
+        "target": "License.agent.json",
+        "kind": "relative",
+        "line": 19
+      },
+      {
+        "block_id": "b000008",
         "label": "`docs/ODF_SUPPORT.md`",
         "target": "ODF_SUPPORT.md",
         "kind": "relative",
-        "line": 19
+        "line": 20
       },
       {
         "block_id": "b000008",
         "label": "JSON",
         "target": "ODF_SUPPORT.agent.json",
         "kind": "relative",
-        "line": 19
+        "line": 20
       },
       {
         "block_id": "b000008",
         "label": "`docs/PDF_SUPPORT.md`",
         "target": "PDF_SUPPORT.md",
         "kind": "relative",
-        "line": 20
+        "line": 21
       },
       {
         "block_id": "b000008",
         "label": "JSON",
         "target": "PDF_SUPPORT.agent.json",
         "kind": "relative",
-        "line": 20
+        "line": 21
       },
       {
         "block_id": "b000008",
         "label": "`docs/PERFORMANCE.md`",
         "target": "PERFORMANCE.md",
         "kind": "relative",
-        "line": 21
+        "line": 22
       },
       {
         "block_id": "b000008",
         "label": "JSON",
         "target": "PERFORMANCE.agent.json",
         "kind": "relative",
-        "line": 21
+        "line": 22
       },
       {
         "block_id": "b000008",
         "label": "`docs/QT_REMOVAL.md`",
         "target": "QT_REMOVAL.md",
         "kind": "relative",
-        "line": 22
+        "line": 23
       },
       {
         "block_id": "b000008",
         "label": "JSON",
         "target": "QT_REMOVAL.agent.json",
         "kind": "relative",
-        "line": 22
+        "line": 23
       },
       {
         "block_id": "b000008",
         "label": "`docs/THINKING_SPACE_DOCUMENT.md`",
         "target": "THINKING_SPACE_DOCUMENT.md",
         "kind": "relative",
-        "line": 23
+        "line": 24
       },
       {
         "block_id": "b000008",
         "label": "JSON",
         "target": "THINKING_SPACE_DOCUMENT.agent.json",
         "kind": "relative",
-        "line": 23
+        "line": 24
       },
       {
         "block_id": "b000008",
         "label": "`docs/WORD_SUPPORT.md`",
         "target": "WORD_SUPPORT.md",
         "kind": "relative",
-        "line": 24
+        "line": 25
       },
       {
         "block_id": "b000008",
         "label": "JSON",
         "target": "WORD_SUPPORT.agent.json",
         "kind": "relative",
-        "line": 24
+        "line": 25
       },
       {
         "block_id": "b000008",
         "label": "`docs/Windows.md`",
         "target": "Windows.md",
         "kind": "relative",
-        "line": 25
+        "line": 26
       },
       {
         "block_id": "b000008",
         "label": "JSON",
         "target": "Windows.agent.json",
         "kind": "relative",
-        "line": 25
+        "line": 26
       },
       {
         "block_id": "b000008",
         "label": "`docs/WindowsBuildAndRun.md`",
         "target": "WindowsBuildAndRun.md",
         "kind": "relative",
-        "line": 26
+        "line": 27
       },
       {
         "block_id": "b000008",
         "label": "JSON",
         "target": "WindowsBuildAndRun.agent.json",
         "kind": "relative",
-        "line": 26
+        "line": 27
       },
       {
         "block_id": "b000008",
         "label": "`docs/XML_TREE_CRUD.md`",
         "target": "XML_TREE_CRUD.md",
         "kind": "relative",
-        "line": 27
+        "line": 28
       },
       {
         "block_id": "b000008",
         "label": "JSON",
         "target": "XML_TREE_CRUD.agent.json",
         "kind": "relative",
-        "line": 27
+        "line": 28
       },
       {
         "block_id": "b000008",
         "label": "`docs/documentation-structure.md`",
         "target": "documentation-structure.md",
         "kind": "relative",
-        "line": 28
+        "line": 29
       },
       {
         "block_id": "b000008",
         "label": "JSON",
         "target": "documentation-structure.agent.json",
         "kind": "relative",
-        "line": 28
+        "line": 29
       },
       {
         "block_id": "b000008",
         "label": "`tests/fixtures/native-upgrade/README.md`",
         "target": "../tests/fixtures/native-upgrade/README.md",
         "kind": "relative",
-        "line": 29
+        "line": 30
       },
       {
         "block_id": "b000008",
         "label": "JSON",
         "target": "mirrors/tests/fixtures/native-upgrade/README.agent.json",
         "kind": "relative",
-        "line": 29
+        "line": 30
       }
     ],
     "tables": [
@@ -522,6 +540,10 @@
           [
             "[`docs/HTML_BLOCK_CRUD.md`](HTML_BLOCK_CRUD.md)",
             "[JSON](HTML_BLOCK_CRUD.agent.json)"
+          ],
+          [
+            "[`docs/License.md`](License.md)",
+            "[JSON](License.agent.json)"
           ],
           [
             "[`docs/ODF_SUPPORT.md`](ODF_SUPPORT.md)",

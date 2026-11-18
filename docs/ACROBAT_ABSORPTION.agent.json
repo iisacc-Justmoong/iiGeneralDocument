@@ -10,9 +10,9 @@
   },
   "source": {
     "path": "docs/ACROBAT_ABSORPTION.md",
-    "sha256": "daf6a8ebbb07db21445dc21585fbf39ac6e2dca1ba5b01036553e6dba2ca0d61",
-    "bytes": 8941,
-    "line_count": 147,
+    "sha256": "d01d63f98c00d6818cf721c2eedba182539ee8dc21daef1b0c877300bcd45635",
+    "bytes": 9012,
+    "line_count": 148,
     "encoding": "utf-8",
     "language": "en"
   },
@@ -348,21 +348,21 @@
       "id": "b000039",
       "kind": "paragraph",
       "start_line": 132,
-      "end_line": 137,
-      "raw": "The engineering contracts are recorded in the adjacent Acrobat project's\n`src/PdfOperations.cpp`, `tests/pdf_operations.cpp`,\n`evidence/pdf-verification.json` and `evidence/pdf-independent-verification.json`.\nThe iisacc-authored MIT counterpart notice is retained under\n`third_party/licenses/acrobat-counterpart/`. Adobe resources, binaries,\ndecompiler output and proprietary source were not copied into this SDK.\n"
+      "end_line": 138,
+      "raw": "The engineering contracts are recorded in the adjacent Acrobat project's\n`src/PdfOperations.cpp`, `tests/pdf_operations.cpp`,\n`evidence/pdf-verification.json` and `evidence/pdf-independent-verification.json`.\nThis module's adaptation is Apache-2.0. The iisacc-authored counterpart\nnotice is retained unchanged, still under the MIT terms, at\n`third_party/licenses/acrobat-counterpart/`. Adobe resources, binaries,\ndecompiler output and proprietary source were not copied into this SDK.\n"
     },
     {
       "id": "b000040",
       "kind": "blank",
-      "start_line": 138,
-      "end_line": 139,
+      "start_line": 139,
+      "end_line": 140,
       "raw": "\n\n"
     },
     {
       "id": "b000041",
       "kind": "heading",
-      "start_line": 140,
-      "end_line": 140,
+      "start_line": 141,
+      "end_line": 141,
       "raw": "## Native dependency migration (0.4)\n",
       "level": 2,
       "title": "Native dependency migration (0.4)"
@@ -370,15 +370,15 @@
     {
       "id": "b000042",
       "kind": "blank",
-      "start_line": 141,
-      "end_line": 141,
+      "start_line": 142,
+      "end_line": 142,
       "raw": "\n"
     },
     {
       "id": "b000043",
       "kind": "paragraph",
-      "start_line": 142,
-      "end_line": 147,
+      "start_line": 143,
+      "end_line": 148,
       "raw": "The complete module now uses C++23 standard types and open-source backends.\nThe full document package requires the Qt-free `iiXmlMarkup` component; the standalone PDF component does not. Neither Qt nor the legacy Qt-based iiXml/iiHtmlBlock packages are required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml\nand persistence uses nlohmann/json. The markup algorithms retain the first-party\nrange/typed-attribute semantics described above. See [migration details](QT_REMOVAL.md)\nfor byte-string API changes, ABI compatibility, prior-file verification and the\nThinking Space schema-2 byte-diff encoding.\n"
     }
   ],
@@ -421,7 +421,7 @@
       "level": 2,
       "title": "Native dependency migration (0.4)",
       "anchor": "native-dependency-migration-04",
-      "start_line": 140
+      "start_line": 141
     }
   ],
   "indexes": {
@@ -456,7 +456,7 @@
       },
       {
         "block_id": "b000043",
-        "line": 143,
+        "line": 144,
         "text": "The full document package requires the Qt-free `iiXmlMarkup` component; the standalone PDF component does not. Neither Qt nor the legacy Qt-based iiXml/iiHtmlBlock packages are required. Author/file APIs use `iiFileProvider::Native`; Word XML uses pugixml",
         "basis": "lexical_match",
         "context": "paragraph"
@@ -476,7 +476,7 @@
         "label": "migration details",
         "target": "QT_REMOVAL.md",
         "kind": "relative",
-        "line": 145
+        "line": 146
       }
     ],
     "tables": [

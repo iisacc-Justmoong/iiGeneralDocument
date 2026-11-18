@@ -499,7 +499,7 @@ if(BUILD_TESTING)
         "-DIIGENERALDOCUMENT_XML_MARKUP_DIR=${iiXmlMarkup_DIR}"
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/QtInstalledBoundaryTest.cmake)
 endif()
-install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument)
+install(FILES LICENSE NOTICE DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument)
 install(DIRECTORY third_party/licenses/ DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument)
 install(FILES third_party/document-dependencies.json DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/iiGeneralDocument)
 

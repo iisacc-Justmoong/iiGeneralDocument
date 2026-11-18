@@ -1,5 +1,6 @@
-// SPDX-License-Identifier: MIT
-// Independent xref-table fixture; adapted from the iisacc MIT engineering counterpart.
+// SPDX-License-Identifier: Apache-2.0
+// Independent xref-table fixture; adapted from the iisacc engineering counterpart.
+// The preserved MIT notice is in third_party/licenses/acrobat-counterpart/LICENSE.
 #pragma once
 #include <iomanip>
 #include <locale>
